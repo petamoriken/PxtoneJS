@@ -1,4 +1,14 @@
-<h1 align="center"><img class="pixelated" src="pxtonejs.png" width="255" height="50" alt="PxtoneJS" style="-ms-interpolation-mode:nearest-neighbor;image-rendering:-webkit-optimize-contrast;image-rendering:-moz-crisp-edges;image-rendering:-o-crisp-edges;image-rendering:pixelated;"></h1>
+<style>
+.pixelated {
+	-ms-interpolation-mode: nearest-neighbor;
+	image-rendering: -webkit-optimize-contrast;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -o-crisp-edges;
+	image-rendering: pixelated;
+}
+</style>
+
+<div align="center"><img class="pixelated" src="pxtonejs.png" width="255" height="50" alt="PxtoneJS"></div>
 
 <p align="center">
 	Play Pxtone Collage files in Browser.
@@ -100,7 +110,7 @@ under [MIT License](http://petamoriken.mit-license.org/2016).
 
 依存するライブラリについては、そのライブラリのライセンスを継承します。
 
-`pxtone_source`: Copyright (c) 2016 STUDIO PIXEL under [MIT License](pxtone_source/LICENSE.txt).
+`pxtone_source`: Copyright (c) 2016 STUDIO PIXEL under [MIT License](pxtone_source/LICENSE.txt).  
 `pxtone_source/src-oggvorbis`: Copyright (c) 2002-2015 Xiph.org Foundation under [3-clause BSD license](pxtone_source/src-oggvorbis/COPYING).
 
 
