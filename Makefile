@@ -22,6 +22,7 @@ build/Pxtone.min.js: build/Pxtone.js
 	uglifyjs build/Pxtone.js -c --comments "/https://git.io/vuKZH/" -o build/Pxtone.min.js
 
 build/Pxtone.js: src/* src/pxtnDecoder.js
+	mkdir temp && \
 	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -o temp/Pxtone.js && \
 	echo "/*! Pxtone.js https://git.io/vuKZH */" | cat - temp/Pxtone.js > build/Pxtone.js
 
@@ -40,4 +41,4 @@ src/pxtnDecoder.js: $(PXTONE_DIR)/src-pxtone/* $(PXTONE_DIR)/src-pxtonePlay/* $(
 	em++ $(CLANG_OPTS) $(EMCC_OPTS) $(EMCC_LINKS) $(EMCC_SRCS) -o src/pxtnDecoder.js
 
 clean:
-	$(RM) lib/* build/* temp/* src/pxtnDecoder.js
+	$(RM) lib/* build/* temp src/pxtnDecoder.js
