@@ -1,14 +1,4 @@
-<style>
-.pixelated {
-	-ms-interpolation-mode: nearest-neighbor;
-	image-rendering: -webkit-optimize-contrast;
-	image-rendering: -moz-crisp-edges;
-	image-rendering: -o-crisp-edges;
-	image-rendering: pixelated;
-}
-</style>
-
-<div align="center"><img class="pixelated" src="pxtonejs.png" width="255" height="50" alt="PxtoneJS"></div>
+<div align="center"><img src="pxtonejs5x.png" alt="PxtoneJS"></div>
 
 <p align="center">
 	Play Pxtone Collage files in Browser.
