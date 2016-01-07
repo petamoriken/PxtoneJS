@@ -26,10 +26,11 @@
   "files": [
     "README.md",
     "pxtonejs.png",
+    "pxtonejs5x.png",
     "index.js",
     "pxtnDecoder.js",
-    "lib"
-    "package.json",
+    "lib",
+    "package.json"
   ],
   "homepage": "https://github.com/petamoriken/PxtoneJS",
   "keywords": [
