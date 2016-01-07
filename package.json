@@ -1,0 +1,54 @@
+{
+  "name": "pxtone",
+  "description": "Play Pxtone Collage files in Browser",
+  "version": "1.0.0",
+  "author": "Kenta Moriuchi (http://moriken.kimamass.com/)",
+  "bugs": {
+    "url": "https://github.com/petamoriken/PxtoneJS/issues"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.3.19",
+    "promise-decode-audio-data": "^0.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.3.17",
+    "babel-eslint": "^4.1.6",
+    "babel-plugin-add-module-exports": "^0.1.1",
+    "babel-plugin-transform-async-to-generator": "^6.3.13",
+    "babel-plugin-transform-runtime": "^6.3.13",
+    "babel-plugin-transform-strict-mode": "^6.3.13",
+    "babel-preset-es2015": "^6.1.18",
+    "babelify": "^7.2.0",
+    "browserify": "^12.0.1",
+    "eslint": "^1.10.3",
+    "uglify-js": "^2.6.1"
+  },
+  "files": [
+    "README.md",
+    "pxtonejs.png",
+    "index.js",
+    "pxtnDecoder.js",
+    "lib"
+    "package.json",
+  ],
+  "homepage": "https://github.com/petamoriken/PxtoneJS",
+  "keywords": [
+    "PxtoneCollage",
+    "PxtoneContext",
+    "webaudio"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "http://petamoriken.mit-license.org/2016"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/petamoriken/PxtoneJS.git"
+  },
+  "scripts": {
+    "build": "make clean && make",
+    "lint": "eslint src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
