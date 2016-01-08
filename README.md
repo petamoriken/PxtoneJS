@@ -1,4 +1,4 @@
-<div align="center" style="padding:5em auto;">
+<div align="center" style="margin:5em auto;">
 	<img src="pxtonejs5x.png" alt="PxtoneJS"><br>
 	Play <a href="http://studiopixel.sakura.ne.jp/pxtone/" target="_blank">Pxtone Collage</a> files in Browser.
 </div>
