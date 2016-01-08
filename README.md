@@ -17,7 +17,7 @@
 
 ##Install & Require
 
-###browserify で使う場合
+###Browserify で使う場合
 
 ```
 npm install --save-dev pxtone
@@ -47,7 +47,7 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 <script src="DEST/TO/Pxtone.js"></script>
 <script src="DEST/TO/pxtnDecoder.js"></script>
 ```
-としてください。
+としてください。  
 デコーダーを Web Worker として使いたい場合（推奨）は
 
 ```html
@@ -140,6 +140,7 @@ under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT Lice
 
 * <a href="http://kripken.github.io/emscripten-site/" href="_target">Emscripten</a>: An LLVM-to-JavaScript Compiler
 * <a href="http://babeljs.io/" href="_target">Babel</a>: a compiler for writing next generation JavaScript
+  * <a href="https://github.com/zloirock/core-js" href="_target">core-js</a> (babel-runtime): Modular standard library for JavaScript
 * <a href="http://browserify.org/" href="_target">Browserify</a>: require('modules') in the browser by bundling up all of your dependencies
 * <a href="http://lisperator.net/uglifyjs/" href="_target">UglifyJS</a>: JavaScript parser / mangler / compressor / beautifier toolkit
 
