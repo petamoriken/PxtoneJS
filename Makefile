@@ -37,7 +37,7 @@ build: src/* src/pxtnDecoder.js
 
 lib/*: src/* src/pxtnDecoder.js
 	$(RM) lib/* && \
-	babel src --ignore "pxtnDecoder.js","emscripten_source/*" -d lib && \
+	babel src --ignore "pxtnDecoder.js" -d lib && \
 	cp src/pxtnDecoder.js lib/
 
 src/pxtnDecoder.js: $(PXTONE_DIR)/src-pxtone/* $(PXTONE_DIR)/src-pxtonePlay/* $(PXTONE_DIR)/src-pxwr/* $(EMCC_DIR)/*
