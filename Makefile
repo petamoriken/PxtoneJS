@@ -18,19 +18,22 @@ EMCC_SRCS+=-x c++ $(EMCC_DIR)/bind.cpp $(PXTONE_DIR)/src-pxtone/*.cpp $(PXTONE_D
 all: build/Pxtone.min.js build/pxtnDecoder.min.js lib/*
 
 
-build/Pxtone.min.js: build/Pxtone.js
+build/Pxtone.min.js: build build/Pxtone.js
 	uglifyjs build/Pxtone.js -c --comments "/https://git.io/vuKZH/" -o build/Pxtone.min.js
 
-build/Pxtone.js: src/* src/pxtnDecoder.js
+build/Pxtone.js: build src/* src/pxtnDecoder.js
 	mkdir -p temp && \
 	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -o temp/Pxtone.js && \
 	echo "/*! Pxtone.js https://git.io/vuKZH */" | cat - temp/Pxtone.js > build/Pxtone.js
 
-build/pxtnDecoder.min.js: build/pxtnDecoder.js
+build/pxtnDecoder.min.js: build build/pxtnDecoder.js
 	uglifyjs build/pxtnDecoder.js -c --comments "/https://git.io/vuKZH/" -o build/pxtnDecoder.min.js
 
-build/pxtnDecoder.js: src/pxtnDecoder.js
+build/pxtnDecoder.js: build src/pxtnDecoder.js
 	echo "/*! pxtnDecoder.js https://git.io/vuKZH */" | cat - src/pxtnDecoder.js > build/pxtnDecoder.js
+
+build: src/* src/pxtnDecoder.js
+	mkdir -p build
 
 lib/*: src/* src/pxtnDecoder.js
 	$(RM) lib/* && \
@@ -41,4 +44,4 @@ src/pxtnDecoder.js: $(PXTONE_DIR)/src-pxtone/* $(PXTONE_DIR)/src-pxtonePlay/* $(
 	em++ $(CLANG_OPTS) $(EMCC_OPTS) $(EMCC_LINKS) $(EMCC_SRCS) -o src/pxtnDecoder.js
 
 clean:
-	$(RM) lib/* build/* temp src/pxtnDecoder.js
+	$(RM) -rf lib/* build temp src/pxtnDecoder.js
