@@ -1,7 +1,11 @@
-<div align="center" style="margin:5em auto;">
+<br><br><br><br>
+
+<div align="center">
 	<img src="pxtonejs5x.png" alt="PxtoneJS"><br>
 	Play <a href="http://studiopixel.sakura.ne.jp/pxtone/" target="_blank">Pxtone Collage</a> files in Browser.
 </div>
+
+<br><br><br><br>
 
 <p align="center">
 	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/v/pxtone.svg" alt="npm Version"></a>
