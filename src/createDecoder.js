@@ -147,8 +147,8 @@ export default function createDecoder(pxtnDecoder) {
 			const data = {
 				loopStart:	rawData.loopStart,
 				loopEnd:	rawData.loopEnd,
-				title:		await textDecoder(rawData.titleBuffer, "shift_jis"),
-				comment:	await textDecoder(rawData.commentBuffer, "shift_jis")
+				title:		await textDecoder(rawData.titleBuffer),
+				comment:	await textDecoder(rawData.commentBuffer)
 			}
 			return [retBuffer, data];
 		}

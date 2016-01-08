@@ -20,7 +20,7 @@ function Memory(val) {
 	this.byteLength = size;
 }
 
-var Memory$prototype = Memory.prototype;
+var Memory$prototype = Memory["prototype"];
 
 Memory$prototype.release = function() {
 	_free(this.ptr);
@@ -90,7 +90,7 @@ function decode(type, inputBuffer, ch, sps, bps) {
 				titleMem.ptr, titleSizeMem.ptr,
 				commentMem.ptr, commentSizeMem.ptr
 			)) {
-				throw new Error("Decode Pxtone Project (.ptcop, .pttune) Error.");
+				throw new Error("Decode Pxtone Project Error.");
 			}
 
 			titleStart = titleMem.getValue(), titleEnd = titleStart + titleSizeMem.getValue();
@@ -135,11 +135,21 @@ if(ENVIRONMENT_IS_REQUIRE) {
 		var data = e["data"];
 		var decoded = decode(data["type"], data["buffer"], data["ch"], data["sps"], data["bps"]);
 		var buffer = decoded[0];
-		self["postMessage"]({
-			"sessionId":	data["sessionId"],
-			"buffer":		buffer,
-			"data":			decoded[1] 
-		}, [buffer]);
+		var rawData = decoded[1];
+
+		if(rawData !== null) {
+			self["postMessage"]({
+				"sessionId":	data["sessionId"],
+				"buffer":		buffer,
+				"data":			rawData
+			}, [buffer, rawData["titleBuffer"], rawData["commentBuffer"]]);
+		} else {
+			self["postMessage"]({
+				"sessionId":	data["sessionId"],
+				"buffer":		buffer,
+				"data":			rawData
+			}, [buffer]);
+		}
 	};
 }
 

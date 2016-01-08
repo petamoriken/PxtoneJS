@@ -1,7 +1,7 @@
 {
   "name": "pxtone",
   "description": "Play Pxtone Collage files in Browser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Kenta Moriuchi (http://moriken.kimamass.com/)",
   "bugs": {
     "url": "https://github.com/petamoriken/PxtoneJS/issues"
@@ -35,7 +35,6 @@
   "homepage": "https://github.com/petamoriken/PxtoneJS",
   "keywords": [
     "PxtoneCollage",
-    "PxtoneContext",
     "webaudio"
   ],
   "license": {

@@ -2892,12 +2892,12 @@ function createDecoder(pxtnDecoder) {
 							_context.t0 = rawData.loopStart;
 							_context.t1 = rawData.loopEnd;
 							_context.next = 16;
-							return (0, _textDecoder2.default)(rawData.titleBuffer, "shift_jis");
+							return (0, _textDecoder2.default)(rawData.titleBuffer);
 
 						case 16:
 							_context.t2 = _context.sent;
 							_context.next = 19;
-							return (0, _textDecoder2.default)(rawData.commentBuffer, "shift_jis");
+							return (0, _textDecoder2.default)(rawData.commentBuffer);
 
 						case 19:
 							_context.t3 = _context.sent;
@@ -2981,9 +2981,8 @@ var _promise2 = _interopRequireDefault(_promise);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Text Decoder
 function textDecoder(arraybuffer) {
-	var charset = arguments.length <= 1 || arguments[1] === undefined ? "utf-8" : arguments[1];
+	var charset = arguments.length <= 1 || arguments[1] === undefined ? "shift_jis" : arguments[1];
 
 	if (arraybuffer.byteLength === 1 && new Uint8Array(arraybuffer)[0] === 255) return _promise2.default.resolve("");
 

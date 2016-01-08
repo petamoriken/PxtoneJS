@@ -22,7 +22,7 @@ build/Pxtone.min.js: build/Pxtone.js
 	uglifyjs build/Pxtone.js -c --comments "/https://git.io/vuKZH/" -o build/Pxtone.min.js
 
 build/Pxtone.js: src/* src/pxtnDecoder.js
-	mkdir temp && \
+	mkdir -p temp && \
 	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -o temp/Pxtone.js && \
 	echo "/*! Pxtone.js https://git.io/vuKZH */" | cat - temp/Pxtone.js > build/Pxtone.js
 

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -120,7 +119,6 @@ bool decodePxtone(uintptr_t pxtn_c, int pxtn_length, int ch, int sps, int bps, u
 	*comment = malloc(*comment_length);
 	memcpy(*comment, commentBuffer, *comment_length);
 
-
 	b_ret = true;
 
 End:
@@ -135,56 +133,3 @@ EMSCRIPTEN_BINDINGS(px_module) {
 	function("decodeNoise", &decodeNoise);
 	function("decodePxtone", &decodePxtone);
 }
-
-/*
-using namespace emscripten;
-
-
-size_t strlength(uintptr_t s) { return strlen((char *)s); }
-pxwrDoc *passThrough(pxwrDoc *ptr) { return ptr; }
-
-
-EMSCRIPTEN_BINDINGS(px_module) {
-
-	class_<pxwrDoc>("PxwrDoc")
-		.constructor<>()
-		.function("setRead", &pxwrDoc::SetRead)
-		.function("getRaw", &passThrough, allow_raw_pointers())
-	;
-
-	class_<pxtoneNoise>("PxtoneNoise")
-		.constructor<>()
-		.function("init", &pxtoneNoise::Init)
-		.function("setQuality", &pxtoneNoise::SetQuality)
-		.function("sample", &pxtoneNoise::Sample)
-	;
-
-	class_<pxtoneVomit>("PxtoneVomit")
-		.constructor<>()
-		.function("init", &pxtoneVomit::Init)
-		.function("read", &pxtoneVomit::Read)
-//		.function("clear", &pxtoneVomit::Clear)
-		.function("start", &pxtoneVomit::Start)
-
-		.function("setQuality", &pxtoneVomit::set_quality)
-//		.function("setLoop", &pxtoneVomit::set_loop)
-//		.function("setVolume", &pxtoneVomit::set_volume)
-//		.function("setFade", &pxtoneVomit::set_fade)
-
-//		.function("isVomiting", &pxtoneVomit::is_vomiting)
-		.function("getTitle", &pxtoneVomit::get_title)
-		.function("getComment", &pxtoneVomit::get_comment)
-//		.function("getLastError", &pxtoneVomit::get_last_error)
-
-		.function("getInfo", &pxtoneVomit::get_info)
-		.function("getMeasRepeat", &pxtoneVomit::get_meas_repeat)
-		.function("getMeasPlay", &pxtoneVomit::get_meas_play)
-
-		.function("vomit", &pxtoneVomit::vomit)
-	;
-
-	function("strlen", &strlength);
-	function("calcSampleNum", &pxtoneVomit_Calc_sample_num);
-
-}
-*/

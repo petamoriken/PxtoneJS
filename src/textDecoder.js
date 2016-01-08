@@ -1,5 +1,4 @@
-// Text Decoder
-export default function textDecoder(arraybuffer, charset = "utf-8") {
+export default function textDecoder(arraybuffer, charset = "shift_jis") {
 	if(arraybuffer.byteLength === 1 && (new Uint8Array(arraybuffer))[0] === 255)
 		return Promise.resolve("");
 
