@@ -1,0 +1,10 @@
+node_modules
+
+lib
+temp
+build
+
+src/pxtnDecoder.js
+
+index.js
+pxtnDecoder.js
