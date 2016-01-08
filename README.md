@@ -41,13 +41,13 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 
 ###script タグで使う場合
 
-`build` フォルダの中身を適当な場所にコピーして
+[releases](https://github.com/petamoriken/PxtoneJS/releases) から `Pxtone.js` と `pxtnDecoder.js` を保存して
 
 ```html
 <script src="DEST/TO/Pxtone.js"></script>
 <script src="DEST/TO/pxtnDecoder.js"></script>
 ```
-
+としてください。
 デコーダーを Web Worker として使いたい場合（推奨）は
 
 ```html
