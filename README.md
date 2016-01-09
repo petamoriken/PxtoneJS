@@ -44,7 +44,7 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 
 ###script タグで使う場合
 
-[releases](https://github.com/petamoriken/PxtoneJS/releases) から `Pxtone.js` と `pxtnDecoder.js` を保存して
+[releases](https://github.com/petamoriken/PxtoneJS/releases) から `Pxtone.js` と `pxtnDecoder.js` を適当な場所に保存して
 
 ```html
 <script src="DEST/TO/Pxtone.js"></script>
@@ -73,7 +73,7 @@ pxtone.decoder = pxtnDecoder;
 
 ##How to Use
 
-ブラウザ上で Pxtone Collage ファイルを再生するには、`XMLHttpRequest` や `Fetch API`, `File API` などで Pxtone Collage Project ファイル（拡張子 .ptcop）か Pxtone Tune ファイル（拡張子 .pttune) の `ArrayBuffer` を取得する必要があります。仮に `buffer` という変数に得た `ArrayBuffer` を入れた場合、以下のようにして `AudioBuffer` を得ることが出来ます。
+ブラウザ上で Pxtone Collage ファイルを再生するには、`XMLHttpRequest` や `Fetch API`, `File API` などで Pxtone Collage Project ファイル（拡張子 .ptcop）か Pxtone Tune ファイル（拡張子 .pttune) の `ArrayBuffer` を取得する必要があります。仮に `buffer` という変数に得た Pxtone Collage ファイル の `ArrayBuffer` を入れた場合、以下のようにして `AudioBuffer` を得ることが出来ます。
 
 ```javascript
 var ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -85,6 +85,22 @@ pxtone.decodePxtoneData(ctx, buffer).then(function(arr) {
 
 得た `AudioBuffer` を再生するには `AudioBufferSourceNode` を使います。詳しくは MDN の <a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Audio_API/Using_Web_Audio_API" target="_blank">Web Audio APIの利用</a> や <a href="https://developer.mozilla.org/ja/docs/Web/API/AudioContext/createBufferSource" target="_blank">AudioContext.createBufferSource()</a> を参考にしてください。
 
+##Browser Support
+
+以下のブラウザ環境で動作することを確認しています。
+
+Windows 10: Chrome 47, Firefox 43, Opera 34, Edge 25 (EdgeHTML 13)  
+OSX 10.8.5: Chrome 47, Firefox 43, Opera 34, Safari 6  
+iOS 9.2: Mobile Safari
+
+上記に書いてないブラウザ環境でも Web Audio API が動く環境であれば動作すると思われます。
+動作する環境について調べたい場合は Can I use の [Web Audio API](http://caniuse.com/#feat=audio-api) を御覧ください。
+
+特にデフォルトで asm.js をサポートしている Edge, Firefox では速くデコードすることが出来ます。
+将来的には WebAssembly によって、どのブラウザでも速くデコードすることが出来るようになると思われます。
+
+また IE は Web Audio API を使うことが出来ませんが、<a href="http://www.g200kg.com/docs/waapisim/" target="_blank">WAAPISim</a> を使うことで動作する可能性があります。
+
 ##Demo
 
 <a href="http://codepen.io/petamoriken/pen/JGWQOE/" target="_blank">PxtoneJS Demo</a>  
@@ -94,14 +110,14 @@ pxtone.decodePxtoneData(ctx, buffer).then(function(arr) {
 
 ###AudioBuffer を作る
   
-* `Pxtone#decodeNoiseData(ctx: AudioContext, buffer: ArrayBuffer, channel: Number = 2, sampleRate: Number = null, bitsPerSample: Number = 16): Promise.resolve(audioBuffer: AudioBuffer)`
+* `Pxtone#decodeNoiseData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve(audioBuffer: AudioBuffer)`
 
   * Pxtone Noise ファイル（拡張子 .ptnoise）を `AudioBuffer` に変換します。
   * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
   * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。
   * `sampleRate` が `null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
 
-* `Pxtone#decodePxtoneData(ctx: AudioContext, buffer: ArrayBuffer, channel: Number = 2, sampleRate: Number = null, bitsPerSample: Number = 16): Promise.resolve([audioBuffer: AudioBuffer, data: Object])`
+* `Pxtone#decodePxtoneData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve([audioBuffer: AudioBuffer, data: Object])`
 
   * Pxtone Collage Project ファイル（拡張子 .ptcop）と Pxtone Tune ファイル（拡張子 .pttune）を `AudioBuffer` に変換します。
   * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
@@ -109,19 +125,19 @@ pxtone.decodePxtoneData(ctx, buffer).then(function(arr) {
   * `sampleRate` が `null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
   
   * `Pxtone#decodeNoiseData` とは違い、返り値の `Promise` は `AudioBuffer` と `Object` を持つ長さ 2 の配列を `resolve` します。そして、その 2 つ目の要素である `Object` は以下の様なプロパティを持ちます。
-    * `title: String`: ファイルが持つタイトルの文字列です。
-    * `comment: String`: ファイルが持つコメントの文字列です。
-    * `loopStart: Number`: ループ初めの位置です（Web Audio API の `AudioBufferSourceNode` に与えて使います） 。
-    * `loopEnd: Number`: ループ終わり位置です（Web Audio API の `AudioBufferSourceNode` に与えて使います）。
+    * `title: string`: ファイルが持つタイトルの文字列です。
+    * `comment: string`: ファイルが持つコメントの文字列です。
+    * `loopStart: number`: ループ初めの位置です（Web Audio API の `AudioBufferSourceNode` に与えて使います） 。
+    * `loopEnd: number`: ループ終わり位置です（Web Audio API の `AudioBufferSourceNode` に与えて使います）。
 
 ###Wave の ArrayBuffer を作る
 
-* `Pxtone#decodeNoise(buffer: ArrayBuffer, channel: Number = 2, sampleRate: Number = null, bitsPerSample: Number = 16): Promise.resolve(waveBuffer: ArrayBuffer)`
+* `Pxtone#decodeNoise(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve(waveBuffer: ArrayBuffer)`
 
   * Pxtone Noise ファイル（拡張子 .ptnoise）を Wave の `ArrayBuffer` に変換します。
   * 引数については `Pxtone#decodeNoiseData` と同じです。ただし `sampleRate` が `null` のときは `44100` として扱います。
 
-* `Pxtone#decodePxtone(buffer: ArrayBuffer, channel: Number = 2, sampleRate: Number = null, bitsPerSample: Number = 16): Promise.resolve([waveBuffer: ArrayBuffer, data: Object])`
+* `Pxtone#decodePxtone(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve([waveBuffer: ArrayBuffer, data: Object])`
 
   * Pxtone Collage Project ファイル（拡張子 .ptcop）と Pxtone Tune ファイル（拡張子 .pttune）を Wave の `ArrayBuffer` に変換します。
   * 引数については `Pxtone#decodePxtoneData` と同じです。ただし `sampleRate` が `null` のときは `44100` として扱います。
@@ -136,8 +152,8 @@ under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT Lice
 
 ソースファイルとして含まれたライブラリは以下の通りです。
 
-* `pxtone_source`: Copyright (c) 2016 <a href="http://studiopixel.sakura.ne.jp/" target="_blank">STUDIO PIXEL</a> under [MIT License](pxtone_source/LICENSE.txt).  
-* `pxtone_source/src-oggvorbis`: Copyright (c) 2002-2015 <a href="http://xiph.org/" target="_blank">Xiph.org Foundation</a> under [3-clause BSD license](pxtone_source/src-oggvorbis/COPYING).
+* [pxtone_source](pxtone_source): Copyright (c) 2016 <a href="http://studiopixel.sakura.ne.jp/" target="_blank">STUDIO PIXEL</a> under [MIT License](pxtone_source/LICENSE.txt).  
+* [pxtone_source/src-oggvorbis](pxtone_source/src-oggvorbis): Copyright (c) 2002-2015 <a href="http://xiph.org/" target="_blank">Xiph.org Foundation</a> under [3-clause BSD license](pxtone_source/src-oggvorbis/COPYING).
 
 ビルドするのに以下のライブラリが使われています。
 
@@ -149,5 +165,7 @@ under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT Lice
 
 その他の依存する npm package については [package.json](package.json) を御覧ください。
 
+##Support
 
-
+何か問題が起きた場合は [issue](https://github.com/petamoriken/PxtoneJS/issues) に投稿してください。  
+また簡単な使い方の質問などは [@printf_moriken](https://twitter.com/printf_moriken) に気軽にどうぞ。
