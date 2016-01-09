@@ -8,10 +8,13 @@
 <br><br><br><br>
 
 <p align="center">
-	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/v/pxtone.svg" alt="npm Version"></a>
-	<a href="http://petamoriken.mit-license.org/2016" target="_blank"><img src="https://img.shields.io/npm/l/pxtone.svg" alt="License"></a>
-	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/dt/pxtone.svg" alt="npm Downloads"></a>
-	<a href="https://david-dm.org/petamoriken/pxtonejs" target="_blank"><img src="https://david-dm.org/petamoriken/pxtonejs.svg" alt="Dependency Status"></a>
+	<a href="http://petamoriken.mit-license.org/2016" target="_blank"><img src="https://img.shields.io/npm/l/pxtone.svg?style=flat-square" alt="License"></a>
+	<a href="https://github.com/petamoriken/PxtoneJS/issues" target="_blank"><img src="https://img.shields.io/github/issues/petamoriken/PxtoneJS.svg?style=flat-square" alt="Github issues"></a>
+	<a href="https://david-dm.org/petamoriken/pxtonejs" target="_blank"><img src="https://david-dm.org/petamoriken/pxtonejs.svg?style=flat-square" alt="Dependency Status"></a><br>
+	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/v/pxtone.svg?style=flat-square" alt="npm Version"></a>
+	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/dt/pxtone.svg?style=flat-square" alt="npm Downloads"></a>
+	<a href="https://github.com/petamoriken/PxtoneJS/releases" target="_blank"><img src="https://img.shields.io/github/release/petamoriken/PxtoneJS.svg?style=flat-square" alt="release Version"></a>
+	<a href="https://github.com/petamoriken/PxtoneJS/releases" target="_blank"><img src="https://img.shields.io/github/downloads/petamoriken/PxtoneJS/total.svg?style=flat-square" alt="release Downloads"></a>
 </p>
 
 
