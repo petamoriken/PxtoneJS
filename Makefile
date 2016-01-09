@@ -19,20 +19,20 @@ all: build/Pxtone.min.js build/pxtnDecoder.min.js lib/*
 
 
 build/Pxtone.min.js: build/Pxtone.js
-	uglifyjs build/Pxtone.js -c --comments "/https://git.io/vuKZH/" -o build/Pxtone.min.js
+	uglifyjs build/Pxtone.js -c --comments "/PxtoneJS/" -o build/Pxtone.min.js
 
-build/Pxtone.js: build src/pxtnDecoder.js
+build/Pxtone.js: build/ src/pxtnDecoder.js
 	mkdir -p temp && \
 	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -o temp/Pxtone.js && \
-	echo "/*! Pxtone.js https://git.io/vuKZH */" | cat - temp/Pxtone.js > build/Pxtone.js
+	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - temp/Pxtone.js > build/Pxtone.js
 
 build/pxtnDecoder.min.js: build/pxtnDecoder.js
-	uglifyjs build/pxtnDecoder.js -c --comments "/https://git.io/vuKZH/" -o build/pxtnDecoder.min.js
+	uglifyjs build/pxtnDecoder.js -c --comments "/PxtoneJS/" -o build/pxtnDecoder.min.js
 
-build/pxtnDecoder.js: build src/pxtnDecoder.js
-	echo "/*! pxtnDecoder.js https://git.io/vuKZH */" | cat - src/pxtnDecoder.js > build/pxtnDecoder.js
+build/pxtnDecoder.js: build/ src/pxtnDecoder.js
+	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - src/pxtnDecoder.js > build/pxtnDecoder.js
 
-build: src/* src/pxtnDecoder.js
+build/: src/* src/pxtnDecoder.js
 	mkdir -p build
 
 lib/*: src/* src/pxtnDecoder.js
