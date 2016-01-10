@@ -1,4 +1,4 @@
-export function checkOptions(ctx, type, buffer, ch, sps, bps) {
+export function checkArguments(ctx, type, buffer, ch, sps, bps) {
 	let errStr = "Invalid arguments:";
 	let isErr = false;
 	const AudioContext = global.AudioContext || global.webkitAudioContext;
@@ -46,6 +46,11 @@ export function checkOptions(ctx, type, buffer, ch, sps, bps) {
 	}
 
 	if(isErr)	throw new RangeError(errStr);
+}
+
+export function checkNull(ctx) {
+	if(ctx === null)
+		throw new RangeError("Invalid arguments: audioContext is null");
 }
 
 export function getAptSampleRate(ctx) {

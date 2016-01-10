@@ -1,12 +1,14 @@
 import { createPrivateStorage } from "./private";
 import createDecoder from "./createDecoder";
 
+import { checkNull } from "./value";
+
 const _ = createPrivateStorage();
 
 export default class Pxtone {
 
-	// private decoder;
 	// private pxtnDecoder;
+	// private decoder;
 
 	constructor() {
 		// private
@@ -38,10 +40,12 @@ export default class Pxtone {
 	}
 
 	async decodeNoiseData(ctx, ...args) {
+		checkNull(ctx);
 		return await _(this).decoder(ctx, "noise", ...args);
 	}
 
 	async decodePxtoneData(ctx, ...args) {
+		checkNull(ctx);
 		return await _(this).decoder(ctx, "pxtone", ...args);
 	}
 

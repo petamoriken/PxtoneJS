@@ -1,7 +1,7 @@
 import "promise-decode-audio-data";
 
 import textDecoder from "./textDecoder";
-import { checkOptions, getAptSampleRate } from "./value";
+import { checkArguments, getAptSampleRate } from "./value";
 
 function uint8SetAscii(offset, str) {
 	const strLength = str.length;
@@ -75,7 +75,7 @@ function decodeBuffer(ctx, pcmBuffer, ch, sps, bps) {
 	}
 
 	return ctx.decodeAudioData(waveBuffer).catch(() => {
-		// for old Firefox in OSX https://bugzilla.mozilla.org/show_bug.cgi?id=864780
+		// for Firefox in OS X https://bugzilla.mozilla.org/show_bug.cgi?id=864780
 		const audioBuffer = ctx.createBuffer(ch, pcmLength / ch, sps);
 
 		const outputChannel = [];
@@ -132,7 +132,7 @@ export default function createDecoder(pxtnDecoder) {
 
 	return async function decode(ctx, type, buffer, ch = 2, sps = null, bps = 16) {
 		// check arguments
-		checkOptions(ctx, type, buffer, ch, sps, bps);
+		checkArguments(ctx, type, buffer, ch, sps, bps);
 
 		// set SampleRate
 		if(sps === null) {

@@ -90,7 +90,7 @@ pxtone.decodePxtoneData(ctx, buffer).then(function(arr) {
 以下のブラウザ環境で動作することを確認しています。
 
 Windows 10: Chrome 47, Firefox 43, Opera 34, Edge 25 (EdgeHTML 13)  
-OSX 10.8.5: Chrome 47, Firefox 43, Opera 34, Safari 6  
+OS X v10.8: Chrome 47, Firefox 43, Opera 34, Safari 6  
 iOS 9.2: Mobile Safari
 
 上記に書いてないブラウザ環境でも Web Audio API が動く環境であれば動作すると思われます。
