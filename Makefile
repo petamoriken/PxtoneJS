@@ -15,20 +15,18 @@ EMCC_SRCS:=-x c $(PXTONE_DIR)/src-oggvorbis/*.c $(PXTONE_DIR)/src-oggvorbis/.lib
 EMCC_SRCS+=-x c++ $(EMCC_DIR)/bind.cpp $(PXTONE_DIR)/src-pxtone/*.cpp $(PXTONE_DIR)/src-pxtonePlay/*.cpp $(PXTONE_DIR)/src-pxwr/*.cpp
 
 
-all: build/Pxtone.min.js build/pxtnDecoder.min.js lib/*
+all: build/*.min.js lib/*
 
 
-build/Pxtone.min.js: build/Pxtone.js
-	uglifyjs build/Pxtone.js -c --comments "/PxtoneJS/" -o build/Pxtone.min.js
+build/*.min.js: build/Pxtone.js build/pxtnDecoder.js
+	uglifyjs build/Pxtone.js -c --comments "/PxtoneJS/" -o build/Pxtone.min.js && \
+	uglifyjs build/pxtnDecoder.js -c --comments "/PxtoneJS/" -o build/pxtnDecoder.min.js
 
 build/Pxtone.js: build/
 	mkdir -p temp && \
 	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -o temp/Pxtone.js && \
 	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - temp/Pxtone.js > build/Pxtone.js && \
 	$(RM) -rf temp
-
-build/pxtnDecoder.min.js: build/pxtnDecoder.js
-	uglifyjs build/pxtnDecoder.js -c --comments "/PxtoneJS/" -o build/pxtnDecoder.min.js
 
 build/pxtnDecoder.js: build/ src/pxtnDecoder.js
 	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - src/pxtnDecoder.js > build/pxtnDecoder.js

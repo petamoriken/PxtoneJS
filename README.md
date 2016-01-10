@@ -165,5 +165,5 @@ under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT Lice
 
 ##Support
 
-何か問題が起きた場合は [issue](https://github.com/petamoriken/PxtoneJS/issues) に投稿してください。  
+何か問題が起きた場合は [issues](https://github.com/petamoriken/PxtoneJS/issues) に投稿してください。  
 また簡単な使い方の質問などは [@printf_moriken](https://twitter.com/printf_moriken) に気軽にどうぞ。
