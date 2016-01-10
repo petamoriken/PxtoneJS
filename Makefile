@@ -21,7 +21,7 @@ all: build/Pxtone.min.js build/pxtnDecoder.min.js lib/*
 build/Pxtone.min.js: build/Pxtone.js
 	uglifyjs build/Pxtone.js -c --comments "/PxtoneJS/" -o build/Pxtone.min.js
 
-build/Pxtone.js: build/ src/pxtnDecoder.js
+build/Pxtone.js: build/
 	mkdir -p temp && \
 	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -o temp/Pxtone.js && \
 	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - temp/Pxtone.js > build/Pxtone.js

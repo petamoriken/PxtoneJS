@@ -54,7 +54,7 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 デコーダーを Web Worker として使いたい場合（推奨）は
 
 ```html
-<script src="DEST/TO/pxtone.js"></script>
+<script src="DEST/TO/Pxtone.js"></script>
 <script>
 	var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 </script>
@@ -78,7 +78,7 @@ pxtone.decoder = pxtnDecoder;
 ```javascript
 var ctx = new (window.AudioContext || window.webkitAudioContext)();
 pxtone.decodePxtoneData(ctx, buffer).then(function(arr) {
-  var audiobuffer = arr[0];
+  var audioBuffer = arr[0];
   var data = arr[1];
 });
 ```
@@ -114,15 +114,13 @@ iOS 9.2: Mobile Safari
 
   * Pxtone Noise ファイル（拡張子 .ptnoise）を `AudioBuffer` に変換します。
   * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
-  * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。
-  * `sampleRate` が `null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
+  * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。`null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
 
 * `Pxtone#decodePxtoneData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve([audioBuffer: AudioBuffer, data: Object])`
 
   * Pxtone Collage Project ファイル（拡張子 .ptcop）と Pxtone Tune ファイル（拡張子 .pttune）を `AudioBuffer` に変換します。
   * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
-  * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。
-  * `sampleRate` が `null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
+  * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。`null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
   
   * `Pxtone#decodeNoiseData` とは違い、返り値の `Promise` は `AudioBuffer` と `Object` を持つ長さ 2 の配列を `resolve` します。そして、その 2 つ目の要素である `Object` は以下の様なプロパティを持ちます。
     * `title: string`: ファイルが持つタイトルの文字列です。
