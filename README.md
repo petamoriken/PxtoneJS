@@ -103,8 +103,8 @@ iOS 9.2: Mobile Safari
 
 ##Demo
 
-<a href="http://codepen.io/petamoriken/pen/JGWQOE/" target="_blank">PxtoneJS Demo</a>  
-※ クロスオリジンの問題があり Web Worker が使用できないため、デコードの処理でブラウザが固まってしまいます。JavaScript は ES6 で書いており、 Babel を使って ES5 のコードにトランスパイルして実行しています。そのままブラウザにコードを移してもおそらく動きませんので注意してください。
+<a href="http://codepen.io/petamoriken/pen/JGWQOE/?editors=001" target="_blank">PxtoneJS Demo</a>  
+※ JavaScript は ES6 で書いており、 Babel を使って ES5 のコードにトランスパイルして実行しています。そのままブラウザにコードを移してもおそらく動きませんので注意してください。
 
 ##API
 
