@@ -1,4 +1,4 @@
-const AudioContext = self.AudioContext || self.webkitAudioContext || require("web-audio-api").AudioContext;
+const AudioContext = global.AudioContext || global.webkitAudioContext || require("web-audio-api").AudioContext;
 
 
 export function checkArguments(ctx, type, buffer, ch, sps, bps) {
