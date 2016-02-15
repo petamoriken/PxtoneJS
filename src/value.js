@@ -1,7 +1,9 @@
+const AudioContext = self.AudioContext || self.webkitAudioContext || require("web-audio-api").AudioContext;
+
+
 export function checkArguments(ctx, type, buffer, ch, sps, bps) {
 	let errStr = "Invalid arguments:";
 	let isErr = false;
-	const AudioContext = global.AudioContext || global.webkitAudioContext;
 
 	if(!(ctx instanceof AudioContext) && ctx !== null) {
 		errStr += ` audioContext(${ ctx })`;
@@ -48,9 +50,9 @@ export function checkArguments(ctx, type, buffer, ch, sps, bps) {
 	if(isErr)	throw new RangeError(errStr);
 }
 
-export function checkNull(ctx) {
-	if(ctx === null)
-		throw new RangeError("Invalid arguments: audioContext is null");
+export function checkAudioContext(ctx) {
+	if(!(ctx instanceof AudioContext))
+		throw new RangeError("Invalid arguments: audioContext must be AudioContext");
 }
 
 export function getAptSampleRate(ctx) {

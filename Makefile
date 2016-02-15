@@ -24,7 +24,7 @@ build/*.min.js: build/Pxtone.js build/pxtnDecoder.js
 
 build/Pxtone.js: build/
 	mkdir -p temp && \
-	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -o temp/Pxtone.js && \
+	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -i web-audio-api -o temp/Pxtone.js && \
 	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - temp/Pxtone.js > build/Pxtone.js && \
 	$(RM) -rf temp
 
