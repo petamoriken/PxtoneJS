@@ -1,7 +1,10 @@
-import "promise-decode-audio-data";
+import "./polyfill";
 
 import textDecoder from "./textDecoder";
 import { checkArguments, getAptSampleRate } from "./value";
+
+const Worker = global.Worker;
+
 
 function uint8SetAscii(offset, str) {
 	const strLength = str.length;

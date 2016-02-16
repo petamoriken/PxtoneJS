@@ -1,3 +1,6 @@
+// load only in node
+const decode = require("iconv-lite").decode;
+
 export default function textDecoder(arraybuffer, charset = "shift_jis") {
 	if(arraybuffer.byteLength === 1 && (new Uint8Array(arraybuffer))[0] === 255)
 		return Promise.resolve("");
@@ -16,5 +19,8 @@ export default function textDecoder(arraybuffer, charset = "shift_jis") {
 			};
 			reader.readAsText(blob, charset);
 		});
+	}).catch(() => {
+		// iconv-lite for node
+		resolve(decode(new Buffer(arraybuffer), charset));
 	});
 }
