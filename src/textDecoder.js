@@ -1,5 +1,4 @@
-// load only in node
-const decode = require("iconv-lite").decode;
+const TextDecoder = global.TextDecoder || require("text-encoding").TextDecoder;
 
 export default function textDecoder(arraybuffer, charset = "shift_jis") {
 	if(arraybuffer.byteLength === 1 && (new Uint8Array(arraybuffer))[0] === 255)
@@ -19,8 +18,5 @@ export default function textDecoder(arraybuffer, charset = "shift_jis") {
 			};
 			reader.readAsText(blob, charset);
 		});
-	}).catch(() => {
-		// iconv-lite for node
-		resolve(decode(new Buffer(arraybuffer), charset));
 	});
 }

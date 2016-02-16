@@ -3,6 +3,7 @@ import createDecoder from "./createDecoder";
 
 import { checkAudioContext } from "./value";
 
+
 const _ = createPrivateStorage();
 
 export default class Pxtone {
