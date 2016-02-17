@@ -2,7 +2,7 @@
 
 <div align="center">
 	<img src="pxtonejs5x.png" alt="PxtoneJS"><br>
-	Play <a href="http://studiopixel.sakura.ne.jp/pxtone/" target="_blank">Pxtone Collage</a> files in Browser.
+	Play <a href="http://studiopixel.sakura.ne.jp/pxtone/" target="_blank">Pxtone Collage</a> files in Web Audio API.
 </div>
 
 <br><br><br><br>
@@ -20,10 +20,12 @@
 
 ##Install & Require
 
-###Browserify で使う場合
+###Browser で鳴らす
+
+####Browserify で使う場合
 
 ```
-npm install --save-dev pxtone
+npm install --save pxtone
 ```
 
 Browserify で require をするときには
@@ -32,6 +34,7 @@ Browserify で require をするときには
 var Pxtone = require("pxtone");
 var pxtnDecoder = require("pxtone/pxtnDecoder");
 ```
+
 としてください。  
 デコーダーを Web Worker として使いたい場合（推奨）は `lib/pxtnDecoder.js` を適当な場所にコピーして
 
@@ -40,9 +43,16 @@ var Pxtone = require("pxtone");
 var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 ```
 
-としてください。
+としてください。  
+なお Browserify でビルドする際は、不要な Node のパッケージである `web-audio-api`, `text-encoding` を含めないようにしてください。例えば以下のようにビルドします。
 
-###script タグで使う場合
+```
+browserify src.js --no-commondir --igv global -i web-audio-api -i text-encoding -o build.js
+```
+
+また、<a href="https://github.com/substack/webworkify" target="_blank">webworkify</a> を使えば 1 つの JavaScript ファイルとしてまとめることが出来ますが、膨大な `lib/pxtnDecoder.js` を文字列化して `URL.createObjectURL` を使って読み込むことになるため、パフォーマンス面から推奨しません。
+
+####script タグで使う場合
 
 [releases](https://github.com/petamoriken/PxtoneJS/releases) から `Pxtone.js` と `pxtnDecoder.js` を適当な場所に保存して
 
@@ -50,6 +60,7 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 <script src="DEST/TO/Pxtone.js"></script>
 <script src="DEST/TO/pxtnDecoder.js"></script>
 ```
+
 としてください。  
 デコーダーを Web Worker として使いたい場合（推奨）は
 
@@ -62,9 +73,26 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 
 としてください。
 
+###Node で鳴らす
+
+```
+npm install --save pxtone
+npm install --save web-audio-api
+```
+
+Node で require をするときには Browserify と同様に
+
+```javascript
+var Pxtone = require("pxtone");
+var pxtnDecoder = require("pxtone/pxtnDecoder");
+```
+
+としてください。  
+Node の場合は `web-audio-api` パッケージを使うことになります。
+
 ##Initialize
 
-`Pxtone` を使う場合は、以下のように初期化してください。
+以下のように初期化します。
 
 ```javascript
 var pxtone = new Pxtone();
@@ -73,17 +101,35 @@ pxtone.decoder = pxtnDecoder;
 
 ##How to Use
 
-ブラウザ上で Pxtone Collage ファイルを再生するには、`XMLHttpRequest` や `Fetch API`, `File API` などで Pxtone Collage Project ファイル（拡張子 .ptcop）か Pxtone Tune ファイル（拡張子 .pttune) の `ArrayBuffer` を取得する必要があります。仮に `buffer` という変数に得た Pxtone Collage ファイル の `ArrayBuffer` を入れた場合、以下のようにして `AudioBuffer` を得ることが出来ます。
+ブラウザ上で Pxtone Collage ファイルを再生するには、`XMLHttpRequest` や `Fetch API`, `File API` などで Pxtone Collage Project ファイル（拡張子 .ptcop）か Pxtone Tune ファイル（拡張子 .pttune) の `ArrayBuffer` を取得する必要があります。仮に `arrayBuffer` という変数に得た Pxtone Collage ファイル の `ArrayBuffer` を入れた場合、以下のようにして `AudioBuffer` を得ることが出来ます。
 
 ```javascript
 var ctx = new (window.AudioContext || window.webkitAudioContext)();
-pxtone.decodePxtoneData(ctx, buffer).then(function(arr) {
+pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(arr) {
   var audioBuffer = arr[0];
   var data = arr[1];
 });
 ```
 
-得た `AudioBuffer` を再生するには `AudioBufferSourceNode` を使います。詳しくは MDN の <a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Audio_API/Using_Web_Audio_API" target="_blank">Web Audio APIの利用</a> や <a href="https://developer.mozilla.org/ja/docs/Web/API/AudioContext/createBufferSource" target="_blank">AudioContext.createBufferSource()</a> を参考にしてください。
+Node で再生する場合も同様に `File System` などを使って `ArrayBuffer` を得る必要があります。PxtoneJS の API が `ArrayBuffer` しか受け付けないことに注意してください。例えば `fs.readFileSync` を使ってローカルファイルの `Buffer` を得た場合は以下のようにして `ArrayBuffer` に変換する必要があります。
+
+```javascript
+let buffer = fs.readFileSync("hoge.pttune"); // Buffer
+let arrayBuffer = new Uint8Array(buffer).buffer; // ArrayBuffer
+``` 
+
+また Node は `Web Audio API` をデフォルトでサポートしてないので `web-audio-api` パッケージを使います。詳しい情報は <a href="https://github.com/sebpiq/node-web-audio-api" target="_blank">node-web-audio-api</a> を御覧ください。
+
+```javascript
+const AudioContext = require("web-audio-api").AudioContext;
+const ctx = new AudioContext();
+pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(arr) {
+  var audioBuffer = arr[0];
+  var data = arr[1];
+});
+```
+
+ブラウザ、Node で、得た `AudioBuffer` を再生するには `AudioBufferSourceNode` を使います。詳しくは MDN の <a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Audio_API/Using_Web_Audio_API" target="_blank">Web Audio APIの利用</a> や <a href="https://developer.mozilla.org/ja/docs/Web/API/AudioContext/createBufferSource" target="_blank">AudioContext.createBufferSource()</a> を参考にしてください。
 
 ##Browser Support
 
@@ -96,7 +142,7 @@ iOS 9.2: Mobile Safari
 上記に書いてないブラウザ環境でも Web Audio API が動く環境であれば動作すると思われます。
 動作する環境について調べたい場合は Can I use の [Web Audio API](http://caniuse.com/#feat=audio-api) を御覧ください。
 
-特にデフォルトで asm.js をサポートしている Edge, Firefox では速くデコードすることが出来ます。
+特にデフォルトで asm.js をサポートしている Firefox, Edge では速くデコードすることが出来ます。
 将来的には WebAssembly によって、どのブラウザでも速くデコードすることが出来るようになると思われます。
 
 また IE は Web Audio API を使うことが出来ませんが、<a href="http://www.g200kg.com/docs/waapisim/" target="_blank">WAAPISim</a> を使うことで動作する可能性があります。
@@ -144,6 +190,8 @@ iOS 9.2: Mobile Safari
 
 <a href="https://github.com/mohayonao/promise-decode-audio-data" target="_blank">promise-decode-audio-data</a> に依存しているため、`AudioContext#decodeAudioData` が `Promise` を返すようになります。
 
+Node で使用した場合も同様に `Promise` を返すようになります。
+
 ##License & Dependencies
 
 under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT License</a>.
@@ -161,7 +209,7 @@ under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT Lice
 * <a href="http://browserify.org/" href="_target">Browserify</a>: require('modules') in the browser by bundling up all of your dependencies
 * <a href="http://lisperator.net/uglifyjs/" href="_target">UglifyJS</a>: JavaScript parser / mangler / compressor / beautifier toolkit
 
-その他の依存する npm package については [package.json](package.json) を御覧ください。
+その他の依存する npm パッケージについては [package.json](package.json) を御覧ください。
 
 ##Support
 
