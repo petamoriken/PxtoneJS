@@ -13,7 +13,7 @@
 	<a href="https://david-dm.org/petamoriken/pxtonejs" target="_blank"><img src="https://david-dm.org/petamoriken/pxtonejs.svg?style=flat-square" alt="Dependency Status"></a><br>
 	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/v/pxtone.svg?style=flat-square" alt="npm Version"></a>
 	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/dt/pxtone.svg?style=flat-square" alt="npm Downloads"></a>
-	<a href="https://github.com/petamoriken/PxtoneJS/releases" target="_blank"><img src="https://img.shields.io/github/release/petamoriken/PxtoneJS.svg?style=flat-square" alt="release Version"></a>
+	<a href="https://github.com/petamoriken/PxtoneJS/releases/latest" target="_blank"><img src="https://img.shields.io/github/release/petamoriken/PxtoneJS.svg?style=flat-square" alt="release Version"></a>
 	<a href="https://github.com/petamoriken/PxtoneJS/releases" target="_blank"><img src="https://img.shields.io/github/downloads/petamoriken/PxtoneJS/total.svg?style=flat-square" alt="release Downloads"></a>
 </p>
 
@@ -44,7 +44,7 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 ```
 
 としてください。  
-なお Browserify でビルドする際は、不要な Node のパッケージである `web-audio-api`, `text-encoding` を含めないようにしてください。例えば以下のようにビルドします。
+なお Browserify でビルドする際は、不要な npm のパッケージである `web-audio-api`, `text-encoding` を含めないようにしてください。例えば以下のようにビルドします。
 
 ```
 browserify src.js --no-commondir --igv global -i web-audio-api -i text-encoding -o build.js
@@ -83,8 +83,8 @@ npm install --save web-audio-api
 Node で require をするときには Browserify と同様に
 
 ```javascript
-var Pxtone = require("pxtone");
-var pxtnDecoder = require("pxtone/pxtnDecoder");
+const Pxtone = require("pxtone");
+const pxtnDecoder = require("pxtone/pxtnDecoder");
 ```
 
 としてください。  
@@ -114,8 +114,8 @@ pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(arr) {
 Node で再生する場合も同様に `File System` などを使って `ArrayBuffer` を得る必要があります。PxtoneJS の API が `ArrayBuffer` しか受け付けないことに注意してください。例えば `fs.readFileSync` を使ってローカルファイルの `Buffer` を得た場合は以下のようにして `ArrayBuffer` に変換する必要があります。
 
 ```javascript
-let buffer = fs.readFileSync("hoge.pttune"); // Buffer
-let arrayBuffer = new Uint8Array(buffer).buffer; // ArrayBuffer
+const buffer = fs.readFileSync("hoge.pttune"); // Buffer
+const arrayBuffer = new Uint8Array(buffer).buffer; // ArrayBuffer
 ``` 
 
 また Node は `Web Audio API` をデフォルトでサポートしてないので `web-audio-api` パッケージを使います。詳しい情報は <a href="https://github.com/sebpiq/node-web-audio-api" target="_blank">node-web-audio-api</a> を御覧ください。
@@ -124,8 +124,8 @@ let arrayBuffer = new Uint8Array(buffer).buffer; // ArrayBuffer
 const AudioContext = require("web-audio-api").AudioContext;
 const ctx = new AudioContext();
 pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(arr) {
-  var audioBuffer = arr[0];
-  var data = arr[1];
+  const audioBuffer = arr[0];
+  const data = arr[1];
 });
 ```
 

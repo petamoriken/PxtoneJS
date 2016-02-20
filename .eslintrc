@@ -8,7 +8,7 @@
   },
   // To give you an idea how to override rule options:
   "rules": {
-    "quotes": [2, "double"],
+    "quotes": [2, "double", "avoid-escape"],
     "no-unused-vars": [1, {"vars": "all", "args": "after-used"}],
     "eol-last": [0],
     "no-mixed-requires": [0],
