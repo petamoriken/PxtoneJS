@@ -11,8 +11,8 @@ EMCC_OPTS+=--pre-js $(EMCC_DIR)/pre.js --post-js $(EMCC_DIR)/post.js
 
 EMCC_LINKS:=-I $(PXTONE_DIR)/src-oggvorbis -I $(PXTONE_DIR)/src-pxtone -I $(PXTONE_DIR)/src-pxtonePlay -I $(PXTONE_DIR)/src-pxwr
 
-EMCC_SRCS:=-x c $(PXTONE_DIR)/src-oggvorbis/*.c $(PXTONE_DIR)/src-oggvorbis/.libs/libvorbis.a
-EMCC_SRCS+=-x c++ $(EMCC_DIR)/bind.cpp $(PXTONE_DIR)/src-pxtone/*.cpp $(PXTONE_DIR)/src-pxtonePlay/*.cpp $(PXTONE_DIR)/src-pxwr/*.cpp
+EMCC_SRCS:=-x c $(wildcard $(PXTONE_DIR)/src-oggvorbis/*.c) $(PXTONE_DIR)/src-oggvorbis/.libs/libvorbis.a
+EMCC_SRCS+=-x c++ $(EMCC_DIR)/bind.cpp $(wildcard $(PXTONE_DIR)/src-pxtone/*.cpp) $(wildcard $(PXTONE_DIR)/src-pxtonePlay/*.cpp) $(wildcard $(PXTONE_DIR)/src-pxwr/*.cpp)
 
 
 all: build/*.min.js lib/*
