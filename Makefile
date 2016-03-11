@@ -22,17 +22,16 @@ build/*.min.js: build/Pxtone.js build/pxtnDecoder.js
 	uglifyjs build/Pxtone.js -c --comments "/PxtoneJS/" -o build/Pxtone.min.js && \
 	uglifyjs build/pxtnDecoder.js -c --comments "/PxtoneJS/" -o build/pxtnDecoder.min.js
 
-build/Pxtone.js: build/
+build/Pxtone.js: src/* src/pxtnDecoder.js
+	mkdir -p build && \
 	mkdir -p temp && \
 	browserify -t babelify -s Pxtone src/index.js --no-commondir --igv global -i web-audio-api -i text-encoding -o temp/Pxtone.js && \
 	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - temp/Pxtone.js > build/Pxtone.js && \
 	$(RM) -rf temp
 
-build/pxtnDecoder.js: build/ src/pxtnDecoder.js
+build/pxtnDecoder.js: src/* src/pxtnDecoder.js
+	mkdir -p build && \
 	echo "/*! PxtoneJS" v`node -pe "require('./package.json').version"` "http://git.io/PxtoneJS */" | cat - src/pxtnDecoder.js > build/pxtnDecoder.js
-
-build/: src/* src/pxtnDecoder.js
-	mkdir -p build
 
 lib/*: src/* src/pxtnDecoder.js
 	$(RM) lib/* && \

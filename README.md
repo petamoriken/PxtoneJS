@@ -43,12 +43,7 @@ var Pxtone = require("pxtone");
 var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 ```
 
-としてください。  
-なお Browserify でビルドする際は、不要な npm のパッケージである `web-audio-api`, `text-encoding` を含めないようにしてください。例えば以下のようにビルドします。
-
-```
-browserify src.js --no-commondir --igv global -i web-audio-api -i text-encoding -o build.js
-```
+としてください。
 
 また、<a href="https://github.com/substack/webworkify" target="_blank">webworkify</a> を使えば 1 つの JavaScript ファイルとしてまとめることが出来ますが、膨大な `lib/pxtnDecoder.js` を文字列化して `URL.createObjectURL` を使って読み込むことになるため、パフォーマンス面から推奨しません。
 

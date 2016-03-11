@@ -1,7 +1,7 @@
 {
   "name": "pxtone",
   "description": "Play Pxtone Collage files in Web Audio API",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Kenta Moriuchi (http://moriken.kimamass.com/)",
   "bugs": {
     "url": "https://github.com/petamoriken/PxtoneJS/issues"
@@ -26,6 +26,10 @@
   "optionalDependencies": {
     "text-encoding": "^0.5.2",
     "web-audio-api": ">=0.2.2"
+  },
+  "browser": {
+    "text-encoding": false,
+    "web-audio-api": false
   },
   "files": [
     "README.md",
