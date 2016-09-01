@@ -1,10 +1,9 @@
 {
-	presets:	["es2015"],
-	plugins:[
+	"presets":	["latest"],
+	"plugins":[
 		"transform-runtime",
-		"transform-async-to-generator",
 		"transform-strict-mode",
 		"add-module-exports"
 	],
-	ignore:		["src/pxtnDecoder.js"]
+	"ignore":		["src/pxtnDecoder.js"]
 }
