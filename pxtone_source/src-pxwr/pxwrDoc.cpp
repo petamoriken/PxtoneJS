@@ -77,6 +77,7 @@ bool pxwrDoc::Open_res( const char *dir, const char *name, const char* mode, boo
 End:
 	return b_ret;
 }
+*/
 
 bool pxwrDoc::Open_path( const char *path, const char* mode )
 {
@@ -96,8 +97,6 @@ bool pxwrDoc::Open_path( const char *path, const char* mode )
 End:
 	return b_ret;
 }
-
-*/
 
 /*
 win32resource or file( HMODULE hModule, const char *type_name, const char *file_name )
@@ -331,7 +330,7 @@ int  pxwrDoc::v_w  ( int val, int *p_add )
 }
 
 
-// �ϒ��ǂݍ��݁iunsigned int  �܂ł�ۏ؁j
+// �ϒ��ǂݍ��݁iunsigned int  �܂ł��ۏ؁j
 bool pxwrDoc::v_r  ( int *p  )
 {
 	if( !_p ) return false;
