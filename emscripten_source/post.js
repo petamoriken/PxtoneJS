@@ -36,22 +36,21 @@ function sizeof(type) {
 	var size;
 
 	switch(type) {
-		case "i8":
-		case "i8*":
+//		case "i8":
+//			size = 1;
+//			break;
+
+//		case "i16":
+//			size = 2;
+//			break;
+
+//		case "i32":
+//		case "float":
 		case "*":
-			size = 1;
-			break;
-
-		case "i16":
-			size = 2;
-			break;
-
-		case "i32":
-		case "float":
 			size = 4;
 			break;
 
-		case "i64":
+//		case "i64":
 		case "double":
 			size = 8;
 			break;
@@ -68,7 +67,7 @@ function decode(type, inputBuffer, ch, sps, bps) {
 	var size = inputBuffer.byteLength, bufferMem = new Memory(size);
 	HEAPU8.set(new Uint8Array(inputBuffer), bufferMem.ptr);
 
-	var outputMem = new Memory("i8*"), outputSizeMem = new Memory("i8*");
+	var outputMem = new Memory("*"), outputSizeMem = new Memory("*");
 	var data = null;
 
 	switch(type) {
@@ -78,35 +77,38 @@ function decode(type, inputBuffer, ch, sps, bps) {
 			}
 			break;
 
-		case "pxtone":
-			var loopStartMem = new Memory("double"), loopEndMem = new Memory("double");
-			var titleMem = new Memory("i8*"), titleSizeMem = new Memory("i8*");
-			var commentMem = new Memory("i8*"), commentSizeMem = new Memory("i8*");
-			var titleStart, titleEnd, commentStart, commentEnd;
+		case "pxtone": 
+			(function() {
+				var loopStartMem = new Memory("double"), loopEndMem = new Memory("double");
+				var titleMem = new Memory("*"), titleSizeMem = new Memory("*");
+				var commentMem = new Memory("*"), commentSizeMem = new Memory("*");
+				var titleStart, titleEnd, commentStart, commentEnd;
 
-			if(!decodePxtone(
-				bufferMem.ptr, size, ch, sps, bps,
-				outputMem.ptr, outputSizeMem.ptr, loopStartMem.ptr, loopEndMem.ptr,
-				titleMem.ptr, titleSizeMem.ptr,
-				commentMem.ptr, commentSizeMem.ptr
-			)) {
-				throw new Error("Decode Pxtone Project Error.");
-			}
+				if(!decodePxtone(
+					bufferMem.ptr, size, ch, sps, bps,
+					outputMem.ptr, outputSizeMem.ptr,
+					loopStartMem.ptr, loopEndMem.ptr,
+					titleMem.ptr, titleSizeMem.ptr,
+					commentMem.ptr, commentSizeMem.ptr
+				)) {
+					throw new Error("Decode Pxtone Project Error.");
+				}
 
-			titleStart = titleMem.getValue(), titleEnd = titleStart + titleSizeMem.getValue();
-			commentStart = commentMem.getValue(), commentEnd = commentStart + commentSizeMem.getValue();
+				titleStart = titleMem.getValue(), titleEnd = titleStart + titleSizeMem.getValue();
+				commentStart = commentMem.getValue(), commentEnd = commentStart + commentSizeMem.getValue();
 
-			data = {
-				"loopStart":		loopStartMem.getValue(),
-				"loopEnd":			loopEndMem.getValue(),
-				"titleBuffer":		buffer.slice(titleStart, titleEnd),
-				"commentBuffer":	buffer.slice(commentStart, commentEnd)  
-			};
+				data = {
+					"loopStart":		loopStartMem.getValue(),
+					"loopEnd":			loopEndMem.getValue(),
+					"titleBuffer":		buffer.slice(titleStart, titleEnd),
+					"commentBuffer":	buffer.slice(commentStart, commentEnd)  
+				};
 
-			// free
-			loopStartMem.release(); loopEndMem.release();
-			_free(titleStart); _free(commentStart);
-			titleMem.release(); titleSizeMem.release(); commentMem.release(); commentSizeMem.release();
+				// free data
+				loopStartMem.release(); loopEndMem.release();
+				_free(titleStart); _free(commentStart);
+				titleMem.release(); titleSizeMem.release(); commentMem.release(); commentSizeMem.release();
+			})();
 			break;
 	}
 
