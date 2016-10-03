@@ -48,37 +48,18 @@ End:
 }
 
 // Pxtone Project
-bool decodePxtone(uintptr_t pxtn_c, int pxtn_length, int ch, int sps, int bps, uintptr_t wave_c, uintptr_t wave_length_c, uintptr_t loopStart_c, uintptr_t loopEnd_c, uintptr_t title_c, uintptr_t title_length_c, uintptr_t comment_c, uintptr_t comment_length_c) {
+bool createPxtone(uintptr_t pxtn_c, int pxtn_length, int ch, int sps, int bps, uintptr_t pxVomit_c, uintptr_t doc_c) {
 
 	void *		pxtn		= (void *) pxtn_c;
-	void **		wave		= (void **) wave_c; 
-	int *		wave_length	= (int *) wave_length_c;
 
-	double *	loopStart	= (double *) loopStart_c;
-	double *	loopEnd		= (double *) loopEnd_c;
+	void **		pxVomit_m	= (void **)	pxVomit_c;
+	void **		doc_m		= (void **)	doc_c;
 
-	void **		title			= (void **) title_c;
-	int *		title_length	= (int *) title_length_c;
-	void **		comment			= (void **) comment_c;
-	int *		comment_length	= (int *) comment_length_c;
+	bool		b_ret		= false;	
 
-
-	bool			b_ret	= false;
 	pxwrDoc *		doc		= new pxwrDoc();
 	pxtoneVomit *	pxVomit	= new pxtoneVomit();
-
-	int			beatNum;
-	float		beatTempo;
-	int			measNum;
-	int			sampleNum;
-	double		duration;
-
-	char		buffer[4096];
-	int			size, pc;
-
-	const char *	titleBuffer;
-	const char *	commentBuffer;
-
+	
 	// set buffer to doc
 	if(!doc->SetRead(pxtn, pxtn_length))	goto End;
 
@@ -88,19 +69,66 @@ bool decodePxtone(uintptr_t pxtn_c, int pxtn_length, int ch, int sps, int bps, u
 
 	// set doc to vomit
 	if(!pxVomit->Read(doc))					goto End;
-	pxVomit->get_info(&beatNum, &beatTempo, NULL, &measNum);
+
+	*pxVomit_m = (void *) pxVomit;
+	*doc_m = (void *) doc;
+
+	b_ret = true;
+
+End:
+	if(!b_ret) {
+		delete pxVomit;
+		delete doc;
+	}
+
+	return b_ret;
+}
+
+bool getPxtoneText(uintptr_t pxVomit_c, uintptr_t title_c, uintptr_t title_length_c, uintptr_t comment_c, uintptr_t comment_length_c) {
+
+	void **		pxVomit_m	= (void **)	pxVomit_c;
+
+	void **		title			= (void **) title_c;
+	int *		title_length	= (int *) title_length_c;
+	void **		comment			= (void **) comment_c;
+	int *		comment_length	= (int *) comment_length_c;
+
+	pxtoneVomit *	pxVomit	= (pxtoneVomit *) *pxVomit_m;
+
+	// title, comment
+	if(*title = (void *) pxVomit->get_title()) {
+		*title_length = strlen((char *) *title);
+	}
+
+	if(*comment = (void *) pxVomit->get_comment()) {
+		*comment_length = strlen((char *) *comment);
+	}
+
+	return true;
+}
+
+bool getPxtoneInfo(uintptr_t pxVomit_c, int ch, int sps, int bps, uintptr_t wave_length_c, uintptr_t loopStart_c, uintptr_t loopEnd_c) {
+
+	void **		pxVomit_m	= (void **)	pxVomit_c;
+
+	int *		wave_length	= (int *) wave_length_c;
+	double *	loopStart	= (double *) loopStart_c;
+	double *	loopEnd		= (double *) loopEnd_c;
+
+	bool		b_ret		= false;
+
+	pxtoneVomit * pxVomit	= (pxtoneVomit *) *pxVomit_m;
+
+	int			beatNum;
+	float		beatTempo;
+	int			measNum;
+	int			sampleNum;
+	double		duration;
+
+	if(!pxVomit->get_info(&beatNum, &beatTempo, NULL, &measNum))	goto End;
 	sampleNum = pxtoneVomit_Calc_sample_num(measNum, beatNum, sps, beatTempo) * ch * bps / 8;
 
-	// vomit!!
-	*wave = malloc(sampleNum);
-	if(!pxVomit->Start(0, 0))				goto End;
-	pc = 0;
-	do {
-		size = (sampleNum - pc < sizeof(buffer)) ? (sampleNum - pc) : sizeof(buffer);
-		if(!pxVomit->vomit(buffer, size))	goto End;
-		memcpy((char *)*wave + pc, buffer, size);
-		pc += size;
-	} while(pc < sampleNum);
+	// length
 	*wave_length = sampleNum;
 
 	// loop
@@ -108,28 +136,50 @@ bool decodePxtone(uintptr_t pxtn_c, int pxtn_length, int ch, int sps, int bps, u
 	*loopStart = (double)pxVomit->get_meas_repeat() / (double)measNum * duration;
 	*loopEnd = (double)pxVomit->get_meas_play() / (double)measNum * duration;
 
-	// title, comment
-	titleBuffer = pxVomit->get_title();
-	*title_length = strlen(titleBuffer);
-	*title = malloc(*title_length);
-	memcpy(*title, titleBuffer, *title_length);
-
-	commentBuffer = pxVomit->get_comment();
-	*comment_length = strlen(commentBuffer);
-	*comment = malloc(*comment_length);
-	memcpy(*comment, commentBuffer, *comment_length);
+	// vomit start
+	if(!pxVomit->Start(0, 0))										goto End;
 
 	b_ret = true;
 
 End:
-	if(pxVomit)			delete pxVomit;
-	if(doc)				delete doc;
-	if(*wave && !b_ret)	free(*wave);
-
 	return b_ret;
 }
 
+bool vomitPxtone(uintptr_t pxVomit_c, uintptr_t buffer_c, int size) {
+
+	void **		pxVomit_m	= (void **)	pxVomit_c;
+	void *		buffer		= (void *)	buffer_c;
+
+	pxtoneVomit *	pxVomit	= (pxtoneVomit *) *pxVomit_m;
+
+	bool		b_ret		= false;
+
+	if(!pxVomit->vomit(buffer, size))	goto End;
+	
+	b_ret = true;
+End:
+	return b_ret;
+}
+
+void releasePxtone(uintptr_t pxVomit_c, uintptr_t doc_c) {
+
+	void **		pxVomit_m	= (void **)	pxVomit_c;
+	void **		doc_m		= (void **)	doc_c;
+
+	pxtoneVomit *	pxVomit	= (pxtoneVomit *) *pxVomit_m;
+	pxwrDoc *		doc		= (pxwrDoc *) *doc_m;
+
+	if(pxVomit)	delete pxVomit;
+	if(doc)		delete doc;
+}
+
+
 EMSCRIPTEN_BINDINGS(px_module) {
 	function("decodeNoise", &decodeNoise);
-	function("decodePxtone", &decodePxtone);
+
+	function("createPxtone", &createPxtone);
+	function("releasePxtone", &releasePxtone);
+	function("getPxtoneText", &getPxtoneText);
+	function("getPxtoneInfo", &getPxtoneInfo);
+	function("vomitPxtone", &vomitPxtone);
 }

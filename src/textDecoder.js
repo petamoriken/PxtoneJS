@@ -1,9 +1,6 @@
 const TextDecoder = global.TextDecoder || require("text-encoding").TextDecoder;
 
 export default function textDecoder(arraybuffer, charset = "shift_jis") {
-	if(arraybuffer.byteLength === 1 && (new Uint8Array(arraybuffer))[0] === 255)
-		return Promise.resolve("");
-
 	return new Promise((resolve) => {
 		// Encoding API
 		const decoder = new TextDecoder(charset);

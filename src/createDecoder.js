@@ -39,7 +39,6 @@ function setAudioBuffer(channel, bps, outputLength, inputuint8, inputint16, outp
 			for(let i=0, l=outputLength; i<l; ++i) {
 				outputArrayOfFloat32[0][i] = inputint16[i] / 32768;
 			}
-
 		}
 	}
 }
@@ -129,7 +128,7 @@ export default function createDecoder(pxtnDecoder) {
 			});
 		} else {
 			// function
-			return Promise.resolve( pxtnDecoder(type, buffer, ch, sps, bps) );
+			return pxtnDecoder(type, buffer, ch, sps, bps);
 		}
 	}
 
@@ -147,11 +146,12 @@ export default function createDecoder(pxtnDecoder) {
 
 		// Pxtone
 		if(rawData) {
+			const {titleBuffer, commentBuffer} = rawData;
 			const data = {
 				loopStart:	rawData.loopStart,
 				loopEnd:	rawData.loopEnd,
-				title:		await textDecoder(rawData.titleBuffer),
-				comment:	await textDecoder(rawData.commentBuffer)
+				title:		titleBuffer ? await textDecoder(titleBuffer) : "",
+				comment:	commentBuffer ? await textDecoder(commentBuffer) : ""
 			}
 			return [retBuffer, data];
 		}
