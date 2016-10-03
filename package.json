@@ -23,12 +23,10 @@
     "uglify-js": "^2.6.1"
   },
   "optionalDependencies": {
-    "text-encoding": "^0.6.0",
-    "web-audio-api": ">=0.2.2"
+    "text-encoding": "^0.6.0"
   },
   "browser": {
-    "text-encoding": false,
-    "web-audio-api": false
+    "text-encoding": false
   },
   "files": [
     "README.md",

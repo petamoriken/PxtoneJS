@@ -152,7 +152,7 @@ export default function createDecoder(pxtnDecoder) {
 				loopEnd:	rawData.loopEnd,
 				title:		titleBuffer ? await textDecoder(titleBuffer) : "",
 				comment:	commentBuffer ? await textDecoder(commentBuffer) : ""
-			}
+			};
 			return [retBuffer, data];
 		}
 
@@ -160,4 +160,3 @@ export default function createDecoder(pxtnDecoder) {
 	}
 	
 }
-

@@ -1,10 +1,8 @@
-const AudioContext = global.AudioContext || global.webkitAudioContext || require("web-audio-api").AudioContext;
-
 export function checkArguments(ctx, type, buffer, ch, sps, bps) {
 	let errStr = "Invalid arguments:";
 	let isErr = false;
 
-	if(!(ctx instanceof AudioContext) && ctx !== null) {
+	if(ctx !== null && !(ctx != null && ctx.decodeAudioData && ctx.sampleRate)) {
 		errStr += ` audioContext(${ ctx })`;
 		isErr = true;
 	}
@@ -50,7 +48,7 @@ export function checkArguments(ctx, type, buffer, ch, sps, bps) {
 }
 
 export function checkAudioContext(ctx) {
-	if(!(ctx instanceof AudioContext))
+	if(!(ctx != null && ctx.decodeAudioData && ctx.sampleRate))
 		throw new RangeError("Invalid arguments: audioContext must be AudioContext");
 }
 
