@@ -1,9 +1,12 @@
 {
-	"presets":	["latest"],
-	"plugins":[
+	"presets":	[
+		"latest",
+		"stage-3"
+	],
+	"plugins":	[
 		"transform-runtime",
 		"transform-strict-mode",
 		"add-module-exports"
 	],
-	"ignore":		["src/pxtnDecoder.js"]
+	"ignore":	["src/pxtnDecoder.js"]
 }

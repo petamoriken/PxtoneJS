@@ -1,4 +1,5 @@
-import "./polyfill";
+// polyfill
+import "promise-decode-audio-data";
 
 import textDecoder from "./textDecoder";
 import { checkArguments, getAptSampleRate } from "./value";

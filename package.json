@@ -12,11 +12,12 @@
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",
-    "babel-eslint": "^6.1.2",
+    "babel-eslint": "^7.0.0",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-runtime": "^6.3.13",
     "babel-plugin-transform-strict-mode": "^6.3.13",
     "babel-preset-latest": "^6.14.0",
+    "babel-preset-stage-3": "^6.17.0",
     "babelify": "^7.2.0",
     "browserify": "^13.0.0",
     "eslint": "^3.4.0",
