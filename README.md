@@ -72,7 +72,7 @@ var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
 
 ```
 npm install --save pxtone
-npm install --save web-audio-api
+npm install --save web-audio-engine
 ```
 
 Node で require をするときには Browserify と同様に
@@ -83,7 +83,7 @@ const pxtnDecoder = require("pxtone/pxtnDecoder");
 ```
 
 としてください。  
-Node の場合は `web-audio-api` パッケージを使うことになります。
+Node の場合は `web-audio-engine` パッケージを使うことになります。
 
 ##Initialize
 
@@ -106,25 +106,7 @@ pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(arr) {
 });
 ```
 
-Node で再生する場合も同様に `File System` などを使って `ArrayBuffer` を得る必要があります。PxtoneJS の API が `ArrayBuffer` しか受け付けないことに注意してください。例えば `fs.readFileSync` を使ってローカルファイルの `Buffer` を得た場合は以下のようにして `ArrayBuffer` に変換する必要があります。
-
-```javascript
-const buffer = fs.readFileSync("hoge.pttune"); // Buffer
-const arrayBuffer = new Uint8Array(buffer).buffer; // ArrayBuffer
-``` 
-
-また Node は `Web Audio API` をデフォルトでサポートしてないので `web-audio-api` パッケージを使います。詳しい情報は <a href="https://github.com/sebpiq/node-web-audio-api" target="_blank">node-web-audio-api</a> を御覧ください。
-
-```javascript
-const AudioContext = require("web-audio-api").AudioContext;
-const ctx = new AudioContext();
-pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(arr) {
-  const audioBuffer = arr[0];
-  const data = arr[1];
-});
-```
-
-ブラウザ、Node で、得た `AudioBuffer` を再生するには `AudioBufferSourceNode` を使います。詳しくは MDN の <a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Audio_API/Using_Web_Audio_API" target="_blank">Web Audio APIの利用</a> や <a href="https://developer.mozilla.org/ja/docs/Web/API/AudioContext/createBufferSource" target="_blank">AudioContext.createBufferSource()</a> を参考にしてください。
+得た `AudioBuffer` を再生するには `AudioBufferSourceNode` を使います。詳しくは MDN の <a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Audio_API/Using_Web_Audio_API" target="_blank">Web Audio APIの利用</a> や <a href="https://developer.mozilla.org/ja/docs/Web/API/AudioContext/createBufferSource" target="_blank">AudioContext.createBufferSource()</a> を参考にしてください。
 
 ##Browser Support
 
@@ -203,6 +185,7 @@ under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT Lice
   * <a href="https://github.com/zloirock/core-js" href="_target">core-js</a> (babel-runtime): Modular standard library for JavaScript
 * <a href="http://browserify.org/" href="_target">Browserify</a>: require('modules') in the browser by bundling up all of your dependencies
 * <a href="http://lisperator.net/uglifyjs/" href="_target">UglifyJS</a>: JavaScript parser / mangler / compressor / beautifier toolkit
+* <a href="https://github.com/nolanlawson/optimize-js" href="_target">optimize-js</a>: Optimize a JavaScript file for faster initial load by wrapping eagerly-invoked functions
 
 その他の依存する npm パッケージについては [package.json](package.json) を御覧ください。
 
