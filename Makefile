@@ -20,7 +20,8 @@ all: build/*.min.js lib/*
 
 build/*.min.js: build/Pxtone.js build/pxtnDecoder.js
 	uglifyjs build/Pxtone.js -c --comments "/PxtoneJS/" -o build/Pxtone.min.js && \
-	uglifyjs build/pxtnDecoder.js -c --comments "/PxtoneJS/" -o build/pxtnDecoder.min.js
+	uglifyjs build/pxtnDecoder.js -c --comments "/PxtoneJS/" -o build/pxtnDecoder.min.js && \
+	optimize-js build/Pxtone.min.js > build/Pxtone.min.opt.js
 
 build/Pxtone.js: src/* src/pxtnDecoder.js
 	mkdir -p build && \
@@ -39,8 +40,7 @@ lib/*: src/* src/pxtnDecoder.js
 	cp src/pxtnDecoder.js lib/
 
 src/pxtnDecoder.js: $(PXTONE_DIR)/src-pxtone/* $(PXTONE_DIR)/src-pxtonePlay/* $(PXTONE_DIR)/src-pxwr/* $(EMCC_DIR)/*
-	em++ $(CLANG_OPTS) $(EMCC_OPTS) $(EMCC_LINKS) $(EMCC_SRCS) -o src/pxtnDecoder.js && \
-	sed -i "" -e "s/almost asm/use asm/g" src/pxtnDecoder.js
+	em++ $(CLANG_OPTS) $(EMCC_OPTS) $(EMCC_LINKS) $(EMCC_SRCS) -o src/pxtnDecoder.js
 
 clean:
 	$(RM) -rf lib/* build temp src/pxtnDecoder.js
