@@ -167,8 +167,6 @@ iOS 9.2: Mobile Safari
 
 <a href="https://github.com/mohayonao/promise-decode-audio-data" target="_blank">promise-decode-audio-data</a> に依存しているため、`AudioContext#decodeAudioData` が `Promise` を返すようになります。
 
-Node で使用した場合も同様に `Promise` を返すようになります。
-
 ##License & Dependencies
 
 under <a href="http://petamoriken.mit-license.org/2016" target="_blank">MIT License</a>.
