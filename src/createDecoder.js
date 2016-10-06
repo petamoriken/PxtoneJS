@@ -143,21 +143,23 @@ export default function createDecoder(pxtnDecoder) {
 		}
 
 		const [pcmBuffer, rawData] = await modifyBuffer(type, buffer, ch, sps, bps);
-		const retBuffer = await decodeBuffer(ctx, pcmBuffer, ch, sps, bps);
+		const ret = {
+			buffer:	await decodeBuffer(ctx, pcmBuffer, ch, sps, bps),
+			data:	null
+		};
 
 		// Pxtone
 		if(rawData) {
 			const {titleBuffer, commentBuffer} = rawData;
-			const data = {
+			ret.data = {
 				loopStart:	rawData.loopStart,
 				loopEnd:	rawData.loopEnd,
 				title:		titleBuffer ? await textDecoder(titleBuffer) : "",
 				comment:	commentBuffer ? await textDecoder(commentBuffer) : ""
 			};
-			return [retBuffer, data];
 		}
 
-		return retBuffer;
-	}
+		return ret;
+	};
 	
-}
+};

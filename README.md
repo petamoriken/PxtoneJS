@@ -133,19 +133,19 @@ iOS 9.2: Mobile Safari
 
 ###AudioBuffer を作る
   
-* `Pxtone#decodeNoiseData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve(audioBuffer: AudioBuffer)`
+* `Pxtone#decodeNoiseData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: AudioBuffer, data: null}>`
 
   * Pxtone Noise ファイル（拡張子 .ptnoise）を `AudioBuffer` に変換します。
   * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
   * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。`null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
 
-* `Pxtone#decodePxtoneData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve([audioBuffer: AudioBuffer, data: Object])`
+* `Pxtone#decodePxtoneData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: AudioBuffer, data: Object}>`
 
   * Pxtone Collage Project ファイル（拡張子 .ptcop）と Pxtone Tune ファイル（拡張子 .pttune）を `AudioBuffer` に変換します。
   * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
   * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。`null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
   
-  * `Pxtone#decodeNoiseData` とは違い、返り値の `Promise` は `AudioBuffer` と `Object` を持つ長さ 2 の配列を `resolve` します。そして、その 2 つ目の要素である `Object` は以下の様なプロパティを持ちます。
+  * `Pxtone#decodeNoiseData` とは違い、返り値の `Promise` は `data: Object` を持ちます。`data: Object` は以下の様なプロパティを持ちます。
     * `title: string`: ファイルが持つタイトルの文字列です。
     * `comment: string`: ファイルが持つコメントの文字列です。
     * `loopStart: number`: ループ初めの位置です（Web Audio API の `AudioBufferSourceNode` に与えて使います） 。
@@ -153,12 +153,12 @@ iOS 9.2: Mobile Safari
 
 ###Wave の ArrayBuffer を作る
 
-* `Pxtone#decodeNoise(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve(waveBuffer: ArrayBuffer)`
+* `Pxtone#decodeNoise(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: ArrayBuffer, data: null}>`
 
   * Pxtone Noise ファイル（拡張子 .ptnoise）を Wave の `ArrayBuffer` に変換します。
   * 引数については `Pxtone#decodeNoiseData` と同じです。ただし `sampleRate` が `null` のときは `44100` として扱います。
 
-* `Pxtone#decodePxtone(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise.resolve([waveBuffer: ArrayBuffer, data: Object])`
+* `Pxtone#decodePxtone(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: ArrayBuffer, data: Object}>`
 
   * Pxtone Collage Project ファイル（拡張子 .ptcop）と Pxtone Tune ファイル（拡張子 .pttune）を Wave の `ArrayBuffer` に変換します。
   * 引数については `Pxtone#decodePxtoneData` と同じです。ただし `sampleRate` が `null` のときは `44100` として扱います。
