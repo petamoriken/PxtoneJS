@@ -100,9 +100,9 @@ pxtone.decoder = pxtnDecoder;
 
 ```javascript
 var ctx = new (window.AudioContext || window.webkitAudioContext)();
-pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(arr) {
-  var audioBuffer = arr[0];
-  var data = arr[1];
+pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(obj) {
+  var audioBuffer = obj.buffer;
+  var data = obj.data;
 });
 ```
 
