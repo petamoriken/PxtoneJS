@@ -112,7 +112,7 @@ export default function createDecoder(pxtnDecoder) {
 				pxtnDecoder.addEventListener("message", function onmessage(e) {
 					const data = e.data;
 					if(sessionId === data.sessionId) {
-						resolve([data.buffer, data.data]);
+						resolve({buffer: data.buffer, data: data.data});
 						pxtnDecoder.removeEventListener("message", onmessage);
 					}
 				});
@@ -142,7 +142,7 @@ export default function createDecoder(pxtnDecoder) {
 			sps = getAptSampleRate(ctx);
 		}
 
-		const [pcmBuffer, rawData] = await modifyBuffer(type, buffer, ch, sps, bps);
+		const {buffer: pcmBuffer, data: rawData} = await modifyBuffer(type, buffer, ch, sps, bps);
 		const ret = {
 			buffer:	await decodeBuffer(ctx, pcmBuffer, ch, sps, bps),
 			data:	null

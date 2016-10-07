@@ -189,7 +189,7 @@ function decode(type, inputBuffer, ch, sps, bps) {
 	return promise.then(function() {
 		// free
 		bufferMem.release();
-		return [outputBuffer, data];
+		return {buffer: outputBuffer, data: data};
 	});
 }
 
@@ -206,8 +206,8 @@ if(ENVIRONMENT_IS_REQUIRE) {
 		var data = e["data"];
 		
 		decode(data["type"], data["buffer"], data["ch"], data["sps"], data["bps"]).then(function(decoded) {
-			var buffer = decoded[0];
-			var rawData = decoded[1];
+			var buffer = decoded.buffer;
+			var rawData = decoded.data;
 
 			var transfer = [buffer];
 			var titleBuffer, commentBuffer;
