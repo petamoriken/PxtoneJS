@@ -16,13 +16,15 @@ module.exports = {
     "ArrayBuffer": false,
     "Uint8Array": false,
     "Int16Array": false,
-    "DataView": false    
+    "DataView": false,
+    "WeakMap": false
   },
   // To give you an idea how to override rule options:
   extends: ["eslint:recommended"],
   rules: {
     "quotes": [2, "double", "avoid-escape"],
     "no-unused-vars": [1, {"vars": "all", "args": "after-used"}],
+    "no-return-await": [1],
     "eol-last": [0],
     "no-mixed-requires": [0],
     "no-underscore-dangle": [0]

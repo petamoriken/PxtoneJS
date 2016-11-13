@@ -9,7 +9,8 @@
   "dependencies": {
     "babel-runtime": "^6.3.19",
     "promise-decode-audio-data": "^0.2.0",
-    "streams": "petamoriken/streams"
+    "streams": "petamoriken/streams",
+    "zen-observable": "^0.3.0"
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",
@@ -36,15 +37,16 @@
     "pxtonejs.png",
     "pxtonejs5x.png",
     "index.js",
-    "pxtnDecoder.js",
     "lib",
     "package.json"
   ],
   "homepage": "https://github.com/petamoriken/PxtoneJS",
   "keywords": [
     "PxtoneCollage",
-    "webaudio",
-    "web-audio-api"
+    "WebAudioAPI",
+    "streams",
+    "web-audio-api",
+    "webaudio"
   ],
   "license": "MIT",
   "main": "index.js",
@@ -55,7 +57,7 @@
   "scripts": {
     "clean": "make clean",
     "build": "make",
-    "lint": "eslint src",
+    "lint": "eslint src --ignore-path .eslintignore",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

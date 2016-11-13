@@ -1,3 +1,5 @@
+import Observable from "zen-observable";
+
 const Worker = global.Worker || (() => {});
 
 const getId = (() => {
@@ -18,29 +20,27 @@ export default function wrapWorker(pxtnDecoder) {
                 pxtnDecoder.addEventListener("message", function onmessage(e) {
                     const data = e.data;
                     if (sessionId !== data.sessionId) return;
-                    
-                    const stream = type === "stream" ? (async function* stream() {
-                        for(;;) {
-                            const { streamBuffer, done } = await new Promise(resolve => {
-                                pxtnDecoder.addEventListener("message", function onstream(e) {
-                                    const data = e.data;
-                                    if(sessionId !== data.sessionId) return;
 
-                                    resolve({streamBuffer: data.streamBuffer, done: data.done});
-                                    pxtnDecoder.removeEventListener("message", onstream);
-                                });
-                            });
+                    const stream = (type === "stream") ? new Observable(observer => {
+                        function handler(e) {
+                            const data = e.data;
+                            if(sessionId !== data.sessionId) return;
 
-                            if(done) break;
-                            const cancel = yield streamBuffer;
-                            if(cancel) {
-                                pxtnDecoder.postMessage({
-                                    sessionId,
-                                    type: "cancel"
-                                });
+                            if(data.done) {
+                                observer.complete();
+                                pxtnDecoder.removeEventListener("message", handler);
                             }
+
+                            observer.next(data.streamBuffer);
                         }
-                    })() : null;
+
+                        pxtnDecoder.addEventListener("message", handler);
+
+                        return () => {
+                            pxtnDecoder.removeEventListener("message", handler);
+                        };
+                    }) : null;
+                    
                     resolve({ buffer: data.buffer, stream, data: data.data });
                     pxtnDecoder.removeEventListener("message", onmessage);
                 });

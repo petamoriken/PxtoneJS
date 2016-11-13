@@ -1,6 +1,6 @@
 // polyfill
 import "promise-decode-audio-data";
-import _ReadableStream from "stream/readable-stream";
+import _ReadableStream from "streams/readable-stream";
 
 import { checkArguments, getAptSampleRate } from "./value";
 import { WAVE_HEADER_SIZE, setWaveHeader, decodeAudio } from "./buffer";
@@ -27,14 +27,15 @@ export default function createDecoder(pxtnDecoder) {
         if (type === "pxtone" || type === "noise") {
             // pxtone, noise
             const { buffer: pcmBuffer, data } = await decoder(type, buffer, ch, sps, bps);
-            const buffer = await decodeAudio(ctx, pcmBuffer, ch, sps, bps);
-            ret = { buffer, data };
+            const audioBuffer = await decodeAudio(ctx, pcmBuffer, ch, sps, bps);
+            ret = { buffer: audioBuffer, data };
 
         } else if (type === "stream") {
             // stream
-            const { stream: streamItarator, data } = await decoder(type, buffer, ch, sps, bps);
+            const { stream: streamObserver, data } = await decoder(type, buffer, ch, sps, bps);
             const { byteLength } = data;
 
+            let subscription;
             const stream = new ReadableStream({
                 type: "bytes",
                 autoAllocateChunkSize: WAVE_HEADER_SIZE + byteLength,
@@ -43,14 +44,17 @@ export default function createDecoder(pxtnDecoder) {
                     setWaveHeader(header, ch, sps, bps, byteLength);
                     controller.enqueue(header);
 
-                    for await (const buffer of streamItarator) {
-                        controller.enqueue(buffer);
-                    }
-
-                    controller.close();
+                    subscription = streamObserver.subscribe({
+                        next(streamBuffer) {
+                            controller.enqueue(streamBuffer);
+                        },
+                        complete() {
+                            controller.close();
+                        }
+                    });
                 },
                 cancel() {
-                    streamItarator.next(true);
+                    subscription.unsubscribe();
                 }
             });
 

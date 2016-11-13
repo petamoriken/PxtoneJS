@@ -4,9 +4,8 @@
 		"stage-3"
 	],
 	"plugins":	[
-		"transform-runtime",
 		"transform-strict-mode",
+		"transform-runtime",
 		"add-module-exports"
-	],
-	"ignore":	["src/pxtnDecoder.js"]
+	]
 }
