@@ -33,21 +33,21 @@ export default class Pxtone {
 	}
 
 	async decodeNoise(...args) {
-		return await _(this).decoder(null, "noise", ...args);
+		return _(this).decoder(null, "noise", ...args);
 	}
 
 	async decodePxtone(...args) {
-		return await _(this).decoder(null, "pxtone", ...args);
+		return _(this).decoder(null, "pxtone", ...args);
 	}
 
 	async decodeNoiseData(ctx, ...args) {
 		checkAudioContext(ctx);
-		return await _(this).decoder(ctx, "noise", ...args);
+		return _(this).decoder(ctx, "noise", ...args);
 	}
 
 	async decodePxtoneData(ctx, ...args) {
 		checkAudioContext(ctx);
-		return await _(this).decoder(ctx, "pxtone", ...args);
+		return _(this).decoder(ctx, "pxtone", ...args);
 	}
 
 	toString() {

@@ -1,14 +1,13 @@
 {
   "name": "pxtone",
   "description": "Play Pxtone Collage files in Web Audio API",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "author": "Kenta Moriuchi (http://moriken.kimamass.com/)",
   "bugs": {
     "url": "https://github.com/petamoriken/PxtoneJS/issues"
   },
   "dependencies": {
-    "babel-runtime": "^6.3.19",
-    "promise-decode-audio-data": "^0.2.0"
+    "babel-runtime": "^6.3.19"
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",
@@ -35,15 +34,16 @@
     "pxtonejs.png",
     "pxtonejs5x.png",
     "index.js",
-    "pxtnDecoder.js",
     "lib",
     "package.json"
   ],
   "homepage": "https://github.com/petamoriken/PxtoneJS",
   "keywords": [
     "PxtoneCollage",
-    "webaudio",
-    "web-audio-api"
+    "pxtone-collage",
+    "WebAudioAPI",
+    "web-audio-api",
+    "webaudio"
   ],
   "license": "MIT",
   "main": "index.js",
@@ -54,7 +54,7 @@
   "scripts": {
     "clean": "make clean",
     "build": "make",
-    "lint": "eslint src",
+    "lint": "eslint src --ignore-path .eslintignore",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
