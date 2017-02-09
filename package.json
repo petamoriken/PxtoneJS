@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "babel-runtime": "^6.3.19",
-    "promise-decode-audio-data": "^0.2.0",
     "streams": "petamoriken/streams",
     "zen-observable": "^0.3.0"
   },

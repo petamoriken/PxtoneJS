@@ -1,5 +1,4 @@
 // polyfill
-import "promise-decode-audio-data";
 import _ReadableStream from "streams/readable-stream";
 
 import { checkArguments, getAptSampleRate } from "./value";
@@ -28,8 +27,8 @@ export default function createDecoder(pxtnDecoder) {
             // pxtone, noise
             const { buffer: pcmBuffer, data } = await decoder(type, buffer, ch, sps, bps);
             const audioBuffer = await decodeAudio(ctx, pcmBuffer, ch, sps, bps);
-            ret = { buffer: audioBuffer, data };
 
+            ret = { buffer: audioBuffer, data };
         } else if (type === "stream") {
             // stream
             const { stream: streamObserver, data } = await decoder(type, buffer, ch, sps, bps);
