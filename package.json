@@ -21,7 +21,7 @@
     "browserify": "^14.0.0",
     "eslint": "^3.4.0",
     "optimize-js": "^1.0.1",
-    "uglify-js": "^2.6.1"
+    "uglify-js": "^3.6.0"
   },
   "browser": {
     "text-encoding": false
