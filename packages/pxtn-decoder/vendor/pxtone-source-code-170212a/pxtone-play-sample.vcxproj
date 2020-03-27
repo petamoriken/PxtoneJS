@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FE623CC3-E5CA-4F0B-994C-C711F809D9FA}</ProjectGuid>
+    <RootNamespace>pxtoneplaysample</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(DXSDK_DIR)Include;$(SolutionDir)libogg\include;$(SolutionDir)libvorbis\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdk_IncludePath);$(FrameworkSDKDir)\include;</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(DXSDK_DIR)Include;$(SolutionDir)libogg\include;$(SolutionDir)libvorbis\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdk_IncludePath);$(FrameworkSDKDir)\include;</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="SimpleXAudio2.cpp" />
+    <ClCompile Include="pxtone\pxtnDelay.cpp" />
+    <ClCompile Include="pxtone\pxtnDescriptor.cpp" />
+    <ClCompile Include="pxtone\pxtnError.cpp" />
+    <ClCompile Include="pxtone\pxtnEvelist.cpp" />
+    <ClCompile Include="pxtone\pxtnMaster.cpp" />
+    <ClCompile Include="pxtone\pxtnMem.cpp" />
+    <ClCompile Include="pxtone\pxtnOverDrive.cpp" />
+    <ClCompile Include="pxtone\pxtnPulse_Frequency.cpp" />
+    <ClCompile Include="pxtone\pxtnPulse_Noise.cpp" />
+    <ClCompile Include="pxtone\pxtnPulse_NoiseBuilder.cpp" />
+    <ClCompile Include="pxtone\pxtnPulse_Oggv.cpp" />
+    <ClCompile Include="pxtone\pxtnPulse_Oscillator.cpp" />
+    <ClCompile Include="pxtone\pxtnPulse_PCM.cpp" />
+    <ClCompile Include="pxtone\pxtnService.cpp" />
+    <ClCompile Include="pxtone\pxtnService_moo.cpp" />
+    <ClCompile Include="pxtone\pxtnText.cpp" />
+    <ClCompile Include="pxtone\pxtnUnit.cpp" />
+    <ClCompile Include="pxtone\pxtnWoice.cpp" />
+    <ClCompile Include="pxtone\pxtnWoicePTV.cpp" />
+    <ClCompile Include="pxtone\pxtnWoice_io.cpp" />
+    <ClCompile Include="pxtone\pxtoneNoise.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="project01\SimpleXAudio2.h" />
+    <ClInclude Include="pxtone\pxtn.h" />
+    <ClInclude Include="pxtone\pxtnDelay.h" />
+    <ClInclude Include="pxtone\pxtnDescriptor.h" />
+    <ClInclude Include="pxtone\pxtnError.h" />
+    <ClInclude Include="pxtone\pxtnEvelist.h" />
+    <ClInclude Include="pxtone\pxtnMaster.h" />
+    <ClInclude Include="pxtone\pxtnMax.h" />
+    <ClInclude Include="pxtone\pxtnMem.h" />
+    <ClInclude Include="pxtone\pxtnOverDrive.h" />
+    <ClInclude Include="pxtone\pxtnPulse_Frequency.h" />
+    <ClInclude Include="pxtone\pxtnPulse_Noise.h" />
+    <ClInclude Include="pxtone\pxtnPulse_NoiseBuilder.h" />
+    <ClInclude Include="pxtone\pxtnPulse_Oggv.h" />
+    <ClInclude Include="pxtone\pxtnPulse_Oscillator.h" />
+    <ClInclude Include="pxtone\pxtnPulse_PCM.h" />
+    <ClInclude Include="pxtone\pxtnService.h" />
+    <ClInclude Include="pxtone\pxtnText.h" />
+    <ClInclude Include="pxtone\pxtnUnit.h" />
+    <ClInclude Include="pxtone\pxtnWoice.h" />
+    <ClInclude Include="pxtone\pxtoneNoise.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
