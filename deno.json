@@ -1,0 +1,19 @@
+{
+  "version": "4.0.0-rc",
+  "imports": {
+    "@deno/dnt": "jsr:@deno/dnt@^0.42.3",
+    "@std/toml": "jsr:@std/toml@^1.0.11",
+    "typescript": "npm:typescript@^6.0.3",
+    "vite": "npm:vite@^8.0.10"
+  },
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "deno.ns"]
+  },
+  "tasks": {
+    "build": "vite build && deno run -A tools/build_dts.ts",
+    "build:npm": "deno run -A tools/build_npm.ts",
+    "test": "deno test --allow-read tests/"
+  },
+  "exclude": ["dist", "npm"],
+  "nodeModulesDir": "auto"
+}

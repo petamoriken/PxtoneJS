@@ -2,111 +2,167 @@
 
 <div align="center">
 	<img src="pxtonejs5x.png" alt="PxtoneJS"><br>
-	Play <a href="http://studiopixel.sakura.ne.jp/pxtone/" target="_blank">Pxtone Collage</a> files in Web Audio API.
+	Play <a href="https://pxtone.org/" target="_blank">Pxtone Collage</a> files in the browser via WebCodecs and Web Audio API.
 </div>
 
 <br><br><br><br>
 
 <p align="center">
-	<a href="https://github.com/petamoriken/PxtoneJS/blob/master/LICENSE" target="_blank"><img src="https://img.shields.io/npm/l/pxtone.svg?style=flat-square" alt="License"></a>
-	<a href="https://github.com/petamoriken/PxtoneJS/issues" target="_blank"><img src="https://img.shields.io/github/issues/petamoriken/PxtoneJS.svg?style=flat-square" alt="Github issues"></a>
-	<a href="https://david-dm.org/petamoriken/pxtonejs" target="_blank"><img src="https://img.shields.io/david/petamoriken/pxtonejs.svg?style=flat-square" alt="Dependency Status"></a><br>
-	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/v/pxtone.svg?style=flat-square" alt="npm Version"></a>
-	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/dt/pxtone.svg?style=flat-square" alt="npm Downloads"></a>
-	<a href="https://github.com/petamoriken/PxtoneJS/releases/latest" target="_blank"><img src="https://img.shields.io/github/release/petamoriken/PxtoneJS.svg?style=flat-square" alt="release Version"></a>
-	<a href="https://github.com/petamoriken/PxtoneJS/releases" target="_blank"><img src="https://img.shields.io/github/downloads/petamoriken/PxtoneJS/total.svg?style=flat-square" alt="release Downloads"></a>
+	<a href="https://github.com/petamoriken/PxtoneJS/blob/master/LICENSE.md" target="_blank"><img src="https://img.shields.io/npm/l/pxtone.svg?style=flat-square" alt="License"></a>
+	<a href="https://github.com/petamoriken/PxtoneJS/issues" target="_blank"><img src="https://img.shields.io/github/issues/petamoriken/PxtoneJS.svg?style=flat-square" alt="GitHub issues"></a>
+	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/v/pxtone.svg?style=flat-square" alt="npm version"></a>
+	<a href="https://www.npmjs.com/package/pxtone" target="_blank"><img src="https://img.shields.io/npm/dt/pxtone.svg?style=flat-square" alt="npm downloads"></a>
 </p>
-
-
 
 ## Demo
 
-<a href="http://codepen.io/petamoriken/pen/JGWQOE/?editors=001" target="_blank">PxtoneJS Demo</a>  
-※ JavaScript は ES6 で書いており、 Babel を使って ES5 のコードにトランスパイルして実行しています。そのままブラウザにコードを移してもおそらく動きませんので注意してください。
+[PxtoneJS v4 Demo](https://codepen.io/petamoriken/pen/JGWQOE/)
 
-## Install & Require
+## Install
 
-[PxtoneJS releases](https://github.com/petamoriken/PxtoneJS/releases) と [pxtnDecoder releases](https://github.com/petamoriken/pxtnDecoder/releases) から `Pxtone.js` と `pxtnDecoder.js` を適当な場所に保存して
-
-```html
-<script src="DEST/TO/Pxtone.js"></script>
-<script src="DEST/TO/pxtnDecoder.js"></script>
+```sh
+npm install pxtone
 ```
 
-としてください。  
-デコーダーを Web Worker として使う場合（推奨）は
+## Usage
 
-```html
-<script src="DEST/TO/Pxtone.js"></script>
-<script>
-	var pxtnDecoder = new Worker("DEST/TO/pxtnDecoder.js");
-</script>
+### Playing a `.ptcop` / `.pttune` file
+
+`Pxtone` holds a native WebAssembly resource. While it will be automatically
+released eventually, it is recommended to use the `using` declaration (Explicit
+Resource Management) or call `[Symbol.dispose]()` manually to ensure the
+resource is disposed of as soon as it is no longer needed.
+
+`stream()` returns a `ReadableStream<AudioData>` (WebCodecs, format `"s16"`).
+Feed the chunks into an `AudioWorkletNode` or any other WebCodecs-aware
+pipeline.
+
+```ts
+import { Pxtone } from "pxtone";
+
+const response = await fetch("song.ptcop");
+const fileBytes = new Uint8Array(await response.arrayBuffer());
+
+using pxtone = new Pxtone();
+pxtone.read(fileBytes);
+
+console.log(pxtone.name);
+console.log(pxtone.duration); // total length in seconds
+
+const stream = pxtone.stream({ loop: true });
+const reader = stream.getReader();
+
+while (true) {
+  const { done, value: audioData } = await reader.read();
+  if (done) break;
+  // pass audioData to an AudioWorklet, MediaStreamTrackGenerator, etc.
+}
 ```
 
-としてください。
+### Decoding a `.ptnoise` file
 
-## Initialize
+```ts
+import { Pxtone } from "pxtone";
 
-以下のように初期化します。
+const response = await fetch("drum.ptnoise");
+const fileBytes = new Uint8Array(await response.arrayBuffer());
 
-```javascript
-var pxtone = new Pxtone();
-pxtone.decoder = pxtnDecoder;
+using pxtone = new Pxtone();
+const { buffer, data } = await pxtone.decodeNoiseData(fileBytes);
+
+const ctx = new AudioContext();
+const source = ctx.createBufferSource();
+source.buffer = buffer;
+source.connect(ctx.destination);
+source.start();
 ```
-
-## How to Use
-
-ブラウザ上で Pxtone Collage ファイルを再生するには、`XMLHttpRequest` や `Fetch API`, `File API` などで Pxtone Collage Project ファイル（拡張子 .ptcop）か Pxtone Tune ファイル（拡張子 .pttune) の `ArrayBuffer` を取得する必要があります。仮に `arrayBuffer` という変数に得た Pxtone Collage ファイル の `ArrayBuffer` を入れた場合、以下のようにして `AudioBuffer` を得ることが出来ます。
-
-```javascript
-var ctx = new (window.AudioContext || window.webkitAudioContext)();
-pxtone.decodePxtoneData(ctx, arrayBuffer).then(function(obj) {
-  var audioBuffer = obj.buffer;
-  var data = obj.data;
-});
-```
-
-得た `AudioBuffer` を再生するには `AudioBufferSourceNode` を使います。詳しくは MDN の <a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Audio_API/Using_Web_Audio_API" target="_blank">Web Audio APIの利用</a> や <a href="https://developer.mozilla.org/ja/docs/Web/API/AudioContext/createBufferSource" target="_blank">AudioContext.createBufferSource()</a> を参考にしてください。
 
 ## API
 
-### AudioBuffer を作る
-  
-* `Pxtone#decodeNoiseData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: AudioBuffer, data: null}>`
+### `new Pxtone()`
 
-  * Pxtone Noise ファイル（拡張子 .ptnoise）を `AudioBuffer` に変換します。
-  * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
-  * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。`null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
+Creates an instance backed by a WebAssembly service.
 
-* `Pxtone#decodePxtoneData(ctx: AudioContext, buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: AudioBuffer, data: Object}>`
+### Properties (available after `read()`)
 
-  * Pxtone Collage Project ファイル（拡張子 .ptcop）と Pxtone Tune ファイル（拡張子 .pttune）を `AudioBuffer` に変換します。
-  * `channel` は `1`, `2` の値を、`bitsPerSample` は `8`, `16` の値のみ取ります。
-  * `sampleRate` は `11025`, `22050`, `44100`, `null` の値のみ取ります。`null` のときは第一引数の `ctx` のプロパティである `ctx.sampleRate` の値を使います。ただし、それが `11025`, `22050`, `44100` のいずれでもない場合は `44100` とします。
-  
-  * `Pxtone#decodeNoiseData` とは違い、返り値の `Promise` は `data: Object` を持ちます。`data: Object` は以下の様なプロパティを持ちます。
-    * `title: string`: ファイルが持つタイトルの文字列です。
-    * `comment: string`: ファイルが持つコメントの文字列です。
-    * `loopStart: number`: ループ初めの位置です（Web Audio API の `AudioBufferSourceNode` に与えて使います） 。
-    * `loopEnd: number`: ループ終わり位置です（Web Audio API の `AudioBufferSourceNode` に与えて使います）。
+| Property      | Type                     | Description                          |
+| ------------- | ------------------------ | ------------------------------------ |
+| `channels`    | `1 \| 2 \| null`         | Output channel count                 |
+| `sampleRate`  | `number \| null`         | Output sample rate in Hz             |
+| `name`        | `string \| null`         | Song title (Shift-JIS decoded)       |
+| `comment`     | `string \| null`         | Song comment (Shift-JIS decoded)     |
+| `duration`    | `number \| null`         | Total duration in seconds            |
+| `loopStart`   | `number \| null`         | Loop start position in seconds       |
+| `loopEnd`     | `number \| null`         | Loop end position in seconds         |
+| `currentTime` | `number`                 | Current playback position in seconds |
+| `units`       | `readonly PxtoneUnit[]`  | Instrument tracks                    |
+| `events`      | `readonly PxtoneEvent[]` | Automation event list                |
 
-### Wave の ArrayBuffer を作る
+### Methods
 
-* `Pxtone#decodeNoise(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: ArrayBuffer, data: null}>`
+#### `read(buffer: ArrayBuffer | Uint8Array): void`
 
-  * Pxtone Noise ファイル（拡張子 .ptnoise）を Wave の `ArrayBuffer` に変換します。
-  * 引数については `Pxtone#decodeNoiseData` と同じです。ただし `sampleRate` が `null` のときは `44100` として扱います。
+Loads a `.ptcop` or `.pttune` file and prepares it for playback. Throws if the
+file is invalid or a stream is currently active.
 
-* `Pxtone#decodePxtone(buffer: ArrayBuffer, channel: number = 2, sampleRate: number = null, bitsPerSample: number = 16): Promise<{buffer: ArrayBuffer, data: Object}>`
+#### `stream(options?: StreamOptions): ReadableStream<AudioData>`
 
-  * Pxtone Collage Project ファイル（拡張子 .ptcop）と Pxtone Tune ファイル（拡張子 .pttune）を Wave の `ArrayBuffer` に変換します。
-  * 引数については `Pxtone#decodePxtoneData` と同じです。ただし `sampleRate` が `null` のときは `44100` として扱います。
+Returns a `ReadableStream` that yields signed 16-bit interleaved PCM chunks as
+`AudioData` objects (format `"s16"`). Only one stream may be active at a time.
 
-## License & Dependencies
+```ts
+export interface StreamOptions {
+  /** Playback start position in seconds. Default: 0 (beginning). */
+  startTime?: number;
+  /** Units whose `played` flag is false are silenced. */
+  unitMute?: boolean;
+  /** Loop playback from the song's repeat point. */
+  loop?: boolean;
+  /** Number of frames per channel per chunk. Default: 1024. */
+  numberOfFrames?: number;
+  /** Backpressure threshold for the underlying `ReadableStream`. Default: 1. */
+  highWaterMark?: number;
+  /** AbortSignal to cancel the stream early. */
+  signal?: AbortSignal;
+}
+```
 
-under [MIT License](LICENSE).
+#### `toggleUnitPlayed(index: number, force?: boolean): void`
 
-## Support
+Toggles (or sets) the `played` flag of the unit at `index`. Takes effect on the
+next call to `stream()`.
 
-何か問題が起きた場合は [issues](https://github.com/petamoriken/PxtoneJS/issues) に投稿してください。  
-また簡単な使い方の質問などは [@printf_moriken](https://twitter.com/printf_moriken) に気軽にどうぞ。
+#### `clear(): void`
+
+Resets the instance to its initial idle state, discarding all loaded song data.
+
+#### `decodeNoiseData(buffer: ArrayBuffer | Uint8Array): Promise<{ buffer: AudioBuffer; data: NoiseData }>`
+
+Decodes a `.ptnoise` file and returns an `AudioBuffer` ready for use with the
+Web Audio API.
+
+### `PxtoneUnit`
+
+| Property | Type      | Description                            |
+| -------- | --------- | -------------------------------------- |
+| `name`   | `string`  | Display name                           |
+| `played` | `boolean` | Whether the unit is active (not muted) |
+
+### `PxtoneEvent`
+
+| Property    | Type              | Description                               |
+| ----------- | ----------------- | ----------------------------------------- |
+| `clock`     | `number`          | Tick position                             |
+| `unitIndex` | `number`          | Target unit index                         |
+| `kind`      | `PxtoneEventKind` | Event type (see `EVENT_KIND_*` constants) |
+| `value`     | `number`          | Event payload                             |
+
+## WebAssembly
+
+`src/pxtone.wasm` is built from
+[petamoriken/pxtone-rs](https://github.com/petamoriken/pxtone-rs), a Rust port
+of the Pxtone Collage library.
+
+## License
+
+[MIT License](LICENSE.md)

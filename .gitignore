@@ -1,27 +1,4 @@
 .DS_Store
-.vscode
-
-# Logs
-logs
-*.log
-npm-debug.log*
-
-# Coverage directory used by tools like istanbul
-coverage
-
-# Dependency directories
-node_modules
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-lib/*
-!lib/.keep
-
-temp/
-
-build/*
-!build/.keep
+/node_modules
+/dist
+/npm
