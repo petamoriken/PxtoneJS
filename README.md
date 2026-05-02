@@ -126,11 +126,6 @@ export interface StreamOptions {
 }
 ```
 
-#### `toggleUnitPlayed(index: number, force?: boolean): void`
-
-Toggles (or sets) the `played` flag of the unit at `index`. Takes effect on the next call to
-`stream()`.
-
 #### `clear(): void`
 
 Resets the instance to its initial idle state, discarding all loaded song data.
@@ -146,14 +141,19 @@ Decodes a `.ptnoise` file and returns an `AudioBuffer` ready for use with the We
 | `name`   | `string`  | Display name                           |
 | `played` | `boolean` | Whether the unit is active (not muted) |
 
+#### `togglePlayed(force?: boolean): void`
+
+Toggles the `played` flag for this unit. If `force` is provided, the flag is set explicitly rather
+than toggled.
+
 ### `PxtoneEvent`
 
-| Property    | Type              | Description                               |
-| ----------- | ----------------- | ----------------------------------------- |
-| `clock`     | `number`          | Tick position                             |
-| `unitIndex` | `number`          | Target unit index                         |
-| `kind`      | `PxtoneEventKind` | Event type (see `EVENT_KIND_*` constants) |
-| `value`     | `number`          | Event payload                             |
+| Property | Type              | Description                                     |
+| -------- | ----------------- | ----------------------------------------------- |
+| `clock`  | `number`          | Tick position                                   |
+| `unit`   | `PxtoneUnit`      | Target unit in the loaded song                  |
+| `kind`   | `PxtoneEventKind` | Event type (see `PxtoneEvent.KIND_*` constants) |
+| `value`  | `number`          | Event payload                                   |
 
 ## WebAssembly
 

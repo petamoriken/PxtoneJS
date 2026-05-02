@@ -156,8 +156,9 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
       );
     } else {
       for (let i = 0; i < pxtone.events.length; i++) {
-        const { clock, unitIndex, kind, value } = pxtone.events[i];
+        const { clock, unit, kind, value } = pxtone.events[i];
         const exp = snapshot.events[i];
+        const unitIndex = pxtone.units.indexOf(unit);
         if (
           clock !== exp.clock || unitIndex !== exp.unit_index ||
           kind !== exp.kind || value !== exp.value
