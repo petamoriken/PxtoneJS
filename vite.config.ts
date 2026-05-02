@@ -22,9 +22,20 @@ function wasmInstancePlugin() {
       const base64 = buffer.toString("base64");
       const wasmModule = new WebAssembly.Module(buffer);
       const namedExports = WebAssembly.Module.exports(wasmModule)
-        .map((e) => `export const ${e.name} = instance.exports.${e.name};`)
+        .map((e) => `export const ${e.name} = exports.${e.name};`)
         .join("\n");
-      return `const instance = new WebAssembly.Instance(new WebAssembly.Module(Uint8Array.from(atob("${base64}"), c => c.charCodeAt(0))));
+      return `const base64wasm = "${base64}";
+let bytes; if (Uint8Array.fromBase64) {
+  bytes = Uint8Array.fromBase64(base64wasm);
+} else {
+  const bin = atob(base64wasm);
+  bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; ++i) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+}
+const module = new WebAssembly.Module(bytes);
+const exports = new WebAssembly.Instance(module).exports;
 ${namedExports}`;
     },
   };
@@ -53,7 +64,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: "src/index.ts",
+      entry: "src/Pxtone.ts",
     },
     emptyOutDir: false,
     minify: false,

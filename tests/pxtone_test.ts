@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { parse as parseToml } from "@std/toml";
 
-import { Pxtone } from "../dist/Pxtone.mjs";
+import { Pxtone } from "../src/Pxtone.ts";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
