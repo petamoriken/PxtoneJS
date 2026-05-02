@@ -344,17 +344,26 @@ export class Pxtone {
 
   /** Total song duration in seconds. `null` before {@link read}. */
   get duration(): number | null {
-    return this.#measureNum !== null ? this.#measureNum * this.#secondsPerMeasure! : null;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#measureNum! * this.#secondsPerMeasure!;
   }
 
   /** Loop start position in seconds. `null` before {@link read}. */
   get loopStart(): number | null {
-    return this.#repeatMeasure !== null ? this.#repeatMeasure * this.#secondsPerMeasure! : null;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#repeatMeasure! * this.#secondsPerMeasure!;
   }
 
   /** Loop end position in seconds. `null` before {@link read}. */
   get loopEnd(): number | null {
-    return this.#lastMeasure !== null ? this.#lastMeasure * this.#secondsPerMeasure! : null;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#lastMeasure! * this.#secondsPerMeasure!;
   }
 
   /**
@@ -362,8 +371,11 @@ export class Pxtone {
    * from the stream returned by {@link stream}.
    */
   get currentTime(): number {
-    if (this.#sampleRate === null) return 0;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return 0;
+    }
     const sampleRate = this.#sampleRate;
+    const currentFrame = this.#currentFrame;
     const lastMeasure = this.#lastMeasure!;
     const repeatMeasure = this.#repeatMeasure!;
     if (repeatMeasure !== 0) {
@@ -373,13 +385,13 @@ export class Pxtone {
       const loopLength = Math.round(
         (lastMeasure - repeatMeasure) * spm * sampleRate,
       );
-      if (loopLength > 0 && this.#currentFrame > loopEndFrame) {
+      if (loopLength > 0 && currentFrame > loopEndFrame) {
         const position = loopStartFrame +
-          (this.#currentFrame - loopEndFrame) % loopLength;
+          (currentFrame - loopEndFrame) % loopLength;
         return position / sampleRate;
       }
     }
-    return this.#currentFrame / sampleRate;
+    return currentFrame / sampleRate;
   }
 
   /** Ordered list of instrument tracks in the loaded song. */
@@ -431,12 +443,13 @@ export class Pxtone {
    * @throws {Error} If the instance has been disposed, called while a stream is active, or the file is invalid.
    */
   read(buffer: ArrayBuffer | Uint8Array): void {
-    if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
-    }
     if (this.#state === "streaming") {
       throw new Error("cannot call read while streaming");
     }
+    if (this.#state === "disposed") {
+      throw new Error("Pxtone instance has been disposed");
+    }
+
     const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
     const memPtr = alloc(bytes.length);
     try {
@@ -484,14 +497,14 @@ export class Pxtone {
       signal,
     }: StreamOptions = {},
   ): ReadableStream<AudioData> {
-    if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
-    }
     if (this.#state === "idle") {
       throw new Error("read must be called before stream");
     }
     if (this.#state === "streaming") {
       throw new Error("stream is already active");
+    }
+    if (this.#state === "disposed") {
+      throw new Error("Pxtone instance has been disposed");
     }
 
     const channels = this.#channels!;
