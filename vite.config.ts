@@ -6,8 +6,11 @@ const { version } = JSON.parse(
   readFileSync("deno.json", "utf-8"),
 ) as { version: string };
 
-const banner =
-  `/*! PxtoneJS v${version} | MIT License - https://github.com/petamoriken/PxtoneJS */`;
+const banner = `/**!
+ * @license
+ * PxtoneJS v${version} | MIT License | 2016-2026 Kenta Moriuchi <moriken@kimamass.com> (https://moriken.dev)
+ * Includes lewton (Vorbis decoder written in pure Rust) | MIT or Apache License 2.0 | 2016 est31 <MTest31@outlook.com> and contributors
+ */`;
 
 function wasmInstancePlugin() {
   return {

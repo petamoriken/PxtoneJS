@@ -3,7 +3,6 @@ import {
   dealloc,
   memory,
   service_free,
-  service_get_beat_clock,
   service_get_beat_num,
   service_get_beat_tempo,
   service_get_channels,
@@ -147,7 +146,6 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
 
     // Master
     {
-      const beatClock = service_get_beat_clock(svc);
       const beatNum = service_get_beat_num(svc);
       const beatTempo = service_get_beat_tempo(svc);
       const measureNum = service_get_measure_num(svc);
@@ -155,7 +153,6 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
       const lastMeasure = service_get_last_measure(svc);
       const m = snapshot.master;
       if (
-        beatClock !== m.beat_clock ||
         beatNum !== m.beat_num ||
         Math.abs(beatTempo - m.beat_tempo) >= 0.001 ||
         measureNum !== m.measure_num ||

@@ -83,20 +83,20 @@ source.start();
 
 Creates an instance backed by a WebAssembly service.
 
-### Properties (available after `read()`)
+### Properties
 
-| Property      | Type                     | Description                          |
-| ------------- | ------------------------ | ------------------------------------ |
-| `channels`    | `1 \| 2 \| null`         | Output channel count                 |
-| `sampleRate`  | `number \| null`         | Output sample rate in Hz             |
-| `name`        | `string \| null`         | Song title (Shift-JIS decoded)       |
-| `comment`     | `string \| null`         | Song comment (Shift-JIS decoded)     |
-| `duration`    | `number \| null`         | Total duration in seconds            |
-| `loopStart`   | `number \| null`         | Loop start position in seconds       |
-| `loopEnd`     | `number \| null`         | Loop end position in seconds         |
-| `currentTime` | `number`                 | Current playback position in seconds |
-| `units`       | `readonly PxtoneUnit[]`  | Instrument tracks                    |
-| `events`      | `readonly PxtoneEvent[]` | Automation event list                |
+| Property      | Type                     | Description                                  |
+| ------------- | ------------------------ | -------------------------------------------- |
+| `channels`    | `2`                      | Output channel count (always stereo)         |
+| `sampleRate`  | `44100`                  | Output sample rate in Hz (always 44.1 kHz)   |
+| `name`        | `string \| null`         | Song title (Shift-JIS decoded)               |
+| `comment`     | `string \| null`         | Song comment (Shift-JIS decoded)             |
+| `duration`    | `number \| null`         | Total duration in seconds                    |
+| `loopStart`   | `number \| null`         | Loop start position in seconds               |
+| `loopEnd`     | `number \| null`         | Loop end position in seconds                 |
+| `currentTime` | `number`                 | Current playback position in seconds         |
+| `units`       | `readonly PxtoneUnit[]`  | Instrument tracks                            |
+| `events`      | `readonly PxtoneEvent[]` | Automation event list                        |
 
 ### Methods
 
@@ -165,4 +165,8 @@ of the Pxtone Collage library.
 
 ## License
 
-[MIT License](LICENSE.md)
+[MIT](LICENSE.md)
+
+This software includes the following third-party components:
+
+* [lewton](https://github.com/RustAudio/lewton) (MIT or Apache-2.0)

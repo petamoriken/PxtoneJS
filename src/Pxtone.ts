@@ -200,10 +200,11 @@ export class Pxtone {
   });
 
   #ptr: number;
+  #channels: 2;
+  #sampleRate: 44100;
+
   #state: "idle" | "ready" | "streaming" | "disposed" = "idle";
 
-  #channels: 1 | 2 | null = null;
-  #sampleRate: number | null = null;
   #name: string | null = null;
   #comment: string | null = null;
   #secondsPerMeasure: number | null = null;
@@ -217,6 +218,8 @@ export class Pxtone {
 
   constructor() {
     this.#ptr = service_new();
+    this.#channels = service_get_channels(this.#ptr) as 2;
+    this.#sampleRate = service_get_sample_rate(this.#ptr) as 44100;
     Pxtone.#registry.register(this, this.#ptr, this);
   }
 
@@ -238,13 +241,13 @@ export class Pxtone {
     }
   }
 
-  /** Number of output channels (`1` = mono, `2` = stereo). `null` before {@link read}. */
-  get channels(): 1 | 2 | null {
+  /** Number of output channels. */
+  get channels(): 2 {
     return this.#channels;
   }
 
-  /** Output sample rate in Hz. `null` before {@link read}. */
-  get sampleRate(): number | null {
+  /** Output sample rate in Hz. */
+  get sampleRate(): 44100 {
     return this.#sampleRate;
   }
 
@@ -326,8 +329,6 @@ export class Pxtone {
       throw new Error("cannot call clear while streaming");
     }
     this.#state = "idle";
-    this.#channels = null;
-    this.#sampleRate = null;
     this.#name = null;
     this.#comment = null;
     this.#secondsPerMeasure = null;
@@ -369,8 +370,6 @@ export class Pxtone {
     if (service_tones_ready(this.#ptr) !== 0) {
       throw new Error("service_tones_ready failed");
     }
-    this.#channels = service_get_channels(this.#ptr) as 1 | 2;
-    this.#sampleRate = service_get_sample_rate(this.#ptr);
     this.#name = this.#readText(service_get_text_name);
     this.#comment = this.#readText(service_get_text_comment);
     const beatTempo = service_get_beat_tempo(this.#ptr);

@@ -100,12 +100,6 @@ export declare const service_render_noise: (
 ) => number;
 
 /**
- * Returns the number of ticks per beat.
- * Returns 0 on error.
- */
-export declare const service_get_beat_clock: (svc: number) => number;
-
-/**
  * Returns the number of beats per measure.
  * Returns 0 on error.
  */
