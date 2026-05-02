@@ -12,7 +12,7 @@
   "tasks": {
     "build": "vite build && deno run -A tools/build_dts.ts",
     "build:npm": "deno run -A tools/build_npm.ts",
-    "test": "deno test --allow-read tests/"
+    "test": "deno test --allow-read=tests/ tests/"
   },
   "fmt": {
     "lineWidth": 100
