@@ -28,14 +28,13 @@ npm install pxtone
 
 ### Playing a `.ptcop` / `.pttune` file
 
-`Pxtone` holds a native WebAssembly resource. While it will be automatically
-released eventually, it is recommended to use the `using` declaration (Explicit
-Resource Management) or call `[Symbol.dispose]()` manually to ensure the
-resource is disposed of as soon as it is no longer needed.
+`Pxtone` holds a native WebAssembly resource. While it will be automatically released eventually, it
+is recommended to use the `using` declaration (Explicit Resource Management) or call
+`[Symbol.dispose]()` manually to ensure the resource is disposed of as soon as it is no longer
+needed.
 
-`stream()` returns a `ReadableStream<AudioData>` (WebCodecs, format `"s16"`).
-Feed the chunks into an `AudioWorkletNode` or any other WebCodecs-aware
-pipeline.
+`stream()` returns a `ReadableStream<AudioData>` (WebCodecs, format `"s16"`). Feed the chunks into
+an `AudioWorkletNode` or any other WebCodecs-aware pipeline.
 
 ```ts
 import { Pxtone } from "pxtone";
@@ -85,30 +84,30 @@ Creates an instance backed by a WebAssembly service.
 
 ### Properties
 
-| Property      | Type                     | Description                                  |
-| ------------- | ------------------------ | -------------------------------------------- |
-| `channels`    | `2`                      | Output channel count (always stereo)         |
-| `sampleRate`  | `44100`                  | Output sample rate in Hz (always 44.1 kHz)   |
-| `name`        | `string \| null`         | Song title (Shift-JIS decoded)               |
-| `comment`     | `string \| null`         | Song comment (Shift-JIS decoded)             |
-| `duration`    | `number \| null`         | Total duration in seconds                    |
-| `loopStart`   | `number \| null`         | Loop start position in seconds               |
-| `loopEnd`     | `number \| null`         | Loop end position in seconds                 |
-| `currentTime` | `number`                 | Current playback position in seconds         |
-| `units`       | `readonly PxtoneUnit[]`  | Instrument tracks                            |
-| `events`      | `readonly PxtoneEvent[]` | Automation event list                        |
+| Property      | Type                     | Description                                |
+| ------------- | ------------------------ | ------------------------------------------ |
+| `channels`    | `2`                      | Output channel count (always stereo)       |
+| `sampleRate`  | `44100`                  | Output sample rate in Hz (always 44.1 kHz) |
+| `name`        | `string \| null`         | Song title (Shift-JIS decoded)             |
+| `comment`     | `string \| null`         | Song comment (Shift-JIS decoded)           |
+| `duration`    | `number \| null`         | Total duration in seconds                  |
+| `loopStart`   | `number \| null`         | Loop start position in seconds             |
+| `loopEnd`     | `number \| null`         | Loop end position in seconds               |
+| `currentTime` | `number`                 | Current playback position in seconds       |
+| `units`       | `readonly PxtoneUnit[]`  | Instrument tracks                          |
+| `events`      | `readonly PxtoneEvent[]` | Automation event list                      |
 
 ### Methods
 
 #### `read(buffer: ArrayBuffer | Uint8Array): void`
 
-Loads a `.ptcop` or `.pttune` file and prepares it for playback. Throws if the
-file is invalid or a stream is currently active.
+Loads a `.ptcop` or `.pttune` file and prepares it for playback. Throws if the file is invalid or a
+stream is currently active.
 
 #### `stream(options?: StreamOptions): ReadableStream<AudioData>`
 
-Returns a `ReadableStream` that yields signed 16-bit interleaved PCM chunks as
-`AudioData` objects (format `"s16"`). Only one stream may be active at a time.
+Returns a `ReadableStream` that yields signed 16-bit interleaved PCM chunks as `AudioData` objects
+(format `"s16"`). Only one stream may be active at a time.
 
 ```ts
 export interface StreamOptions {
@@ -129,8 +128,8 @@ export interface StreamOptions {
 
 #### `toggleUnitPlayed(index: number, force?: boolean): void`
 
-Toggles (or sets) the `played` flag of the unit at `index`. Takes effect on the
-next call to `stream()`.
+Toggles (or sets) the `played` flag of the unit at `index`. Takes effect on the next call to
+`stream()`.
 
 #### `clear(): void`
 
@@ -138,8 +137,7 @@ Resets the instance to its initial idle state, discarding all loaded song data.
 
 #### `decodeNoiseData(buffer: ArrayBuffer | Uint8Array): Promise<{ buffer: AudioBuffer; data: NoiseData }>`
 
-Decodes a `.ptnoise` file and returns an `AudioBuffer` ready for use with the
-Web Audio API.
+Decodes a `.ptnoise` file and returns an `AudioBuffer` ready for use with the Web Audio API.
 
 ### `PxtoneUnit`
 
@@ -159,9 +157,8 @@ Web Audio API.
 
 ## WebAssembly
 
-`src/pxtone.wasm` is built from
-[petamoriken/pxtone-rs](https://github.com/petamoriken/pxtone-rs), a Rust port
-of the Pxtone Collage library.
+`src/pxtone.wasm` is built from [petamoriken/pxtone-rs](https://github.com/petamoriken/pxtone-rs), a
+Rust port of the Pxtone Collage library.
 
 ## License
 
@@ -169,4 +166,4 @@ of the Pxtone Collage library.
 
 This software includes the following third-party components:
 
-* [lewton](https://github.com/RustAudio/lewton) (MIT or Apache-2.0)
+- [lewton](https://github.com/RustAudio/lewton) (MIT or Apache-2.0)

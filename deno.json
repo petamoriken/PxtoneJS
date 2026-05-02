@@ -14,6 +14,9 @@
     "build:npm": "deno run -A tools/build_npm.ts",
     "test": "deno test --allow-read tests/"
   },
+  "fmt": {
+    "lineWidth": 100
+  },
   "exclude": ["dist", "npm"],
   "nodeModulesDir": "auto"
 }

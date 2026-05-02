@@ -43,9 +43,7 @@ for (const diag of diagnostics) {
   if (diag.category === ts.DiagnosticCategory.Error) {
     const message = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
     const location = diag.file
-      ? `${diag.file.fileName}:${
-        diag.file.getLineAndCharacterOfPosition(diag.start!).line + 1
-      }`
+      ? `${diag.file.fileName}:${diag.file.getLineAndCharacterOfPosition(diag.start!).line + 1}`
       : "unknown";
     console.error(`error: ${location}: ${message}`);
     hasError = true;

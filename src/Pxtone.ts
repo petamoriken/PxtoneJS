@@ -263,23 +263,17 @@ export class Pxtone {
 
   /** Total song duration in seconds. `null` before {@link read}. */
   get duration(): number | null {
-    return this.#measureNum !== null
-      ? this.#measureNum * this.#secondsPerMeasure!
-      : null;
+    return this.#measureNum !== null ? this.#measureNum * this.#secondsPerMeasure! : null;
   }
 
   /** Loop start position in seconds. `null` before {@link read}. */
   get loopStart(): number | null {
-    return this.#repeatMeasure !== null
-      ? this.#repeatMeasure * this.#secondsPerMeasure!
-      : null;
+    return this.#repeatMeasure !== null ? this.#repeatMeasure * this.#secondsPerMeasure! : null;
   }
 
   /** Loop end position in seconds. `null` before {@link read}. */
   get loopEnd(): number | null {
-    return this.#lastMeasure !== null
-      ? this.#lastMeasure * this.#secondsPerMeasure!
-      : null;
+    return this.#lastMeasure !== null ? this.#lastMeasure * this.#secondsPerMeasure! : null;
   }
 
   /**
@@ -355,9 +349,7 @@ export class Pxtone {
     if (this.#state === "streaming") {
       throw new Error("cannot call read while streaming");
     }
-    const bytes = buffer instanceof Uint8Array
-      ? buffer
-      : new Uint8Array(buffer);
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
     const memPtr = alloc(bytes.length);
     try {
       new Uint8Array(memory.buffer, memPtr, bytes.length).set(bytes);
