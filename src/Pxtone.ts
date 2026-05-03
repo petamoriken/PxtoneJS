@@ -17,6 +17,7 @@ import {
   service_get_sample_rate,
   service_get_text_comment,
   service_get_text_name,
+  service_get_ticks_per_beat,
   service_get_unit_count,
   service_get_unit_name,
   service_get_unit_played,
@@ -275,18 +276,23 @@ export class Pxtone {
   #channels: 2;
   #sampleRate: 44100;
 
-  #state: "idle" | "ready" | "streaming" | "disposed" = "idle";
-
   #name: string | null = null;
   #comment: string | null = null;
-  #secondsPerMeasure: number | null = null;
-  #measureNum: number | null = null;
-  #repeatMeasure: number | null = null;
-  #lastMeasure: number | null = null;
 
+  #ticksPerBeat: number | null = null;
+  #beatsPerMeasure: number | null = null;
+  #beatTempo: number | null = null;
+  #measureCount: number | null = null;
+  #secondsPerMeasure: number | null = null;
+
+  #loopStartMeasure: number | null = null;
+  #loopEndMeasure: number | null = null;
+
+  #state: "idle" | "ready" | "streaming" | "disposed" = "idle";
   #currentFrame = 0;
-  #units: readonly PxtoneUnit[] = Object.freeze([]);
-  #events: readonly PxtoneEvent[] = Object.freeze([]);
+
+  #units: readonly PxtoneUnit[] | null = null;
+  #events: readonly PxtoneEvent[] | null = null;
 
   constructor() {
     this.#ptr = service_new();
@@ -334,12 +340,68 @@ export class Pxtone {
     return this.#comment;
   }
 
+  /** Ticks per beat. `null` before {@link read}. */
+  get ticksPerBeat(): number | null {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#ticksPerBeat!;
+  }
+
+  /** Beats per measure. `null` before {@link read}. */
+  get beatsPerMeasure(): number | null {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#beatsPerMeasure!;
+  }
+
+  /** Tempo in beats per minute. `null` before {@link read}. */
+  get beatTempo(): number | null {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#beatTempo!;
+  }
+
+  /** Total number of measures in the song. `null` before {@link read}. */
+  get measureCount(): number | null {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#measureCount!;
+  }
+
+  /** Loop start position in measures. `null` before {@link read}. */
+  get loopStartMeasure(): number | null {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#loopStartMeasure!;
+  }
+
+  /** Loop end position in measures. `null` before {@link read}. */
+  get loopEndMeasure(): number | null {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#loopEndMeasure!;
+  }
+
+  /** Total length of the song in ticks. `null` before {@link read}. */
+  get tickCount(): number | null {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#measureCount! * this.#beatsPerMeasure! * this.#ticksPerBeat!;
+  }
+
   /** Total song duration in seconds. `null` before {@link read}. */
   get duration(): number | null {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
-    return this.#measureNum! * this.#secondsPerMeasure!;
+    return this.#measureCount! * this.#secondsPerMeasure!;
   }
 
   /** Loop start position in seconds. `null` before {@link read}. */
@@ -347,7 +409,7 @@ export class Pxtone {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
-    return this.#repeatMeasure! * this.#secondsPerMeasure!;
+    return this.#loopStartMeasure! * this.#secondsPerMeasure!;
   }
 
   /** Loop end position in seconds. `null` before {@link read}. */
@@ -355,44 +417,73 @@ export class Pxtone {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
-    return this.#lastMeasure! * this.#secondsPerMeasure!;
+    return this.#loopEndMeasure! * this.#secondsPerMeasure!;
   }
 
-  /**
-   * Current playback position in seconds, updated as each chunk is pulled
-   * from the stream returned by {@link stream}.
-   */
+  /** Current playback position in ticks, updated as each chunk is pulled from the stream. */
+  get currentTick(): number {
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return 0;
+    }
+    const spm = this.#secondsPerMeasure!;
+    const tpm = this.#beatsPerMeasure! * this.#ticksPerBeat!;
+    return Math.round(this.#resolveCurrentFrame() * tpm / (spm * this.#sampleRate));
+  }
+
+  /** Current playback position in seconds, updated as each chunk is pulled from the stream. */
   get currentTime(): number {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return 0;
     }
+    return this.#resolveCurrentFrame() / this.#sampleRate;
+  }
+
+  #resolveCurrentFrame(): number {
     const sampleRate = this.#sampleRate;
     const currentFrame = this.#currentFrame;
-    const lastMeasure = this.#lastMeasure!;
-    const repeatMeasure = this.#repeatMeasure!;
-    if (repeatMeasure !== 0) {
+    const loopEndMeasure = this.#loopEndMeasure!;
+    const loopStartMeasure = this.#loopStartMeasure!;
+    if (loopStartMeasure !== 0) {
       const spm = this.#secondsPerMeasure!;
-      const loopEndFrame = Math.round(lastMeasure * spm * sampleRate);
-      const loopStartFrame = Math.round(repeatMeasure * spm * sampleRate);
+      const loopEndFrame = Math.round(loopEndMeasure * spm * sampleRate);
+      const loopStartFrame = Math.round(loopStartMeasure * spm * sampleRate);
       const loopLength = Math.round(
-        (lastMeasure - repeatMeasure) * spm * sampleRate,
+        (loopEndMeasure - loopStartMeasure) * spm * sampleRate,
       );
       if (loopLength > 0 && currentFrame > loopEndFrame) {
-        const position = loopStartFrame +
-          (currentFrame - loopEndFrame) % loopLength;
-        return position / sampleRate;
+        return loopStartFrame + (currentFrame - loopEndFrame) % loopLength;
       }
     }
-    return currentFrame / sampleRate;
+    return currentFrame;
   }
 
   /** Ordered list of instrument tracks in the loaded song. */
   get units(): readonly PxtoneUnit[] {
+    if (this.#units !== null) {
+      return this.#units;
+    }
+    if (this.#state === "idle" || this.#state === "disposed") {
+      this.#events = Object.freeze([]);
+      this.#units = Object.freeze([]);
+    } else {
+      this.#units = this.#loadUnits();
+      this.#events = this.#loadEvents(this.#units);
+    }
     return this.#units;
   }
 
   /** Ordered list of automation events in the loaded song. */
   get events(): readonly PxtoneEvent[] {
+    if (this.#events !== null) {
+      return this.#events;
+    }
+    if (this.#state === "idle" || this.#state === "disposed") {
+      this.#units = Object.freeze([]);
+      this.#events = Object.freeze([]);
+    } else {
+      this.#units = this.#loadUnits();
+      this.#events = this.#loadEvents(this.#units);
+    }
     return this.#events;
   }
 
@@ -414,16 +505,21 @@ export class Pxtone {
   #release() {
     this.#name = null;
     this.#comment = null;
+    this.#ticksPerBeat = null;
+    this.#beatsPerMeasure = null;
+    this.#beatTempo = null;
     this.#secondsPerMeasure = null;
-    this.#measureNum = null;
-    this.#repeatMeasure = null;
-    this.#lastMeasure = null;
+    this.#measureCount = null;
+    this.#loopStartMeasure = null;
+    this.#loopEndMeasure = null;
     this.#currentFrame = 0;
-    for (let i = 0; i < this.#units.length; ++i) {
-      releaseUnitPtr(this.#units[i]);
+    if (this.#units !== null) {
+      for (let i = 0; i < this.#units.length; ++i) {
+        releaseUnitPtr(this.#units[i]);
+      }
     }
-    this.#units = Object.freeze([]);
-    this.#events = Object.freeze([]);
+    this.#units = null;
+    this.#events = null;
   }
 
   /**
@@ -457,16 +553,17 @@ export class Pxtone {
     }
     this.#name = this.#readText(service_get_text_name);
     this.#comment = this.#readText(service_get_text_comment);
-    const beatTempo = service_get_beat_tempo(this.#ptr);
-    const beatsPerMeasure = service_get_beats_per_measure(this.#ptr);
-    this.#secondsPerMeasure = (beatsPerMeasure * 60) / beatTempo;
-    this.#measureNum = service_get_measure_num(this.#ptr);
-    this.#repeatMeasure = service_get_repeat_measure(this.#ptr);
-    const lastMeasure = service_get_last_measure(this.#ptr);
-    this.#lastMeasure = lastMeasure !== 0 ? lastMeasure : this.#measureNum;
+    this.#ticksPerBeat = service_get_ticks_per_beat(this.#ptr);
+    this.#beatsPerMeasure = service_get_beats_per_measure(this.#ptr);
+    this.#beatTempo = service_get_beat_tempo(this.#ptr);
+    this.#secondsPerMeasure = (this.#beatsPerMeasure * 60) / this.#beatTempo;
+    this.#measureCount = service_get_measure_num(this.#ptr);
+    this.#loopStartMeasure = service_get_repeat_measure(this.#ptr);
+    const loopEndMeasure = service_get_last_measure(this.#ptr);
+    this.#loopEndMeasure = loopEndMeasure !== 0 ? loopEndMeasure : this.#measureCount;
     this.#currentFrame = 0;
-    this.#units = this.#loadUnits();
-    this.#events = this.#loadEvents(this.#units);
+    this.#units = null;
+    this.#events = null;
     this.#state = "ready";
   }
 
