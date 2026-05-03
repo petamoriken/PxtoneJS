@@ -3,8 +3,8 @@ name = "ふわふわ"
 comment = ""
 
 [master]
-beat_clock = 480
-beat_num = 4
+ticks_per_beat = 480
+beats_per_measure = 4
 beat_tempo = 120.0
 measure_num = 8
 repeat_measure = 0
@@ -43,2587 +43,2587 @@ name = "flute"
 played = true
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 0
 kind = 12
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 1
 kind = 12
 value = 1
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 2
 kind = 12
 value = 2
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 3
 kind = 12
 value = 3
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 4
 kind = 12
 value = 4
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 5
 kind = 12
 value = 5
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 6
 kind = 12
 value = 6
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 7
 kind = 12
 value = 7
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 0
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 1
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 2
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 3
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 4
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 5
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 6
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 7
 kind = 13
 value = 0
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 0
 kind = 2
 value = 24064
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 1
 kind = 2
 value = 25088
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 3
 kind = 2
 value = 17920
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 4
 kind = 2
 value = 25088
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 5
 kind = 2
 value = 22784
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 6
 kind = 2
 value = 27136
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 7
 kind = 2
 value = 25088
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 0
 kind = 1
 value = 1920
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 1
 kind = 1
 value = 480
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 3
 kind = 1
 value = 6720
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 4
 kind = 1
 value = 3840
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 5
 kind = 1
 value = 3840
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 6
 kind = 1
 value = 6720
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 2
 kind = 3
 value = 96
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 4
 kind = 3
 value = 88
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 6
 kind = 3
 value = 40
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 3
 kind = 4
 value = 104
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 6
 kind = 4
 value = 104
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 0
 kind = 5
 value = 88
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 1
 kind = 5
 value = 40
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 2
 kind = 5
 value = 32
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 3
 kind = 5
 value = 64
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 4
 kind = 5
 value = 32
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 5
 kind = 5
 value = 32
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 6
 kind = 5
 value = 80
 
 [[events]]
-clock = 0
+tick = 0
 unit_index = 7
 kind = 5
 value = 48
 
 [[events]]
-clock = 240
+tick = 240
 unit_index = 2
 kind = 2
 value = 24064
 
 [[events]]
-clock = 240
+tick = 240
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 240
+tick = 240
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 1
 kind = 2
 value = 25088
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 2
 kind = 2
 value = 25088
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 7
 kind = 2
 value = 25088
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 1
 kind = 1
 value = 480
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 480
+tick = 480
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 720
+tick = 720
 unit_index = 2
 kind = 2
 value = 25856
 
 [[events]]
-clock = 720
+tick = 720
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 720
+tick = 720
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 1
 kind = 2
 value = 25344
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 7
 kind = 2
 value = 25344
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 1
 kind = 1
 value = 480
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 960
+tick = 960
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 1200
+tick = 1200
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 1200
+tick = 1200
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 1200
+tick = 1200
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 1
 kind = 2
 value = 27136
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 2
 kind = 2
 value = 25856
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 7
 kind = 2
 value = 27136
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 1
 kind = 1
 value = 240
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 1440
+tick = 1440
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 1680
+tick = 1680
 unit_index = 2
 kind = 2
 value = 25088
 
 [[events]]
-clock = 1680
+tick = 1680
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 1680
+tick = 1680
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 0
 kind = 2
 value = 24576
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 1
 kind = 2
 value = 26880
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 7
 kind = 2
 value = 26880
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 0
 kind = 1
 value = 1440
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 1
 kind = 1
 value = 720
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 7
 kind = 1
 value = 840
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 5
 kind = 3
 value = 40
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 1920
+tick = 1920
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 2160
+tick = 2160
 unit_index = 2
 kind = 2
 value = 24576
 
 [[events]]
-clock = 2160
+tick = 2160
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 2160
+tick = 2160
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 2400
+tick = 2400
 unit_index = 2
 kind = 2
 value = 25856
 
 [[events]]
-clock = 2400
+tick = 2400
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 2400
+tick = 2400
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 2640
+tick = 2640
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 2640
+tick = 2640
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 2640
+tick = 2640
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 1
 kind = 2
 value = 25856
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 7
 kind = 2
 value = 25856
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 1
 kind = 1
 value = 360
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 7
 kind = 1
 value = 360
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 2880
+tick = 2880
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 3120
+tick = 3120
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 3120
+tick = 3120
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 3120
+tick = 3120
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 0
 kind = 2
 value = 25088
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 1
 kind = 2
 value = 27648
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 2
 kind = 2
 value = 26880
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 7
 kind = 2
 value = 27648
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 0
 kind = 1
 value = 240
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 1
 kind = 1
 value = 360
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 3360
+tick = 3360
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 3600
+tick = 3600
 unit_index = 0
 kind = 2
 value = 25344
 
 [[events]]
-clock = 3600
+tick = 3600
 unit_index = 2
 kind = 2
 value = 25856
 
 [[events]]
-clock = 3600
+tick = 3600
 unit_index = 0
 kind = 1
 value = 240
 
 [[events]]
-clock = 3600
+tick = 3600
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 3600
+tick = 3600
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 3600
+tick = 3600
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 0
 kind = 2
 value = 25856
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 1
 kind = 2
 value = 27136
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 4
 kind = 2
 value = 25088
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 5
 kind = 2
 value = 22784
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 7
 kind = 2
 value = 27136
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 0
 kind = 1
 value = 1920
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 1
 kind = 1
 value = 960
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 4
 kind = 1
 value = 2880
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 5
 kind = 1
 value = 2880
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 7
 kind = 1
 value = 1200
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 3840
+tick = 3840
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 4080
+tick = 4080
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 4080
+tick = 4080
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 4080
+tick = 4080
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 4320
+tick = 4320
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 4320
+tick = 4320
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 4320
+tick = 4320
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 4560
+tick = 4560
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 4560
+tick = 4560
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 4560
+tick = 4560
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 4800
+tick = 4800
 unit_index = 2
 kind = 2
 value = 30208
 
 [[events]]
-clock = 4800
+tick = 4800
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 4800
+tick = 4800
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 5040
+tick = 5040
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 5040
+tick = 5040
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 5040
+tick = 5040
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 1
 kind = 2
 value = 27648
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 7
 kind = 2
 value = 27648
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 1
 kind = 1
 value = 240
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 7
 kind = 1
 value = 240
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 5280
+tick = 5280
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 1
 kind = 2
 value = 28416
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 2
 kind = 2
 value = 26880
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 7
 kind = 2
 value = 28416
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 1
 kind = 1
 value = 240
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 7
 kind = 1
 value = 240
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 5520
+tick = 5520
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 0
 kind = 2
 value = 26368
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 1
 kind = 2
 value = 28160
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 2
 kind = 2
 value = 25088
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 7
 kind = 2
 value = 28160
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 0
 kind = 1
 value = 960
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 1
 kind = 1
 value = 360
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 7
 kind = 1
 value = 840
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 0
 kind = 3
 value = 24
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 5760
+tick = 5760
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 6000
+tick = 6000
 unit_index = 2
 kind = 2
 value = 26368
 
 [[events]]
-clock = 6000
+tick = 6000
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 6000
+tick = 6000
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 6240
+tick = 6240
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 6240
+tick = 6240
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 6240
+tick = 6240
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 6480
+tick = 6480
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 6480
+tick = 6480
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 6480
+tick = 6480
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 0
 kind = 2
 value = 26624
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 1
 kind = 2
 value = 28160
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 2
 kind = 2
 value = 25088
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 3
 kind = 2
 value = 15872
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 4
 kind = 2
 value = 25088
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 5
 kind = 2
 value = 24064
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 6
 kind = 2
 value = 28160
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 7
 kind = 2
 value = 28160
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 0
 kind = 1
 value = 960
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 1
 kind = 1
 value = 600
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 3
 kind = 1
 value = 960
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 4
 kind = 1
 value = 960
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 5
 kind = 1
 value = 960
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 6
 kind = 1
 value = 960
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 7
 kind = 1
 value = 960
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 3
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 6
 kind = 4
 value = 104
 
 [[events]]
-clock = 6720
+tick = 6720
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 6960
+tick = 6960
 unit_index = 2
 kind = 2
 value = 26624
 
 [[events]]
-clock = 6960
+tick = 6960
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 6960
+tick = 6960
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 7200
+tick = 7200
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 7200
+tick = 7200
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 7200
+tick = 7200
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 7440
+tick = 7440
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 7440
+tick = 7440
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 7440
+tick = 7440
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 0
 kind = 2
 value = 27136
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 1
 kind = 2
 value = 28416
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 3
 kind = 2
 value = 16128
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 4
 kind = 2
 value = 25344
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 5
 kind = 2
 value = 23296
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 6
 kind = 2
 value = 28416
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 7
 kind = 2
 value = 28416
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 0
 kind = 1
 value = 960
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 1
 kind = 1
 value = 600
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 3
 kind = 1
 value = 960
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 4
 kind = 1
 value = 960
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 5
 kind = 1
 value = 960
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 6
 kind = 1
 value = 1920
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 7
 kind = 1
 value = 960
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 3
 kind = 4
 value = 104
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 6
 kind = 4
 value = 104
 
 [[events]]
-clock = 7680
+tick = 7680
 unit_index = 7
 kind = 4
 value = 104
 
 [[events]]
-clock = 7920
+tick = 7920
 unit_index = 2
 kind = 2
 value = 26368
 
 [[events]]
-clock = 7920
+tick = 7920
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 7920
+tick = 7920
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 8160
+tick = 8160
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 8160
+tick = 8160
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 8160
+tick = 8160
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 8400
+tick = 8400
 unit_index = 2
 kind = 2
 value = 29440
 
 [[events]]
-clock = 8400
+tick = 8400
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 8400
+tick = 8400
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 0
 kind = 2
 value = 25856
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 1
 kind = 2
 value = 29952
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 2
 kind = 2
 value = 29952
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 3
 kind = 2
 value = 15360
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 4
 kind = 2
 value = 25344
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 5
 kind = 2
 value = 22272
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 7
 kind = 2
 value = 29952
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 0
 kind = 1
 value = 480
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 1
 kind = 1
 value = 480
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 3
 kind = 1
 value = 960
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 4
 kind = 1
 value = 960
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 5
 kind = 1
 value = 960
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 3
 kind = 4
 value = 96
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 8640
+tick = 8640
 unit_index = 7
 kind = 4
 value = 80
 
 [[events]]
-clock = 8880
+tick = 8880
 unit_index = 2
 kind = 2
 value = 29440
 
 [[events]]
-clock = 8880
+tick = 8880
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 8880
+tick = 8880
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 0
 kind = 2
 value = 27648
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 1
 kind = 2
 value = 28928
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 7
 kind = 2
 value = 28928
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 0
 kind = 1
 value = 480
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 1
 kind = 1
 value = 480
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 9120
+tick = 9120
 unit_index = 7
 kind = 4
 value = 88
 
 [[events]]
-clock = 9360
+tick = 9360
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 9360
+tick = 9360
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 9360
+tick = 9360
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 0
 kind = 2
 value = 26880
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 1
 kind = 2
 value = 29952
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 3
 kind = 2
 value = 16640
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 4
 kind = 2
 value = 25856
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 5
 kind = 2
 value = 23808
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 6
 kind = 2
 value = 28928
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 7
 kind = 2
 value = 29952
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 0
 kind = 1
 value = 960
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 1
 kind = 1
 value = 960
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 3
 kind = 1
 value = 960
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 4
 kind = 1
 value = 960
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 5
 kind = 1
 value = 960
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 6
 kind = 1
 value = 960
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 7
 kind = 1
 value = 960
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 3
 kind = 4
 value = 104
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 6
 kind = 4
 value = 104
 
 [[events]]
-clock = 9600
+tick = 9600
 unit_index = 7
 kind = 4
 value = 64
 
 [[events]]
-clock = 9840
+tick = 9840
 unit_index = 2
 kind = 2
 value = 25856
 
 [[events]]
-clock = 9840
+tick = 9840
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 9840
+tick = 9840
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 10080
+tick = 10080
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 10080
+tick = 10080
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 10080
+tick = 10080
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 10320
+tick = 10320
 unit_index = 2
 kind = 2
 value = 28160
 
 [[events]]
-clock = 10320
+tick = 10320
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 10320
+tick = 10320
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 0
 kind = 2
 value = 27648
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 1
 kind = 2
 value = 30720
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 3
 kind = 2
 value = 14592
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 4
 kind = 2
 value = 24576
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 5
 kind = 2
 value = 23808
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 6
 kind = 2
 value = 27648
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 7
 kind = 2
 value = 30720
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 0
 kind = 1
 value = 960
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 1
 kind = 1
 value = 480
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 3
 kind = 1
 value = 960
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 4
 kind = 1
 value = 960
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 5
 kind = 1
 value = 960
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 6
 kind = 1
 value = 960
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 3
 kind = 4
 value = 104
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 6
 kind = 4
 value = 104
 
 [[events]]
-clock = 10560
+tick = 10560
 unit_index = 7
 kind = 4
 value = 48
 
 [[events]]
-clock = 10800
+tick = 10800
 unit_index = 2
 kind = 2
 value = 25856
 
 [[events]]
-clock = 10800
+tick = 10800
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 10800
+tick = 10800
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 1
 kind = 2
 value = 28928
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 7
 kind = 2
 value = 28928
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 1
 kind = 1
 value = 480
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 7
 kind = 1
 value = 480
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 11040
+tick = 11040
 unit_index = 7
 kind = 4
 value = 64
 
 [[events]]
-clock = 11280
+tick = 11280
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 11280
+tick = 11280
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 11280
+tick = 11280
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 0
 kind = 2
 value = 27136
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 1
 kind = 2
 value = 30208
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 3
 kind = 2
 value = 17920
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 4
 kind = 2
 value = 25088
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 5
 kind = 2
 value = 24064
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 6
 kind = 2
 value = 27136
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 7
 kind = 2
 value = 30208
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 0
 kind = 1
 value = 960
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 1
 kind = 1
 value = 1560
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 3
 kind = 1
 value = 3840
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 4
 kind = 1
 value = 3360
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 5
 kind = 1
 value = 3360
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 6
 kind = 1
 value = 3360
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 7
 kind = 1
 value = 1560
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 3
 kind = 4
 value = 104
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 4
 kind = 4
 value = 104
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 5
 kind = 4
 value = 104
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 6
 kind = 4
 value = 104
 
 [[events]]
-clock = 11520
+tick = 11520
 unit_index = 7
 kind = 4
 value = 56
 
 [[events]]
-clock = 11760
+tick = 11760
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 11760
+tick = 11760
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 11760
+tick = 11760
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 12000
+tick = 12000
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 12000
+tick = 12000
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 12000
+tick = 12000
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 12240
+tick = 12240
 unit_index = 2
 kind = 2
 value = 30208
 
 [[events]]
-clock = 12240
+tick = 12240
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 12240
+tick = 12240
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 12480
+tick = 12480
 unit_index = 0
 kind = 2
 value = 25856
 
 [[events]]
-clock = 12480
+tick = 12480
 unit_index = 2
 kind = 2
 value = 30720
 
 [[events]]
-clock = 12480
+tick = 12480
 unit_index = 0
 kind = 1
 value = 960
 
 [[events]]
-clock = 12480
+tick = 12480
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 12480
+tick = 12480
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 12480
+tick = 12480
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 12720
+tick = 12720
 unit_index = 2
 kind = 2
 value = 30208
 
 [[events]]
-clock = 12720
+tick = 12720
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 12720
+tick = 12720
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 12960
+tick = 12960
 unit_index = 2
 kind = 2
 value = 28928
 
 [[events]]
-clock = 12960
+tick = 12960
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 12960
+tick = 12960
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 13200
+tick = 13200
 unit_index = 2
 kind = 2
 value = 27648
 
 [[events]]
-clock = 13200
+tick = 13200
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 13200
+tick = 13200
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 0
 kind = 2
 value = 25088
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 1
 kind = 2
 value = 28928
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 2
 kind = 2
 value = 27136
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 7
 kind = 2
 value = 28928
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 0
 kind = 1
 value = 1440
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 1
 kind = 1
 value = 1200
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 2
 kind = 1
 value = 120
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 7
 kind = 1
 value = 1440
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 0
 kind = 4
 value = 104
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 1
 kind = 4
 value = 104
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 2
 kind = 4
 value = 104
 
 [[events]]
-clock = 13440
+tick = 13440
 unit_index = 7
 kind = 4
 value = 48

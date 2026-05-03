@@ -87,23 +87,28 @@ export declare const service_get_sample_rate: (svc: number) => number;
 /**
  * Renders a `.ptnoise` file and returns a pointer to the allocated PCM buffer
  * (signed 16-bit interleaved). The caller must free it with `dealloc(ptr, outSamplesLen)`.
- * Writes channel count, sample rate, and byte length to the respective `out*` pointers.
+ * Writes the byte length to `outSamplesLen`. Use {@link service_get_channels} /
+ * {@link service_get_sample_rate} for format info.
  * Returns 0 on failure.
  */
 export declare const service_render_noise: (
   svc: number,
   data: number,
   dataLen: number,
-  outChannels: number,
-  outSampleRate: number,
   outSamplesLen: number,
 ) => number;
+
+/**
+ * Returns the number of ticks per beat.
+ * Returns 0 on error.
+ */
+export declare const service_get_ticks_per_beat: (svc: number) => number;
 
 /**
  * Returns the number of beats per measure.
  * Returns 0 on error.
  */
-export declare const service_get_beat_num: (svc: number) => number;
+export declare const service_get_beats_per_measure: (svc: number) => number;
 
 /**
  * Returns the tempo in beats per minute.
@@ -191,9 +196,9 @@ export declare const service_set_unit_played: (
 export declare const service_get_event_count: (svc: number) => number;
 
 /**
- * Returns the tick clock of the event at `idx`, or 0 on error.
+ * Returns the tick position of the event at `idx`, or 0 on error.
  */
-export declare const service_get_event_clock: (
+export declare const service_get_event_tick: (
   svc: number,
   idx: number,
 ) => number;

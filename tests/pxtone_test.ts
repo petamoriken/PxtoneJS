@@ -1,6 +1,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { assert, assertEquals, assertNotEquals, assertThrows } from "@std/assert";
 import { parse as parseToml } from "@std/toml";
 
 import { Pxtone } from "../src/Pxtone.ts";
@@ -101,7 +102,7 @@ function pcmToWav(
 interface PtcopSnapshot {
   units: Array<{ name: string; played: boolean }>;
   events: Array<
-    { clock: number; unit_index: number; kind: number; value: number }
+    { tick: number; unit_index: number; kind: number; value: number }
   >;
 }
 
@@ -156,10 +157,11 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
       );
     } else {
       for (let i = 0; i < pxtone.events.length; i++) {
-        const { clock, unitIndex, kind, value } = pxtone.events[i];
+        const { tick, unit, kind, value } = pxtone.events[i];
         const exp = snapshot.events[i];
+        const unitIndex = pxtone.units.indexOf(unit);
         if (
-          clock !== exp.clock || unitIndex !== exp.unit_index ||
+          tick !== exp.tick || unitIndex !== exp.unit_index ||
           kind !== exp.kind || value !== exp.value
         ) {
           failures.push(`${stem}: event[${i}] mismatch`);
@@ -233,9 +235,8 @@ Deno.test("decoded ptnoise matches reference (Pxtone)", async () => {
       continue;
     }
 
-    const { buffer, data } = result;
-    const buf = buffer as unknown as MockAudioBuffer;
-    const wav = pcmToWav(audioBufToPcm(buf), data.channels, data.sampleRate);
+    const buf = result as unknown as MockAudioBuffer;
+    const wav = pcmToWav(audioBufToPcm(buf), pxtone.channels, pxtone.sampleRate);
     const expected = await Deno.readFile(join(snapshotDir, `${stem}.wav`));
     if (
       wav.length !== expected.length || wav.some((b, i) => b !== expected[i])
@@ -251,4 +252,92 @@ Deno.test("decoded ptnoise matches reference (Pxtone)", async () => {
       }`,
     );
   }
+});
+
+Deno.test("Pxtone getters are guarded by state", async () => {
+  const sampleDir = join(projectRoot, "tests/sample/ptcop");
+  const names: string[] = [];
+
+  for await (const entry of Deno.readDir(sampleDir)) {
+    if (entry.isFile && entry.name.endsWith(".ptcop")) names.push(entry.name);
+  }
+  names.sort();
+
+  if (names.length === 0) {
+    throw new Error("no .ptcop files found in tests/sample/ptcop/");
+  }
+  const fileData = await Deno.readFile(join(sampleDir, names[0]));
+
+  const pxtone = new Pxtone();
+
+  // --- idle ---
+
+  assertEquals(pxtone.duration, null);
+  assertEquals(pxtone.loopStart, null);
+  assertEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTime, 0);
+  assertEquals(pxtone.units.length, 0);
+  assertEquals(pxtone.events.length, 0);
+  assertThrows(() => pxtone.stream());
+
+  // --- ready ---
+
+  pxtone.read(fileData);
+
+  assertNotEquals(pxtone.duration, null);
+  assertNotEquals(pxtone.loopStart, null);
+  assertNotEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTime, 0);
+  assert(pxtone.units.length > 0);
+  assert(pxtone.events.length > 0);
+
+  // --- streaming ---
+
+  const stream = pxtone.stream();
+  const reader = stream.getReader();
+  await reader.read();
+  await reader.read();
+
+  assertNotEquals(pxtone.duration, null);
+  assertNotEquals(pxtone.loopStart, null);
+  assertNotEquals(pxtone.loopEnd, null);
+  assert(pxtone.currentTime > 0);
+  assert(pxtone.units.length > 0);
+  assert(pxtone.events.length > 0);
+  assertThrows(() => pxtone.read(fileData));
+  assertThrows(() => pxtone.stream());
+
+  // --- ready ---
+
+  reader.releaseLock();
+  await stream.cancel();
+
+  assertNotEquals(pxtone.duration, null);
+  assertNotEquals(pxtone.loopStart, null);
+  assertNotEquals(pxtone.loopEnd, null);
+  assert(pxtone.currentTime > 0);
+  assert(pxtone.units.length > 0);
+  assert(pxtone.events.length > 0);
+
+  // --- idle ---
+
+  pxtone.clear();
+
+  assertEquals(pxtone.duration, null);
+  assertEquals(pxtone.loopStart, null);
+  assertEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTime, 0);
+  assertEquals(pxtone.units.length, 0);
+  assertEquals(pxtone.events.length, 0);
+
+  // --- disposed ---
+
+  pxtone[Symbol.dispose]();
+
+  assertEquals(pxtone.duration, null);
+  assertEquals(pxtone.loopStart, null);
+  assertEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTime, 0);
+  assertEquals(pxtone.units.length, 0);
+  assertEquals(pxtone.events.length, 0);
 });

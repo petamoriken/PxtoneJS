@@ -3,12 +3,12 @@ import {
   dealloc,
   memory,
   service_free,
-  service_get_beat_num,
   service_get_beat_tempo,
+  service_get_beats_per_measure,
   service_get_channels,
-  service_get_event_clock,
   service_get_event_count,
   service_get_event_kind,
+  service_get_event_tick,
   service_get_event_unit_index,
   service_get_event_value,
   service_get_last_measure,
@@ -30,29 +30,36 @@ import {
   service_tones_ready,
 } from "./pxtone.wasm";
 
-/** Decoded noise waveform metadata returned by {@link Pxtone.decodeNoiseData}. */
-export interface NoiseData {
-  /** Number of output channels (1 = mono, 2 = stereo). */
-  channels: 1 | 2;
-  /** Sample rate in Hz. */
-  sampleRate: number;
-}
+const illegalConstructorKey: unique symbol = Symbol("illegalConstructorKey");
 
-let setUnitPlayed!: (unit: PxtoneUnit, played: boolean) => void;
+let releaseUnitPtr!: (unit: PxtoneUnit) => void;
 
 /** A single instrument track in a pxtone song. */
 export class PxtoneUnit {
+  #ptr: number | null;
   readonly #name: string;
   #played: boolean;
+  readonly #index: number;
 
-  constructor(name: string, played: boolean) {
+  private constructor(
+    key: typeof illegalConstructorKey,
+    ptr: number,
+    name: string,
+    played: boolean,
+    index: number,
+  ) {
+    if (key !== illegalConstructorKey) {
+      throw new TypeError("Illegal constructor");
+    }
     this.#name = name;
     this.#played = played;
+    this.#index = index;
+    this.#ptr = ptr;
   }
 
   static {
-    setUnitPlayed = (unit, played) => {
-      unit.#played = played;
+    releaseUnitPtr = (unit) => {
+      unit.#ptr = null;
     };
   }
 
@@ -63,92 +70,148 @@ export class PxtoneUnit {
 
   /**
    * Whether this unit is active (not muted).
-   * Can be toggled via {@link Pxtone.toggleUnitPlayed}.
+   * Can be toggled via {@link togglePlayed}.
    */
   get played(): boolean {
     return this.#played;
   }
-}
 
-/** No event / padding. */
-export const EVENT_KIND_NULL = 0;
-/** Note-on: begins a note. The `value` is the note length in ticks. */
-export const EVENT_KIND_ON = 1;
-/** Key (pitch). The `value` is encoded as `(octave * 12 + semitone) * 256`. */
-export const EVENT_KIND_KEY = 2;
-/** Pan (stereo position). `value` ranges from 0 (left) to 128 (center) to 256 (right). */
-export const EVENT_KIND_PAN_VOLUME = 3;
-/** Velocity (attack strength). `value` ranges from 0 to 128. */
-export const EVENT_KIND_VELOCITY = 4;
-/** Volume. `value` ranges from 0 to 128. */
-export const EVENT_KIND_VOLUME = 5;
-/** Portamento (pitch glide). `value` is the portamento length in ticks. */
-export const EVENT_KIND_PORTAMENT = 6;
-/** Beat clock: ticks per beat. */
-export const EVENT_KIND_BEAT_CLOCK = 7;
-/** Beat tempo in BPM (floating-point encoded as `Math.round(bpm * 100)`). */
-export const EVENT_KIND_BEAT_TEMPO = 8;
-/** Beats per measure. */
-export const EVENT_KIND_BEAT_NUM = 9;
-/** Repeat: marks the loop start measure. */
-export const EVENT_KIND_REPEAT = 10;
-/** Last: marks the loop end measure. */
-export const EVENT_KIND_LAST = 11;
-/** Voice number: selects which instrument voice to use. */
-export const EVENT_KIND_VOICE_NO = 12;
-/** Group number: assigns the unit to a group. */
-export const EVENT_KIND_GROUP_NO = 13;
-/** Tuning offset in semitones (floating-point encoded as `Math.round(semitones * 100)`). */
-export const EVENT_KIND_TUNING = 14;
-/** Time-based pan (auto-pan). `value` is the pan sweep period in ticks. */
-export const EVENT_KIND_PAN_TIME = 15;
+  /**
+   * Toggles the {@link played} flag of the unit.
+   *
+   * @param force - If provided, sets `played` to this value instead of toggling.
+   */
+  togglePlayed(force?: boolean | undefined) {
+    const newPlayed = force ?? !this.#played;
+    this.#played = newPlayed;
+    if (this.#ptr !== null) {
+      service_set_unit_played(this.#ptr, this.#index, newPlayed ? 1 : 0);
+    }
+  }
+
+  toJSON(): { name: string; played: boolean } {
+    return {
+      name: this.#name,
+      played: this.#played,
+    };
+  }
+}
 
 /** Union of all valid {@link PxtoneEvent} kind values. */
 export type PxtoneEventKind =
-  | typeof EVENT_KIND_NULL
-  | typeof EVENT_KIND_ON
-  | typeof EVENT_KIND_KEY
-  | typeof EVENT_KIND_PAN_VOLUME
-  | typeof EVENT_KIND_VELOCITY
-  | typeof EVENT_KIND_VOLUME
-  | typeof EVENT_KIND_PORTAMENT
-  | typeof EVENT_KIND_BEAT_CLOCK
-  | typeof EVENT_KIND_BEAT_TEMPO
-  | typeof EVENT_KIND_BEAT_NUM
-  | typeof EVENT_KIND_REPEAT
-  | typeof EVENT_KIND_LAST
-  | typeof EVENT_KIND_VOICE_NO
-  | typeof EVENT_KIND_GROUP_NO
-  | typeof EVENT_KIND_TUNING
-  | typeof EVENT_KIND_PAN_TIME;
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15;
 
 /** A single automation event in a pxtone song's event list. */
 export class PxtoneEvent {
-  readonly #clock: number;
-  readonly #unitIndex: number;
+  /** No event / padding. */
+  static get KIND_NULL() {
+    return 0 as const;
+  }
+  /** Note-on: begins a note. The `value` is the note length in ticks. */
+  static get KIND_ON() {
+    return 1 as const;
+  }
+  /** Key (pitch). The `value` is encoded as `(octave * 12 + semitone) * 256`. */
+  static get KIND_KEY() {
+    return 2 as const;
+  }
+  /** Pan (stereo position). `value` ranges from 0 (left) to 128 (center) to 256 (right). */
+  static get KIND_PAN_VOLUME() {
+    return 3 as const;
+  }
+  /** Velocity (attack strength). `value` ranges from 0 to 128. */
+  static get KIND_VELOCITY() {
+    return 4 as const;
+  }
+  /** Volume. `value` ranges from 0 to 128. */
+  static get KIND_VOLUME() {
+    return 5 as const;
+  }
+  /** Portamento (pitch glide). `value` is the portamento length in ticks. */
+  static get KIND_PORTAMENT() {
+    return 6 as const;
+  }
+  /** Ticks per beat. */
+  static get KIND_TICKS_PER_BEAT() {
+    return 7 as const;
+  }
+  /** Beat tempo in BPM (floating-point encoded as `Math.round(bpm * 100)`). */
+  static get KIND_BEAT_TEMPO() {
+    return 8 as const;
+  }
+  /** Beats per measure. */
+  static get KIND_BEATS_PER_MEASURE() {
+    return 9 as const;
+  }
+  /** Repeat: marks the loop start measure. */
+  static get KIND_REPEAT() {
+    return 10 as const;
+  }
+  /** Last: marks the loop end measure. */
+  static get KIND_LAST() {
+    return 11 as const;
+  }
+  /** Voice number: selects which instrument voice to use. */
+  static get KIND_VOICE_NO() {
+    return 12 as const;
+  }
+  /** Group number: assigns the unit to a group. */
+  static get KIND_GROUP_NO() {
+    return 13 as const;
+  }
+  /** Tuning offset in semitones (floating-point encoded as `Math.round(semitones * 100)`). */
+  static get KIND_TUNING() {
+    return 14 as const;
+  }
+  /** Time-based pan (auto-pan). `value` is the pan sweep period in ticks. */
+  static get KIND_PAN_TIME() {
+    return 15 as const;
+  }
+
+  readonly #tick: number;
+  readonly #unit: PxtoneUnit;
   readonly #kind: PxtoneEventKind;
   readonly #value: number;
 
-  constructor(
-    clock: number,
-    unitIndex: number,
+  private constructor(
+    key: typeof illegalConstructorKey,
+    tick: number,
+    unit: PxtoneUnit,
     kind: PxtoneEventKind,
     value: number,
   ) {
-    this.#clock = clock;
-    this.#unitIndex = unitIndex;
+    if (key !== illegalConstructorKey) {
+      throw new TypeError("Illegal constructor");
+    }
+    this.#tick = tick;
+    this.#unit = unit;
     this.#kind = kind;
     this.#value = value;
   }
 
   /** Tick position at which this event fires. */
-  get clock(): number {
-    return this.#clock;
+  get tick(): number {
+    return this.#tick;
   }
 
   /** Index into {@link Pxtone.units} that this event targets. */
-  get unitIndex(): number {
-    return this.#unitIndex;
+  get unit(): PxtoneUnit {
+    return this.#unit;
   }
 
   /** What this event controls. See the `EVENT_KIND_*` constants. */
@@ -159,6 +222,15 @@ export class PxtoneEvent {
   /** The event's payload. Interpretation depends on {@link kind}. */
   get value(): number {
     return this.#value;
+  }
+
+  toJSON(): { tick: number; unit: PxtoneUnit; kind: PxtoneEventKind; value: number } {
+    return {
+      tick: this.#tick,
+      unit: this.#unit,
+      kind: this.#kind,
+      value: this.#value,
+    };
   }
 }
 
@@ -235,6 +307,7 @@ export class Pxtone {
     if (this.#state === "disposed") return;
     const wasStreaming = this.#state === "streaming";
     this.#state = "disposed";
+    this.#release();
     Pxtone.#registry.unregister(this);
     if (!wasStreaming) {
       service_free(this.#ptr);
@@ -263,17 +336,26 @@ export class Pxtone {
 
   /** Total song duration in seconds. `null` before {@link read}. */
   get duration(): number | null {
-    return this.#measureNum !== null ? this.#measureNum * this.#secondsPerMeasure! : null;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#measureNum! * this.#secondsPerMeasure!;
   }
 
   /** Loop start position in seconds. `null` before {@link read}. */
   get loopStart(): number | null {
-    return this.#repeatMeasure !== null ? this.#repeatMeasure * this.#secondsPerMeasure! : null;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#repeatMeasure! * this.#secondsPerMeasure!;
   }
 
   /** Loop end position in seconds. `null` before {@link read}. */
   get loopEnd(): number | null {
-    return this.#lastMeasure !== null ? this.#lastMeasure * this.#secondsPerMeasure! : null;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return null;
+    }
+    return this.#lastMeasure! * this.#secondsPerMeasure!;
   }
 
   /**
@@ -281,8 +363,11 @@ export class Pxtone {
    * from the stream returned by {@link stream}.
    */
   get currentTime(): number {
-    if (this.#sampleRate === null) return 0;
+    if (this.#state !== "ready" && this.#state !== "streaming") {
+      return 0;
+    }
     const sampleRate = this.#sampleRate;
+    const currentFrame = this.#currentFrame;
     const lastMeasure = this.#lastMeasure!;
     const repeatMeasure = this.#repeatMeasure!;
     if (repeatMeasure !== 0) {
@@ -292,13 +377,13 @@ export class Pxtone {
       const loopLength = Math.round(
         (lastMeasure - repeatMeasure) * spm * sampleRate,
       );
-      if (loopLength > 0 && this.#currentFrame > loopEndFrame) {
+      if (loopLength > 0 && currentFrame > loopEndFrame) {
         const position = loopStartFrame +
-          (this.#currentFrame - loopEndFrame) % loopLength;
+          (currentFrame - loopEndFrame) % loopLength;
         return position / sampleRate;
       }
     }
-    return this.#currentFrame / sampleRate;
+    return currentFrame / sampleRate;
   }
 
   /** Ordered list of instrument tracks in the loaded song. */
@@ -323,6 +408,10 @@ export class Pxtone {
       throw new Error("cannot call clear while streaming");
     }
     this.#state = "idle";
+    this.#release();
+  }
+
+  #release() {
     this.#name = null;
     this.#comment = null;
     this.#secondsPerMeasure = null;
@@ -330,6 +419,9 @@ export class Pxtone {
     this.#repeatMeasure = null;
     this.#lastMeasure = null;
     this.#currentFrame = 0;
+    for (let i = 0; i < this.#units.length; ++i) {
+      releaseUnitPtr(this.#units[i]);
+    }
     this.#units = Object.freeze([]);
     this.#events = Object.freeze([]);
   }
@@ -343,12 +435,13 @@ export class Pxtone {
    * @throws {Error} If the instance has been disposed, called while a stream is active, or the file is invalid.
    */
   read(buffer: ArrayBuffer | Uint8Array): void {
-    if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
-    }
     if (this.#state === "streaming") {
       throw new Error("cannot call read while streaming");
     }
+    if (this.#state === "disposed") {
+      throw new Error("Pxtone instance has been disposed");
+    }
+
     const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
     const memPtr = alloc(bytes.length);
     try {
@@ -365,15 +458,15 @@ export class Pxtone {
     this.#name = this.#readText(service_get_text_name);
     this.#comment = this.#readText(service_get_text_comment);
     const beatTempo = service_get_beat_tempo(this.#ptr);
-    const beatNum = service_get_beat_num(this.#ptr);
-    this.#secondsPerMeasure = (beatNum * 60) / beatTempo;
+    const beatsPerMeasure = service_get_beats_per_measure(this.#ptr);
+    this.#secondsPerMeasure = (beatsPerMeasure * 60) / beatTempo;
     this.#measureNum = service_get_measure_num(this.#ptr);
     this.#repeatMeasure = service_get_repeat_measure(this.#ptr);
     const lastMeasure = service_get_last_measure(this.#ptr);
     this.#lastMeasure = lastMeasure !== 0 ? lastMeasure : this.#measureNum;
     this.#currentFrame = 0;
     this.#units = this.#loadUnits();
-    this.#events = this.#loadEvents();
+    this.#events = this.#loadEvents(this.#units);
     this.#state = "ready";
   }
 
@@ -396,14 +489,14 @@ export class Pxtone {
       signal,
     }: StreamOptions = {},
   ): ReadableStream<AudioData> {
-    if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
-    }
     if (this.#state === "idle") {
       throw new Error("read must be called before stream");
     }
     if (this.#state === "streaming") {
       throw new Error("stream is already active");
+    }
+    if (this.#state === "disposed") {
+      throw new Error("Pxtone instance has been disposed");
     }
 
     const channels = this.#channels!;
@@ -492,48 +585,21 @@ export class Pxtone {
   }
 
   /**
-   * Toggles the {@link PxtoneUnit.played} flag of the unit at `index`.
-   *
-   * @param index - Index into {@link units}.
-   * @param force - If provided, sets `played` to this value instead of toggling.
-   * @throws {Error} If the instance has been disposed, or {@link read} has not been called.
-   * @throws {RangeError} If `index` is out of bounds.
-   */
-  toggleUnitPlayed(index: number, force?: boolean): void {
-    if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
-    }
-    if (this.#state === "idle") {
-      throw new Error("read must be called before toggleUnitPlayed");
-    }
-    const unit = this.#units[index];
-    if (unit === undefined) {
-      throw new RangeError(`unit index ${index} is out of range`);
-    }
-    const newPlayed = force ?? !unit.played;
-    service_set_unit_played(this.#ptr, index, newPlayed ? 1 : 0);
-    setUnitPlayed(unit, newPlayed);
-  }
-
-  /**
    * Decodes a `.ptnoise` file and returns the rendered PCM as an `AudioBuffer`.
    *
    * @param buffer - Raw `.ptnoise` file bytes.
-   * @returns A promise that resolves with the decoded `AudioBuffer` and its metadata.
+   * @returns A promise that resolves with the decoded `AudioBuffer`.
    * @throws {Error} If the instance has been disposed.
    */
   decodeNoiseData(
     buffer: ArrayBuffer | Uint8Array,
-  ): Promise<{ buffer: AudioBuffer; data: NoiseData }> {
+  ): Promise<AudioBuffer> {
     if (this.#state === "disposed") {
       return Promise.reject(new Error("Pxtone instance has been disposed"));
     }
     try {
       const { pcm, channels, sampleRate } = this.#renderNoise(buffer);
-      return Promise.resolve({
-        buffer: this.#pcmToAudioBuffer(pcm, channels, sampleRate),
-        data: { channels, sampleRate },
-      });
+      return Promise.resolve(this.#pcmToAudioBuffer(pcm, channels, sampleRate));
     } catch (e) {
       return Promise.reject(e);
     }
@@ -565,7 +631,16 @@ export class Pxtone {
           new Uint8Array(memory.buffer, namePtr, nameLen),
         );
         const played = service_get_unit_played(this.#ptr, i) !== 0;
-        units.push(new PxtoneUnit(name, played));
+        units.push(
+          // @ts-expect-error: allow private constructor
+          new PxtoneUnit(
+            illegalConstructorKey,
+            this.#ptr,
+            name,
+            played,
+            i,
+          ),
+        );
       }
       return Object.freeze(units);
     } finally {
@@ -573,14 +648,16 @@ export class Pxtone {
     }
   }
 
-  #loadEvents(): readonly PxtoneEvent[] {
+  #loadEvents(units: readonly PxtoneUnit[]): readonly PxtoneEvent[] {
     const count = service_get_event_count(this.#ptr);
     const events: PxtoneEvent[] = [];
     for (let i = 0; i < count; i++) {
       events.push(
+        // @ts-expect-error: allow private constructor
         new PxtoneEvent(
-          service_get_event_clock(this.#ptr, i),
-          service_get_event_unit_index(this.#ptr, i),
+          illegalConstructorKey,
+          service_get_event_tick(this.#ptr, i),
+          units[service_get_event_unit_index(this.#ptr, i)],
           service_get_event_kind(this.#ptr, i) as PxtoneEventKind,
           service_get_event_value(this.#ptr, i),
         ),
@@ -594,8 +671,6 @@ export class Pxtone {
   ): { pcm: Uint8Array; channels: 1 | 2; sampleRate: number } {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
     const dataPtr = alloc(bytes.length);
-    const outChannels = alloc(4);
-    const outSampleRate = alloc(4);
     const outSamplesLen = alloc(4);
     try {
       new Uint8Array(memory.buffer, dataPtr, bytes.length).set(bytes);
@@ -603,23 +678,15 @@ export class Pxtone {
         this.#ptr,
         dataPtr,
         bytes.length,
-        outChannels,
-        outSampleRate,
         outSamplesLen,
       );
       if (samplesPtr === 0) throw new Error("service_render_noise failed");
-      const channels = new Uint32Array(memory.buffer, outChannels, 1)[0] as
-        | 1
-        | 2;
-      const sampleRate = new Uint32Array(memory.buffer, outSampleRate, 1)[0];
       const samplesLen = new Uint32Array(memory.buffer, outSamplesLen, 1)[0];
       const pcm = new Uint8Array(memory.buffer, samplesPtr, samplesLen).slice();
       dealloc(samplesPtr, samplesLen);
-      return { pcm, channels, sampleRate };
+      return { pcm, channels: this.#channels, sampleRate: this.#sampleRate };
     } finally {
       dealloc(dataPtr, bytes.length);
-      dealloc(outChannels, 4);
-      dealloc(outSampleRate, 4);
       dealloc(outSamplesLen, 4);
     }
   }
