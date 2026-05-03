@@ -291,8 +291,8 @@ export class Pxtone {
   #state: "idle" | "ready" | "streaming" | "disposed" = "idle";
   #currentFrame = 0;
 
-  #units: readonly PxtoneUnit[] = Object.freeze([]);
-  #events: readonly PxtoneEvent[] = Object.freeze([]);
+  #units: readonly PxtoneUnit[] | null = null;
+  #events: readonly PxtoneEvent[] | null = null;
 
   constructor() {
     this.#ptr = service_new();
@@ -459,11 +459,31 @@ export class Pxtone {
 
   /** Ordered list of instrument tracks in the loaded song. */
   get units(): readonly PxtoneUnit[] {
+    if (this.#units !== null) {
+      return this.#units;
+    }
+    if (this.#state === "idle" || this.#state === "disposed") {
+      this.#events = Object.freeze([]);
+      this.#units = Object.freeze([]);
+    } else {
+      this.#units = this.#loadUnits();
+      this.#events = this.#loadEvents(this.#units);
+    }
     return this.#units;
   }
 
   /** Ordered list of automation events in the loaded song. */
   get events(): readonly PxtoneEvent[] {
+    if (this.#events !== null) {
+      return this.#events;
+    }
+    if (this.#state === "idle" || this.#state === "disposed") {
+      this.#units = Object.freeze([]);
+      this.#events = Object.freeze([]);
+    } else {
+      this.#units = this.#loadUnits();
+      this.#events = this.#loadEvents(this.#units);
+    }
     return this.#events;
   }
 
@@ -493,11 +513,13 @@ export class Pxtone {
     this.#loopStartMeasure = null;
     this.#loopEndMeasure = null;
     this.#currentFrame = 0;
-    for (let i = 0; i < this.#units.length; ++i) {
-      releaseUnitPtr(this.#units[i]);
+    if (this.#units !== null) {
+      for (let i = 0; i < this.#units.length; ++i) {
+        releaseUnitPtr(this.#units[i]);
+      }
     }
-    this.#units = Object.freeze([]);
-    this.#events = Object.freeze([]);
+    this.#units = null;
+    this.#events = null;
   }
 
   /**
@@ -540,8 +562,8 @@ export class Pxtone {
     const loopEndMeasure = service_get_last_measure(this.#ptr);
     this.#loopEndMeasure = loopEndMeasure !== 0 ? loopEndMeasure : this.#measureCount;
     this.#currentFrame = 0;
-    this.#units = this.#loadUnits();
-    this.#events = this.#loadEvents(this.#units);
+    this.#units = null;
+    this.#events = null;
     this.#state = "ready";
   }
 
