@@ -84,18 +84,53 @@ Creates an instance backed by a WebAssembly service.
 
 ### Properties
 
-| Property      | Type                     | Description                                |
-| ------------- | ------------------------ | ------------------------------------------ |
-| `channels`    | `2`                      | Output channel count (always stereo)       |
-| `sampleRate`  | `44100`                  | Output sample rate in Hz (always 44.1 kHz) |
-| `name`        | `string \| null`         | Song title (Shift-JIS decoded)             |
-| `comment`     | `string \| null`         | Song comment (Shift-JIS decoded)           |
-| `duration`    | `number \| null`         | Total duration in seconds                  |
-| `loopStart`   | `number \| null`         | Loop start position in seconds             |
-| `loopEnd`     | `number \| null`         | Loop end position in seconds               |
-| `currentTime` | `number`                 | Current playback position in seconds       |
-| `units`       | `readonly PxtoneUnit[]`  | Instrument tracks                          |
-| `events`      | `readonly PxtoneEvent[]` | Automation event list                      |
+#### Audio output
+
+| Property     | Type    | Description                                |
+| ------------ | ------- | ------------------------------------------ |
+| `channels`   | `2`     | Output channel count (always stereo)       |
+| `sampleRate` | `44100` | Output sample rate in Hz (always 44.1 kHz) |
+
+#### Metadata (available after `read()`)
+
+| Property  | Type             | Description                      |
+| --------- | ---------------- | -------------------------------- |
+| `name`    | `string \| null` | Song title (Shift-JIS decoded)   |
+| `comment` | `string \| null` | Song comment (Shift-JIS decoded) |
+
+#### Master (available after `read()`)
+
+| Property          | Type             | Description               |
+| ----------------- | ---------------- | ------------------------- |
+| `ticksPerBeat`    | `number \| null` | Ticks per beat            |
+| `beatsPerMeasure` | `number \| null` | Beats per measure         |
+| `beatTempo`       | `number \| null` | Tempo in BPM              |
+| `measureCount`    | `number \| null` | Total number of measures  |
+| `tickCount`       | `number \| null` | Total length in ticks     |
+| `duration`        | `number \| null` | Total duration in seconds |
+
+#### Loop (available after `read()`)
+
+| Property           | Type             | Description                     |
+| ------------------ | ---------------- | ------------------------------- |
+| `loopStartMeasure` | `number \| null` | Loop start position in measures |
+| `loopEndMeasure`   | `number \| null` | Loop end position in measures   |
+| `loopStart`        | `number \| null` | Loop start position in seconds  |
+| `loopEnd`          | `number \| null` | Loop end position in seconds    |
+
+### Playback
+
+| Property      | Type     | Description                          |
+| ------------- | -------- | ------------------------------------ |
+| `currentTick` | `number` | Current playback position in ticks   |
+| `currentTime` | `number` | Current playback position in seconds |
+
+#### Song data
+
+| Property | Type                     | Description           |
+| -------- | ------------------------ | --------------------- |
+| `units`  | `readonly PxtoneUnit[]`  | Instrument tracks     |
+| `events` | `readonly PxtoneEvent[]` | Automation event list |
 
 ### Methods
 

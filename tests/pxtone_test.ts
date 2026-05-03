@@ -272,22 +272,43 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   // --- idle ---
 
+  assertEquals(pxtone.ticksPerBeat, null);
+  assertEquals(pxtone.beatsPerMeasure, null);
+  assertEquals(pxtone.beatTempo, null);
+  assertEquals(pxtone.measureCount, null);
+  assertEquals(pxtone.tickCount, null);
   assertEquals(pxtone.duration, null);
+
+  assertEquals(pxtone.loopStartMeasure, null);
+  assertEquals(pxtone.loopEndMeasure, null);
   assertEquals(pxtone.loopStart, null);
   assertEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTick, 0);
   assertEquals(pxtone.currentTime, 0);
+
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
+
   assertThrows(() => pxtone.stream());
 
   // --- ready ---
 
   pxtone.read(fileData);
 
+  assertNotEquals(pxtone.ticksPerBeat, null);
+  assertNotEquals(pxtone.beatsPerMeasure, null);
+  assertNotEquals(pxtone.beatTempo, null);
+  assertNotEquals(pxtone.measureCount, null);
+  assertNotEquals(pxtone.tickCount, null);
   assertNotEquals(pxtone.duration, null);
+
+  assertNotEquals(pxtone.loopStartMeasure, null);
+  assertNotEquals(pxtone.loopEndMeasure, null);
   assertNotEquals(pxtone.loopStart, null);
   assertNotEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTick, 0);
   assertEquals(pxtone.currentTime, 0);
+
   assert(pxtone.units.length > 0);
   assert(pxtone.events.length > 0);
 
@@ -298,12 +319,23 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   await reader.read();
   await reader.read();
 
+  assertNotEquals(pxtone.ticksPerBeat, null);
+  assertNotEquals(pxtone.beatsPerMeasure, null);
+  assertNotEquals(pxtone.beatTempo, null);
+  assertNotEquals(pxtone.measureCount, null);
+  assertNotEquals(pxtone.tickCount, null);
   assertNotEquals(pxtone.duration, null);
+
+  assertNotEquals(pxtone.loopStartMeasure, null);
+  assertNotEquals(pxtone.loopEndMeasure, null);
   assertNotEquals(pxtone.loopStart, null);
   assertNotEquals(pxtone.loopEnd, null);
+  assert(pxtone.currentTick > 0);
   assert(pxtone.currentTime > 0);
+
   assert(pxtone.units.length > 0);
   assert(pxtone.events.length > 0);
+
   assertThrows(() => pxtone.read(fileData));
   assertThrows(() => pxtone.stream());
 
@@ -312,10 +344,20 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   reader.releaseLock();
   await stream.cancel();
 
+  assertNotEquals(pxtone.ticksPerBeat, null);
+  assertNotEquals(pxtone.beatsPerMeasure, null);
+  assertNotEquals(pxtone.beatTempo, null);
+  assertNotEquals(pxtone.measureCount, null);
+  assertNotEquals(pxtone.tickCount, null);
   assertNotEquals(pxtone.duration, null);
+
+  assertNotEquals(pxtone.loopStartMeasure, null);
+  assertNotEquals(pxtone.loopEndMeasure, null);
   assertNotEquals(pxtone.loopStart, null);
   assertNotEquals(pxtone.loopEnd, null);
+  assert(pxtone.currentTick > 0);
   assert(pxtone.currentTime > 0);
+
   assert(pxtone.units.length > 0);
   assert(pxtone.events.length > 0);
 
@@ -323,10 +365,20 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   pxtone.clear();
 
+  assertEquals(pxtone.ticksPerBeat, null);
+  assertEquals(pxtone.beatsPerMeasure, null);
+  assertEquals(pxtone.beatTempo, null);
+  assertEquals(pxtone.measureCount, null);
+  assertEquals(pxtone.tickCount, null);
   assertEquals(pxtone.duration, null);
+
+  assertEquals(pxtone.loopStartMeasure, null);
+  assertEquals(pxtone.loopEndMeasure, null);
   assertEquals(pxtone.loopStart, null);
   assertEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTick, 0);
   assertEquals(pxtone.currentTime, 0);
+
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
 
@@ -334,10 +386,20 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   pxtone[Symbol.dispose]();
 
+  assertEquals(pxtone.ticksPerBeat, null);
+  assertEquals(pxtone.beatsPerMeasure, null);
+  assertEquals(pxtone.beatTempo, null);
+  assertEquals(pxtone.measureCount, null);
+  assertEquals(pxtone.tickCount, null);
   assertEquals(pxtone.duration, null);
+
+  assertEquals(pxtone.loopStartMeasure, null);
+  assertEquals(pxtone.loopEndMeasure, null);
   assertEquals(pxtone.loopStart, null);
   assertEquals(pxtone.loopEnd, null);
+  assertEquals(pxtone.currentTick, 0);
   assertEquals(pxtone.currentTime, 0);
+
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
 });
