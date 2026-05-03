@@ -102,7 +102,7 @@ function pcmToWav(
 interface PtcopSnapshot {
   units: Array<{ name: string; played: boolean }>;
   events: Array<
-    { clock: number; unit_index: number; kind: number; value: number }
+    { tick: number; unit_index: number; kind: number; value: number }
   >;
 }
 
@@ -157,11 +157,11 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
       );
     } else {
       for (let i = 0; i < pxtone.events.length; i++) {
-        const { clock, unit, kind, value } = pxtone.events[i];
+        const { tick, unit, kind, value } = pxtone.events[i];
         const exp = snapshot.events[i];
         const unitIndex = pxtone.units.indexOf(unit);
         if (
-          clock !== exp.clock || unitIndex !== exp.unit_index ||
+          tick !== exp.tick || unitIndex !== exp.unit_index ||
           kind !== exp.kind || value !== exp.value
         ) {
           failures.push(`${stem}: event[${i}] mismatch`);
@@ -235,9 +235,8 @@ Deno.test("decoded ptnoise matches reference (Pxtone)", async () => {
       continue;
     }
 
-    const { buffer, data } = result;
-    const buf = buffer as unknown as MockAudioBuffer;
-    const wav = pcmToWav(audioBufToPcm(buf), data.channels, data.sampleRate);
+    const buf = result as unknown as MockAudioBuffer;
+    const wav = pcmToWav(audioBufToPcm(buf), pxtone.channels, pxtone.sampleRate);
     const expected = await Deno.readFile(join(snapshotDir, `${stem}.wav`));
     if (
       wav.length !== expected.length || wav.some((b, i) => b !== expected[i])

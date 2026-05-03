@@ -3,12 +3,12 @@ import {
   dealloc,
   memory,
   service_free,
-  service_get_beat_num,
   service_get_beat_tempo,
+  service_get_beats_per_measure,
   service_get_channels,
-  service_get_event_clock,
   service_get_event_count,
   service_get_event_kind,
+  service_get_event_tick,
   service_get_event_unit_index,
   service_get_event_value,
   service_get_last_measure,
@@ -146,8 +146,8 @@ export class PxtoneEvent {
   static get KIND_PORTAMENT() {
     return 6 as const;
   }
-  /** Beat clock: ticks per beat. */
-  static get KIND_BEAT_CLOCK() {
+  /** Ticks per beat. */
+  static get KIND_TICKS_PER_BEAT() {
     return 7 as const;
   }
   /** Beat tempo in BPM (floating-point encoded as `Math.round(bpm * 100)`). */
@@ -155,7 +155,7 @@ export class PxtoneEvent {
     return 8 as const;
   }
   /** Beats per measure. */
-  static get KIND_BEAT_NUM() {
+  static get KIND_BEATS_PER_MEASURE() {
     return 9 as const;
   }
   /** Repeat: marks the loop start measure. */
@@ -183,14 +183,14 @@ export class PxtoneEvent {
     return 15 as const;
   }
 
-  readonly #clock: number;
+  readonly #tick: number;
   readonly #unit: PxtoneUnit;
   readonly #kind: PxtoneEventKind;
   readonly #value: number;
 
   private constructor(
     key: typeof illegalConstructorKey,
-    clock: number,
+    tick: number,
     unit: PxtoneUnit,
     kind: PxtoneEventKind,
     value: number,
@@ -198,15 +198,15 @@ export class PxtoneEvent {
     if (key !== illegalConstructorKey) {
       throw new TypeError("Illegal constructor");
     }
-    this.#clock = clock;
+    this.#tick = tick;
     this.#unit = unit;
     this.#kind = kind;
     this.#value = value;
   }
 
   /** Tick position at which this event fires. */
-  get clock(): number {
-    return this.#clock;
+  get tick(): number {
+    return this.#tick;
   }
 
   /** Index into {@link Pxtone.units} that this event targets. */
@@ -224,9 +224,9 @@ export class PxtoneEvent {
     return this.#value;
   }
 
-  toJSON(): { clock: number; unit: PxtoneUnit; kind: PxtoneEventKind; value: number } {
+  toJSON(): { tick: number; unit: PxtoneUnit; kind: PxtoneEventKind; value: number } {
     return {
-      clock: this.#clock,
+      tick: this.#tick,
       unit: this.#unit,
       kind: this.#kind,
       value: this.#value,
@@ -248,14 +248,6 @@ export interface StreamOptions {
   highWaterMark?: number;
   /** AbortSignal to cancel the stream early. */
   signal?: AbortSignal;
-}
-
-/** Decoded noise waveform metadata returned by {@link Pxtone.decodeNoiseData}. */
-export interface NoiseData {
-  /** Number of output channels (1 = mono, 2 = stereo). */
-  channels: 1 | 2;
-  /** Sample rate in Hz. */
-  sampleRate: number;
 }
 
 /**
@@ -466,8 +458,8 @@ export class Pxtone {
     this.#name = this.#readText(service_get_text_name);
     this.#comment = this.#readText(service_get_text_comment);
     const beatTempo = service_get_beat_tempo(this.#ptr);
-    const beatNum = service_get_beat_num(this.#ptr);
-    this.#secondsPerMeasure = (beatNum * 60) / beatTempo;
+    const beatsPerMeasure = service_get_beats_per_measure(this.#ptr);
+    this.#secondsPerMeasure = (beatsPerMeasure * 60) / beatTempo;
     this.#measureNum = service_get_measure_num(this.#ptr);
     this.#repeatMeasure = service_get_repeat_measure(this.#ptr);
     const lastMeasure = service_get_last_measure(this.#ptr);
@@ -596,21 +588,18 @@ export class Pxtone {
    * Decodes a `.ptnoise` file and returns the rendered PCM as an `AudioBuffer`.
    *
    * @param buffer - Raw `.ptnoise` file bytes.
-   * @returns A promise that resolves with the decoded `AudioBuffer` and its metadata.
+   * @returns A promise that resolves with the decoded `AudioBuffer`.
    * @throws {Error} If the instance has been disposed.
    */
   decodeNoiseData(
     buffer: ArrayBuffer | Uint8Array,
-  ): Promise<{ buffer: AudioBuffer; data: NoiseData }> {
+  ): Promise<AudioBuffer> {
     if (this.#state === "disposed") {
       return Promise.reject(new Error("Pxtone instance has been disposed"));
     }
     try {
       const { pcm, channels, sampleRate } = this.#renderNoise(buffer);
-      return Promise.resolve({
-        buffer: this.#pcmToAudioBuffer(pcm, channels, sampleRate),
-        data: { channels, sampleRate },
-      });
+      return Promise.resolve(this.#pcmToAudioBuffer(pcm, channels, sampleRate));
     } catch (e) {
       return Promise.reject(e);
     }
@@ -667,7 +656,7 @@ export class Pxtone {
         // @ts-expect-error: allow private constructor
         new PxtoneEvent(
           illegalConstructorKey,
-          service_get_event_clock(this.#ptr, i),
+          service_get_event_tick(this.#ptr, i),
           units[service_get_event_unit_index(this.#ptr, i)],
           service_get_event_kind(this.#ptr, i) as PxtoneEventKind,
           service_get_event_value(this.#ptr, i),
@@ -682,8 +671,6 @@ export class Pxtone {
   ): { pcm: Uint8Array; channels: 1 | 2; sampleRate: number } {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
     const dataPtr = alloc(bytes.length);
-    const outChannels = alloc(4);
-    const outSampleRate = alloc(4);
     const outSamplesLen = alloc(4);
     try {
       new Uint8Array(memory.buffer, dataPtr, bytes.length).set(bytes);
@@ -691,23 +678,15 @@ export class Pxtone {
         this.#ptr,
         dataPtr,
         bytes.length,
-        outChannels,
-        outSampleRate,
         outSamplesLen,
       );
       if (samplesPtr === 0) throw new Error("service_render_noise failed");
-      const channels = new Uint32Array(memory.buffer, outChannels, 1)[0] as
-        | 1
-        | 2;
-      const sampleRate = new Uint32Array(memory.buffer, outSampleRate, 1)[0];
       const samplesLen = new Uint32Array(memory.buffer, outSamplesLen, 1)[0];
       const pcm = new Uint8Array(memory.buffer, samplesPtr, samplesLen).slice();
       dealloc(samplesPtr, samplesLen);
-      return { pcm, channels, sampleRate };
+      return { pcm, channels: this.#channels, sampleRate: this.#sampleRate };
     } finally {
       dealloc(dataPtr, bytes.length);
-      dealloc(outChannels, 4);
-      dealloc(outSampleRate, 4);
       dealloc(outSamplesLen, 4);
     }
   }
