@@ -524,8 +524,10 @@ export class Pxtone {
 
   /**
    * Loads a `.ptcop` or `.pttune` file and prepares it for playback.
-   * Populates {@link channels}, {@link sampleRate}, {@link name}, {@link comment},
-   * {@link duration}, {@link loopStart}, {@link loopEnd}, {@link units}, and {@link events}.
+   * Populates {@link name}, {@link comment}, {@link ticksPerBeat}, {@link beatsPerMeasure},
+   * {@link beatTempo}, {@link measureCount}, {@link loopStartMeasure}, {@link loopEndMeasure},
+   * {@link tickCount}, {@link duration}, {@link loopStart}, {@link loopEnd},
+   * and enables lazy access to {@link units} and {@link events}.
    *
    * @param buffer - Raw file bytes.
    * @throws {Error} If the instance has been disposed, called while a stream is active, or the file is invalid.
