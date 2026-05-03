@@ -1,3 +1,5 @@
+import { pcmToAudioData } from "./pcm.ts";
+
 import {
   alloc,
   dealloc,
@@ -570,8 +572,8 @@ export class Pxtone {
   }
 
   /**
-   * Returns a `ReadableStream` that yields signed 16-bit interleaved PCM chunks
-   * as {@link AudioData} objects (format `"s16"`).
+   * Returns a `ReadableStream` that yields PCM chunks as {@link AudioData} objects
+   * (format `"f32-planar"`).
    *
    * Only one stream may be active at a time. The stream ends naturally when the
    * song finishes (or the loop point is reached with `loop: false`).
@@ -611,11 +613,7 @@ export class Pxtone {
         loop ? 1 : 0,
       ) !== 0
     ) {
-      return new ReadableStream({
-        start(controller) {
-          controller.error(new Error("service_moo_preparation failed"));
-        },
-      });
+      throw new Error("service_moo_preparation failed");
     }
 
     this.#state = "streaming";
@@ -633,16 +631,39 @@ export class Pxtone {
     const ptr = this.#ptr;
     let currentFrame = startSample;
 
+    let abortHandler: (() => void) | undefined;
+    const cleanupAbort = () => {
+      if (signal && abortHandler !== undefined) {
+        signal.removeEventListener("abort", abortHandler);
+        abortHandler = undefined;
+      }
+    };
+
     return new ReadableStream<AudioData>({
+      start(controller) {
+        if (signal == null) return;
+        if (signal.aborted) {
+          onStreamEnd();
+          controller.error(signal.reason);
+          return;
+        }
+        abortHandler = () => {
+          cleanupAbort();
+          onStreamEnd();
+          controller.error(signal.reason);
+        };
+        signal.addEventListener("abort", abortHandler);
+      },
       pull(controller) {
         try {
-          signal?.throwIfAborted();
           if (isDisposed()) {
+            cleanupAbort();
             onStreamEnd();
             controller.error(new Error("Pxtone instance has been disposed"));
             return;
           }
           if (service_is_end_vomit(ptr) !== 0) {
+            cleanupAbort();
             onStreamEnd();
             controller.close();
             return;
@@ -650,21 +671,17 @@ export class Pxtone {
           const memPtr = alloc(chunkBytes);
           try {
             if (service_moo(ptr, memPtr, chunkBytes) === 0) {
+              cleanupAbort();
               onStreamEnd();
               controller.close();
               return;
             }
-            const audioData = new AudioData({
-              format: "s16",
+            const audioData = pcmToAudioData({
+              data: new Int16Array(memory.buffer, memPtr, chunkBytes / 2),
               sampleRate,
               numberOfFrames,
               numberOfChannels: channels,
               timestamp: Math.round(currentFrame * 1_000_000 / sampleRate),
-              data: new Int16Array(
-                memory.buffer,
-                memPtr,
-                chunkBytes / 2,
-              ),
             });
             controller.enqueue(audioData);
             setCurrentFrame(currentFrame);
@@ -673,11 +690,13 @@ export class Pxtone {
             dealloc(memPtr, chunkBytes);
           }
         } catch (e) {
+          cleanupAbort();
           onStreamEnd();
           throw e;
         }
       },
       cancel() {
+        cleanupAbort();
         onStreamEnd();
       },
     }, { highWaterMark });
@@ -687,18 +706,27 @@ export class Pxtone {
    * Decodes a `.ptnoise` file and returns the rendered PCM as an `AudioBuffer`.
    *
    * @param buffer - Raw `.ptnoise` file bytes.
-   * @returns A promise that resolves with the decoded `AudioBuffer`.
+   * @returns A promise that resolves with the decoded `AudioData`.
    * @throws {Error} If the instance has been disposed.
    */
   decodeNoiseData(
     buffer: ArrayBuffer | Uint8Array,
-  ): Promise<AudioBuffer> {
+  ): Promise<AudioData> {
     if (this.#state === "disposed") {
       return Promise.reject(new Error("Pxtone instance has been disposed"));
     }
     try {
       const { pcm, channels, sampleRate } = this.#renderNoise(buffer);
-      return Promise.resolve(this.#pcmToAudioBuffer(pcm, channels, sampleRate));
+      const numberOfFrames = pcm.length / (channels * 2);
+      return Promise.resolve(
+        pcmToAudioData({
+          data: new Int16Array(pcm.buffer, pcm.byteOffset, pcm.length / 2),
+          sampleRate,
+          numberOfFrames,
+          numberOfChannels: channels,
+          timestamp: 0,
+        }),
+      );
     } catch (e) {
       return Promise.reject(e);
     }
@@ -788,30 +816,5 @@ export class Pxtone {
       dealloc(dataPtr, bytes.length);
       dealloc(outSamplesLen, 4);
     }
-  }
-
-  #pcmToAudioBuffer(
-    pcm: Uint8Array,
-    channels: number,
-    sampleRate: number,
-  ): AudioBuffer {
-    const totalSamples = pcm.length / (channels * 2);
-    const audioBuffer = new AudioBuffer({
-      numberOfChannels: channels,
-      length: totalSamples,
-      sampleRate,
-    });
-    const channelData: Float32Array<ArrayBuffer>[] = [];
-    for (let i = 0; i < channels; ++i) {
-      channelData.push(audioBuffer.getChannelData(i));
-    }
-    const int16 = new Int16Array(pcm.buffer, pcm.byteOffset, pcm.length / 2);
-    for (let i = 0; i < totalSamples; i++) {
-      for (let ch = 0; ch < channels; ch++) {
-        const s = int16[i * channels + ch];
-        channelData[ch][i] = s / (s >= 0 ? 32767 : 32768);
-      }
-    }
-    return audioBuffer;
   }
 }

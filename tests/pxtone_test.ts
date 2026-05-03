@@ -8,65 +8,45 @@ import { Pxtone } from "../src/Pxtone.ts";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// Mock AudioBuffer (used by decodeNoiseData via new AudioBuffer({...}))
-class MockAudioBuffer {
-  #data: Float32Array[];
-  readonly numberOfChannels: number;
-  readonly length: number;
-  readonly sampleRate: number;
-
-  constructor(
-    { numberOfChannels = 1, length, sampleRate }: {
-      numberOfChannels?: number;
-      length: number;
-      sampleRate: number;
-    },
-  ) {
-    this.numberOfChannels = numberOfChannels;
-    this.length = length;
-    this.sampleRate = sampleRate;
-    this.#data = Array.from(
-      { length: numberOfChannels },
-      () => new Float32Array(length),
-    );
-  }
-
-  getChannelData(channel: number): Float32Array {
-    return this.#data[channel];
-  }
-}
-
-// Mock AudioData (used by stream() via new AudioData({...}))
-const audioDataPcm = new WeakMap<object, ArrayBuffer>();
-
+// Mock AudioData (used by stream() and decodeNoiseData() via new AudioData({...}))
 class MockAudioData {
-  constructor(
-    init: {
-      format: string;
-      sampleRate: number;
-      numberOfFrames: number;
-      numberOfChannels: number;
-      timestamp: number;
-      data: BufferSource;
-    },
-  ) {
+  readonly format: string;
+  readonly sampleRate: number;
+  readonly numberOfFrames: number;
+  readonly numberOfChannels: number;
+  readonly timestamp: number;
+  readonly data: ArrayBuffer;
+
+  constructor(init: {
+    format: string;
+    sampleRate: number;
+    numberOfFrames: number;
+    numberOfChannels: number;
+    timestamp: number;
+    data: BufferSource;
+  }) {
+    this.format = init.format;
+    this.sampleRate = init.sampleRate;
+    this.numberOfFrames = init.numberOfFrames;
+    this.numberOfChannels = init.numberOfChannels;
+    this.timestamp = init.timestamp;
     const { data } = init;
-    const buf = data instanceof ArrayBuffer
+    this.data = data instanceof ArrayBuffer
       ? data
       : data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-    audioDataPcm.set(this, buf);
   }
 }
 
-(globalThis as Record<string, unknown>).AudioBuffer = MockAudioBuffer;
 (globalThis as Record<string, unknown>).AudioData = MockAudioData;
 
-function audioBufToPcm(buf: MockAudioBuffer): Uint8Array {
-  const { numberOfChannels: channels, length } = buf;
-  const int16 = new Int16Array(length * channels);
-  for (let i = 0; i < length; i++) {
+// Converts f32-planar MockAudioData back to s16 interleaved PCM for WAV comparison.
+function audioDataToPcm(audioData: MockAudioData): Uint8Array {
+  const { numberOfFrames: frames, numberOfChannels: channels, data } = audioData;
+  const f32 = new Float32Array(data);
+  const int16 = new Int16Array(frames * channels);
+  for (let i = 0; i < frames; i++) {
     for (let ch = 0; ch < channels; ch++) {
-      int16[i * channels + ch] = buf.getChannelData(ch)[i] * 32768;
+      int16[i * channels + ch] = f32[ch * frames + i] * 0x8000;
     }
   }
   return new Uint8Array(int16.buffer);
@@ -174,9 +154,7 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      pcmChunks.push(
-        new Uint8Array(audioDataPcm.get(value as unknown as object)!),
-      );
+      pcmChunks.push(audioDataToPcm(value as unknown as MockAudioData));
     }
 
     const totalLen = pcmChunks.reduce((n, c) => n + c.length, 0);
@@ -235,8 +213,8 @@ Deno.test("decoded ptnoise matches reference (Pxtone)", async () => {
       continue;
     }
 
-    const buf = result as unknown as MockAudioBuffer;
-    const wav = pcmToWav(audioBufToPcm(buf), pxtone.channels, pxtone.sampleRate);
+    const buf = result as unknown as MockAudioData;
+    const wav = pcmToWav(audioDataToPcm(buf), pxtone.channels, pxtone.sampleRate);
     const expected = await Deno.readFile(join(snapshotDir, `${stem}.wav`));
     if (
       wav.length !== expected.length || wav.some((b, i) => b !== expected[i])
