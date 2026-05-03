@@ -613,11 +613,7 @@ export class Pxtone {
         loop ? 1 : 0,
       ) !== 0
     ) {
-      return new ReadableStream({
-        start(controller) {
-          controller.error(new Error("service_moo_preparation failed"));
-        },
-      });
+      throw new Error("service_moo_preparation failed");
     }
 
     this.#state = "streaming";
@@ -635,16 +631,39 @@ export class Pxtone {
     const ptr = this.#ptr;
     let currentFrame = startSample;
 
+    let abortHandler: (() => void) | undefined;
+    const cleanupAbort = () => {
+      if (signal && abortHandler !== undefined) {
+        signal.removeEventListener("abort", abortHandler);
+        abortHandler = undefined;
+      }
+    };
+
     return new ReadableStream<AudioData>({
+      start(controller) {
+        if (signal == null) return;
+        if (signal.aborted) {
+          onStreamEnd();
+          controller.error(signal.reason);
+          return;
+        }
+        abortHandler = () => {
+          cleanupAbort();
+          onStreamEnd();
+          controller.error(signal.reason);
+        };
+        signal.addEventListener("abort", abortHandler);
+      },
       pull(controller) {
         try {
-          signal?.throwIfAborted();
           if (isDisposed()) {
+            cleanupAbort();
             onStreamEnd();
             controller.error(new Error("Pxtone instance has been disposed"));
             return;
           }
           if (service_is_end_vomit(ptr) !== 0) {
+            cleanupAbort();
             onStreamEnd();
             controller.close();
             return;
@@ -652,6 +671,7 @@ export class Pxtone {
           const memPtr = alloc(chunkBytes);
           try {
             if (service_moo(ptr, memPtr, chunkBytes) === 0) {
+              cleanupAbort();
               onStreamEnd();
               controller.close();
               return;
@@ -670,11 +690,13 @@ export class Pxtone {
             dealloc(memPtr, chunkBytes);
           }
         } catch (e) {
+          cleanupAbort();
           onStreamEnd();
           throw e;
         }
       },
       cancel() {
+        cleanupAbort();
         onStreamEnd();
       },
     }, { highWaterMark });
