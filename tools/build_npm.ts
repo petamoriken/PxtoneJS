@@ -48,6 +48,9 @@ await Deno.writeTextFile(
         type: "git",
         url: "github:petamoriken/PxtoneJS",
       },
+      publishConfig: {
+        provenance: true,
+      },
     },
     null,
     2,
