@@ -1,5 +1,27 @@
 {
+  "name": "@petamoriken/pxtone",
   "version": "4.0.0-rc",
+  "exports": {
+    ".": "./src/Pxtone.ts",
+    "./bundle": "./bundle/Pxtone.mjs"
+  },
+  "publish": {
+    "exclude": [
+      "tests/",
+      "tools/",
+      "npm/",
+      "node_modules/",
+      ".github/",
+      ".vscode/",
+      "vite.config.ts",
+      "bundle/Pxtone.js",
+      "bundle/Pxtone.js.map",
+      "deno.lock",
+      "!bundle/Pxtone.mjs",
+      "!bundle/Pxtone.mjs.map",
+      "!bundle/Pxtone.d.mts"
+    ]
+  },
   "imports": {
     "@deno/dnt": "jsr:@deno/dnt@^0.42.3",
     "@std/assert": "jsr:@std/assert@^1.0.19",

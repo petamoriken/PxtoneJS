@@ -4,13 +4,6 @@ const { version } = JSON.parse(await Deno.readTextFile("./deno.json")) as {
   version: string;
 };
 
-const { success } = await new Deno.Command("deno", {
-  args: ["task", "build"],
-  stdout: "inherit",
-  stderr: "inherit",
-}).output();
-if (!success) throw new Error("Vite build failed");
-
 await emptyDir("./npm");
 
 await Promise.all([

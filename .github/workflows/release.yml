@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: latest
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install Deno dependencies
+        run: deno install --frozen
+
+      - name: Build
+        run: deno task build && deno task build:npm
+
+      - name: Publish to JSR
+        run: deno publish --allow-dirty
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        working-directory: ./npm
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: bundle/*

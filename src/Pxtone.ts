@@ -122,68 +122,68 @@ export type PxtoneEventKind =
 /** A single automation event in a pxtone song's event list. */
 export class PxtoneEvent {
   /** No event / padding. */
-  static get KIND_NULL() {
-    return 0 as const;
+  static get KIND_NULL(): 0 {
+    return 0;
   }
   /** Note-on: begins a note. The `value` is the note length in ticks. */
-  static get KIND_ON() {
-    return 1 as const;
+  static get KIND_ON(): 1 {
+    return 1;
   }
   /** Key (pitch). The `value` is encoded as `(octave * 12 + semitone) * 256`. */
-  static get KIND_KEY() {
-    return 2 as const;
+  static get KIND_KEY(): 2 {
+    return 2;
   }
   /** Pan (stereo position). `value` ranges from 0 (left) to 128 (center) to 256 (right). */
-  static get KIND_PAN_VOLUME() {
-    return 3 as const;
+  static get KIND_PAN_VOLUME(): 3 {
+    return 3;
   }
   /** Velocity (attack strength). `value` ranges from 0 to 128. */
-  static get KIND_VELOCITY() {
-    return 4 as const;
+  static get KIND_VELOCITY(): 4 {
+    return 4;
   }
   /** Volume. `value` ranges from 0 to 128. */
-  static get KIND_VOLUME() {
-    return 5 as const;
+  static get KIND_VOLUME(): 5 {
+    return 5;
   }
   /** Portamento (pitch glide). `value` is the portamento length in ticks. */
-  static get KIND_PORTAMENT() {
-    return 6 as const;
+  static get KIND_PORTAMENT(): 6 {
+    return 6;
   }
   /** Ticks per beat. */
-  static get KIND_TICKS_PER_BEAT() {
-    return 7 as const;
+  static get KIND_TICKS_PER_BEAT(): 7 {
+    return 7;
   }
   /** Beat tempo in BPM (floating-point encoded as `Math.round(bpm * 100)`). */
-  static get KIND_BEAT_TEMPO() {
-    return 8 as const;
+  static get KIND_BEAT_TEMPO(): 8 {
+    return 8;
   }
   /** Beats per measure. */
-  static get KIND_BEATS_PER_MEASURE() {
-    return 9 as const;
+  static get KIND_BEATS_PER_MEASURE(): 9 {
+    return 9;
   }
   /** Repeat: marks the loop start measure. */
-  static get KIND_REPEAT() {
-    return 10 as const;
+  static get KIND_REPEAT(): 10 {
+    return 10;
   }
   /** Last: marks the loop end measure. */
-  static get KIND_LAST() {
-    return 11 as const;
+  static get KIND_LAST(): 11 {
+    return 11;
   }
   /** Voice number: selects which instrument voice to use. */
-  static get KIND_VOICE_NO() {
-    return 12 as const;
+  static get KIND_VOICE_NO(): 12 {
+    return 12;
   }
   /** Group number: assigns the unit to a group. */
-  static get KIND_GROUP_NO() {
-    return 13 as const;
+  static get KIND_GROUP_NO(): 13 {
+    return 13;
   }
   /** Tuning offset in semitones (floating-point encoded as `Math.round(semitones * 100)`). */
-  static get KIND_TUNING() {
-    return 14 as const;
+  static get KIND_TUNING(): 14 {
+    return 14;
   }
   /** Time-based pan (auto-pan). `value` is the pan sweep period in ticks. */
-  static get KIND_PAN_TIME() {
-    return 15 as const;
+  static get KIND_PAN_TIME(): 15 {
+    return 15;
   }
 
   readonly #tick: number;
