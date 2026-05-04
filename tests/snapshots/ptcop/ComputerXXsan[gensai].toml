@@ -6,7 +6,7 @@ comment = "：：： ｺﾝﾋﾟｭｰﾀｰ*****ｻﾝ ：：："
 ticks_per_beat = 480
 beats_per_measure = 4
 beat_tempo = 168.0
-measure_num = 40
+measure_count = 40
 repeat_measure = 0
 last_measure = 0
 

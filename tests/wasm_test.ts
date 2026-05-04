@@ -12,7 +12,7 @@ import {
   service_get_event_unit_index,
   service_get_event_value,
   service_get_last_measure,
-  service_get_measure_num,
+  service_get_measure_count,
   service_get_repeat_measure,
   service_get_sample_rate,
   service_get_text_comment,
@@ -28,6 +28,8 @@ import {
   service_read,
   service_render_noise,
   service_tones_ready,
+  validate,
+  validate_noise,
 } from "../src/pxtone.wasm";
 
 import { dirname, join } from "node:path";
@@ -43,7 +45,7 @@ interface PtcopSnapshot {
     ticks_per_beat: number;
     beats_per_measure: number;
     beat_tempo: number;
-    measure_num: number;
+    measure_count: number;
     repeat_measure: number;
     last_measure: number;
   };
@@ -79,6 +81,76 @@ function pcmToWav(
   new Uint8Array(buf, 44).set(samples);
   return new Uint8Array(buf);
 }
+
+Deno.test("validate ptcop (wasm)", async () => {
+  const sampleDir = join(projectRoot, "tests/sample/ptcop");
+
+  const names: string[] = [];
+  for await (const entry of Deno.readDir(sampleDir)) {
+    if (entry.isFile && entry.name.endsWith(".ptcop")) names.push(entry.name);
+  }
+  names.sort();
+
+  if (names.length === 0) {
+    throw new Error("no .ptcop files found in tests/sample/ptcop/");
+  }
+
+  for (const name of names) {
+    const data = await Deno.readFile(join(sampleDir, name));
+    const ptr = alloc(data.length);
+    new Uint8Array(memory.buffer, ptr, data.length).set(data);
+    const result = validate(ptr, data.length);
+    dealloc(ptr, data.length);
+    if (result !== 0) {
+      throw new Error(`${name}: validate returned ${result}, expected 0`);
+    }
+  }
+
+  // invalid data must fail
+  const junk = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]);
+  const junkPtr = alloc(junk.length);
+  new Uint8Array(memory.buffer, junkPtr, junk.length).set(junk);
+  const junkResult = validate(junkPtr, junk.length);
+  dealloc(junkPtr, junk.length);
+  if (junkResult === 0) {
+    throw new Error("validate returned 0 for invalid data");
+  }
+});
+
+Deno.test("validate ptnoise (wasm)", async () => {
+  const sampleDir = join(projectRoot, "tests/sample/ptnoise");
+
+  const names: string[] = [];
+  for await (const entry of Deno.readDir(sampleDir)) {
+    if (entry.isFile && entry.name.endsWith(".ptnoise")) names.push(entry.name);
+  }
+  names.sort();
+
+  if (names.length === 0) {
+    throw new Error("no .ptnoise files found in tests/sample/ptnoise/");
+  }
+
+  for (const name of names) {
+    const data = await Deno.readFile(join(sampleDir, name));
+    const ptr = alloc(data.length);
+    new Uint8Array(memory.buffer, ptr, data.length).set(data);
+    const result = validate_noise(ptr, data.length);
+    dealloc(ptr, data.length);
+    if (result !== 0) {
+      throw new Error(`${name}: validate_noise returned ${result}, expected 0`);
+    }
+  }
+
+  // invalid data must fail
+  const junk = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]);
+  const junkPtr = alloc(junk.length);
+  new Uint8Array(memory.buffer, junkPtr, junk.length).set(junk);
+  const junkResult = validate_noise(junkPtr, junk.length);
+  dealloc(junkPtr, junk.length);
+  if (junkResult === 0) {
+    throw new Error("validate_noise returned 0 for invalid data");
+  }
+});
 
 Deno.test("decoded ptcop matches reference (wasm)", async () => {
   const sampleDir = join(projectRoot, "tests/sample/ptcop");
@@ -150,7 +222,7 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
       const ticksPerBeat = service_get_ticks_per_beat(svc);
       const beatsPerMeasure = service_get_beats_per_measure(svc);
       const beatTempo = service_get_beat_tempo(svc);
-      const measureNum = service_get_measure_num(svc);
+      const measureCount = service_get_measure_count(svc);
       const repeatMeasure = service_get_repeat_measure(svc);
       const lastMeasure = service_get_last_measure(svc);
       const m = snapshot.master;
@@ -158,7 +230,7 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
         ticksPerBeat !== m.ticks_per_beat ||
         beatsPerMeasure !== m.beats_per_measure ||
         Math.abs(beatTempo - m.beat_tempo) >= 0.001 ||
-        measureNum !== m.measure_num ||
+        measureCount !== m.measure_count ||
         repeatMeasure !== m.repeat_measure ||
         lastMeasure !== m.last_measure
       ) {

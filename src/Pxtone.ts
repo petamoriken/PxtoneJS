@@ -14,7 +14,7 @@ import {
   service_get_event_unit_index,
   service_get_event_value,
   service_get_last_measure,
-  service_get_measure_num,
+  service_get_measure_count,
   service_get_repeat_measure,
   service_get_sample_rate,
   service_get_text_comment,
@@ -31,6 +31,8 @@ import {
   service_render_noise,
   service_set_unit_played,
   service_tones_ready,
+  validate,
+  validate_noise,
 } from "./pxtone.wasm";
 
 const illegalConstructorKey: unique symbol = Symbol("illegalConstructorKey");
@@ -295,6 +297,36 @@ export class Pxtone {
 
   #units: readonly PxtoneUnit[] | null = null;
   #events: readonly PxtoneEvent[] | null = null;
+
+  /**
+   * Returns `true` if `buffer` is a valid `.ptcop` / `.pttune` file, `false` otherwise.
+   * Does not create a persistent service instance.
+   */
+  static validate(buffer: ArrayBuffer | Uint8Array): boolean {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    const ptr = alloc(bytes.length);
+    try {
+      new Uint8Array(memory.buffer, ptr, bytes.length).set(bytes);
+      return validate(ptr, bytes.length) === 0;
+    } finally {
+      dealloc(ptr, bytes.length);
+    }
+  }
+
+  /**
+   * Returns `true` if `buffer` is a valid `.ptnoise` file, `false` otherwise.
+   * Does not create a persistent service instance.
+   */
+  static validateNoiseData(buffer: ArrayBuffer | Uint8Array): boolean {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    const ptr = alloc(bytes.length);
+    try {
+      new Uint8Array(memory.buffer, ptr, bytes.length).set(bytes);
+      return validate_noise(ptr, bytes.length) === 0;
+    } finally {
+      dealloc(ptr, bytes.length);
+    }
+  }
 
   constructor() {
     this.#ptr = service_new();
@@ -561,7 +593,7 @@ export class Pxtone {
     this.#beatsPerMeasure = service_get_beats_per_measure(this.#ptr);
     this.#beatTempo = service_get_beat_tempo(this.#ptr);
     this.#secondsPerMeasure = (this.#beatsPerMeasure * 60) / this.#beatTempo;
-    this.#measureCount = service_get_measure_num(this.#ptr);
+    this.#measureCount = service_get_measure_count(this.#ptr);
     this.#loopStartMeasure = service_get_repeat_measure(this.#ptr);
     const loopEndMeasure = service_get_last_measure(this.#ptr);
     this.#loopEndMeasure = loopEndMeasure !== 0 ? loopEndMeasure : this.#measureCount;

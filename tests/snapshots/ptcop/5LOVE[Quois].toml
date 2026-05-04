@@ -6,7 +6,7 @@ comment = ""
 ticks_per_beat = 480
 beats_per_measure = 5
 beat_tempo = 186.0
-measure_num = 33
+measure_count = 33
 repeat_measure = 1
 last_measure = 0
 

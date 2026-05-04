@@ -24,7 +24,7 @@ await Deno.writeTextFile(
     {
       name: "pxtone",
       version,
-      description: "Play Pxtone Collage files in Web Audio API",
+      description: "Play pxtone files in the browser",
       type: "module",
       exports: {
         ".": {
@@ -36,6 +36,7 @@ await Deno.writeTextFile(
       bugs: { url: "https://github.com/petamoriken/PxtoneJS/issues" },
       homepage: "https://github.com/petamoriken/PxtoneJS",
       keywords: [
+        "pxtone",
         "PxtoneCollage",
         "pxtone-collage",
         "WebAudioAPI",

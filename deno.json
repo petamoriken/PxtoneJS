@@ -5,6 +5,7 @@
     ".": "./src/Pxtone.ts",
     "./bundle": "./bundle/Pxtone.mjs"
   },
+  "license": "MIT",
   "publish": {
     "exclude": [
       "tests/",

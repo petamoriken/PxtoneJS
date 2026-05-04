@@ -120,7 +120,7 @@ export declare const service_get_beat_tempo: (svc: number) => number;
  * Returns the number of measures in the loaded song.
  * Returns 0 on error.
  */
-export declare const service_get_measure_num: (svc: number) => number;
+export declare const service_get_measure_count: (svc: number) => number;
 
 /**
  * Returns the repeat position in measures.
@@ -226,3 +226,15 @@ export declare const service_get_event_value: (
   svc: number,
   idx: number,
 ) => number;
+
+/**
+ * Validates a `.ptcop`/`.pttune` file from `data[..len]` without creating a persistent service.
+ * Returns 0 if valid, -1 otherwise.
+ */
+export declare const validate: (data: number, len: number) => number;
+
+/**
+ * Validates a `.ptnoise` file from `data[..len]` without using a service.
+ * Returns 0 if valid, -1 otherwise.
+ */
+export declare const validate_noise: (data: number, len: number) => number;

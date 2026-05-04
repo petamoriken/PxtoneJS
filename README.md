@@ -2,7 +2,7 @@
 
 <div align="center">
 	<img src="pxtonejs5x.png" alt="PxtoneJS"><br>
-	Play <a href="https://pxtone.org/" target="_blank">Pxtone Collage</a> files in the browser via WebCodecs and Web Audio API.
+	Play <a href="https://pxtone.org/" target="_blank">pxtone</a> files in the browser.
 </div>
 
 <br><br><br><br>
@@ -12,7 +12,7 @@
   <a href="https://www.npmjs.com/package/pxtone"><img src="https://img.shields.io/npm/v/pxtone.svg?label=version&amp;logo=npm&amp;style=flat-square" alt="npm version"></a>
   <a href="https://jsr.io/@petamoriken/pxtone"><img src="https://jsr.io/badges/@petamoriken/pxtone?label=version&amp;style=flat-square" alt="jsr version"></a>
   <br>
-  <a href="https://github.com/petamoriken/PxtoneJS/blob/main/deno.json"><img src="https://img.shields.io/badge/dependencies-none-brightgreen?style=flat-square" alt="dependencies"></a>
+  <a href="https://www.npmjs.com/package/pxtone?activeTab=dependencies"><img src="https://img.shields.io/badge/dependencies-none-brightgreen?style=flat-square" alt="dependencies"></a>
   <a href="https://github.com/petamoriken/PxtoneJS/blob/main/LICENSE.md"><img src="https://img.shields.io/npm/l/pxtone.svg?style=flat-square" alt="license"></a>
 </p>
 
@@ -194,6 +194,16 @@ Creates an instance backed by a WebAssembly service.
 | `events` | `readonly PxtoneEvent[]` | Automation event list |
 
 ### Methods
+
+#### `static Pxtone.validate(buffer: ArrayBuffer | Uint8Array): boolean`
+
+Checks whether `buffer` is a valid `.ptcop` or `.pttune` file without loading it. Returns `true` if
+valid, `false` otherwise.
+
+#### `static Pxtone.validateNoiseData(buffer: ArrayBuffer | Uint8Array): boolean`
+
+Checks whether `buffer` is a valid `.ptnoise` file without loading it. Returns `true` if valid,
+`false` otherwise.
 
 #### `read(buffer: ArrayBuffer | Uint8Array): void`
 
