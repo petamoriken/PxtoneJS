@@ -57,6 +57,6 @@ if (!dtsContent) {
   Deno.exit(1);
 }
 
-const outPath = join(projectRoot, "dist", "Pxtone.d.mts");
+const outPath = join(projectRoot, "bundle", "Pxtone.d.mts");
 await Deno.writeTextFile(outPath, dtsContent);
 console.log(`Generated ${outPath}`);

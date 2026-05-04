@@ -165,7 +165,7 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
       off += c.length;
     }
 
-    const wav = pcmToWav(pcm, pxtone.channels!, pxtone.sampleRate!);
+    const wav = pcmToWav(pcm, pxtone.numberOfChannels!, pxtone.sampleRate!);
     const expected = await Deno.readFile(join(snapshotDir, `${stem}.wav`));
     const compareLen = Math.min(wav.length - 44, expected.length - 44);
     if (
@@ -214,7 +214,7 @@ Deno.test("decoded ptnoise matches reference (Pxtone)", async () => {
     }
 
     const buf = result as unknown as MockAudioData;
-    const wav = pcmToWav(audioDataToPcm(buf), pxtone.channels, pxtone.sampleRate);
+    const wav = pcmToWav(audioDataToPcm(buf), pxtone.numberOfChannels, pxtone.sampleRate);
     const expected = await Deno.readFile(join(snapshotDir, `${stem}.wav`));
     if (
       wav.length !== expected.length || wav.some((b, i) => b !== expected[i])
@@ -253,8 +253,8 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertEquals(pxtone.ticksPerBeat, null);
   assertEquals(pxtone.beatsPerMeasure, null);
   assertEquals(pxtone.beatTempo, null);
-  assertEquals(pxtone.measureCount, null);
-  assertEquals(pxtone.tickCount, null);
+  assertEquals(pxtone.numberOfMeasures, null);
+  assertEquals(pxtone.numberOfTicks, null);
   assertEquals(pxtone.duration, null);
 
   assertEquals(pxtone.loopStartMeasure, null);
@@ -276,8 +276,8 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertNotEquals(pxtone.ticksPerBeat, null);
   assertNotEquals(pxtone.beatsPerMeasure, null);
   assertNotEquals(pxtone.beatTempo, null);
-  assertNotEquals(pxtone.measureCount, null);
-  assertNotEquals(pxtone.tickCount, null);
+  assertNotEquals(pxtone.numberOfMeasures, null);
+  assertNotEquals(pxtone.numberOfTicks, null);
   assertNotEquals(pxtone.duration, null);
 
   assertNotEquals(pxtone.loopStartMeasure, null);
@@ -300,8 +300,8 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertNotEquals(pxtone.ticksPerBeat, null);
   assertNotEquals(pxtone.beatsPerMeasure, null);
   assertNotEquals(pxtone.beatTempo, null);
-  assertNotEquals(pxtone.measureCount, null);
-  assertNotEquals(pxtone.tickCount, null);
+  assertNotEquals(pxtone.numberOfMeasures, null);
+  assertNotEquals(pxtone.numberOfTicks, null);
   assertNotEquals(pxtone.duration, null);
 
   assertNotEquals(pxtone.loopStartMeasure, null);
@@ -325,8 +325,8 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertNotEquals(pxtone.ticksPerBeat, null);
   assertNotEquals(pxtone.beatsPerMeasure, null);
   assertNotEquals(pxtone.beatTempo, null);
-  assertNotEquals(pxtone.measureCount, null);
-  assertNotEquals(pxtone.tickCount, null);
+  assertNotEquals(pxtone.numberOfMeasures, null);
+  assertNotEquals(pxtone.numberOfTicks, null);
   assertNotEquals(pxtone.duration, null);
 
   assertNotEquals(pxtone.loopStartMeasure, null);
@@ -346,8 +346,8 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertEquals(pxtone.ticksPerBeat, null);
   assertEquals(pxtone.beatsPerMeasure, null);
   assertEquals(pxtone.beatTempo, null);
-  assertEquals(pxtone.measureCount, null);
-  assertEquals(pxtone.tickCount, null);
+  assertEquals(pxtone.numberOfMeasures, null);
+  assertEquals(pxtone.numberOfTicks, null);
   assertEquals(pxtone.duration, null);
 
   assertEquals(pxtone.loopStartMeasure, null);
@@ -367,8 +367,8 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertEquals(pxtone.ticksPerBeat, null);
   assertEquals(pxtone.beatsPerMeasure, null);
   assertEquals(pxtone.beatTempo, null);
-  assertEquals(pxtone.measureCount, null);
-  assertEquals(pxtone.tickCount, null);
+  assertEquals(pxtone.numberOfMeasures, null);
+  assertEquals(pxtone.numberOfTicks, null);
   assertEquals(pxtone.duration, null);
 
   assertEquals(pxtone.loopStartMeasure, null);

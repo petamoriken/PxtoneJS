@@ -18,6 +18,6 @@
   "fmt": {
     "lineWidth": 100
   },
-  "exclude": ["dist", "npm"],
+  "exclude": ["bundle", "npm"],
   "nodeModulesDir": "auto"
 }

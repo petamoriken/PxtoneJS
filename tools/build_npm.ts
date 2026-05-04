@@ -14,11 +14,11 @@ if (!success) throw new Error("Vite build failed");
 await emptyDir("./npm");
 
 await Promise.all([
-  Deno.copyFile("./dist/Pxtone.mjs", "./npm/Pxtone.mjs"),
-  Deno.copyFile("./dist/Pxtone.mjs.map", "./npm/Pxtone.mjs.map"),
-  Deno.copyFile("./dist/Pxtone.js", "./npm/Pxtone.js"),
-  Deno.copyFile("./dist/Pxtone.js.map", "./npm/Pxtone.js.map"),
-  Deno.copyFile("./dist/Pxtone.d.mts", "./npm/Pxtone.d.mts"),
+  Deno.copyFile("./bundle/Pxtone.mjs", "./npm/Pxtone.mjs"),
+  Deno.copyFile("./bundle/Pxtone.mjs.map", "./npm/Pxtone.mjs.map"),
+  Deno.copyFile("./bundle/Pxtone.js", "./npm/Pxtone.js"),
+  Deno.copyFile("./bundle/Pxtone.js.map", "./npm/Pxtone.js.map"),
+  Deno.copyFile("./bundle/Pxtone.d.mts", "./npm/Pxtone.d.mts"),
   Deno.copyFile("./LICENSE.md", "./npm/LICENSE.md"),
   Deno.copyFile("./README.md", "./npm/README.md"),
   Deno.copyFile("./pxtonejs.png", "./npm/pxtonejs.png"),

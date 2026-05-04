@@ -323,7 +323,7 @@ export class Pxtone {
   }
 
   /** Number of output channels. */
-  get channels(): 2 {
+  get numberOfChannels(): 2 {
     return this.#channels;
   }
 
@@ -367,7 +367,7 @@ export class Pxtone {
   }
 
   /** Total number of measures in the song. `null` before {@link read}. */
-  get measureCount(): number | null {
+  get numberOfMeasures(): number | null {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
@@ -391,7 +391,7 @@ export class Pxtone {
   }
 
   /** Total length of the song in ticks. `null` before {@link read}. */
-  get tickCount(): number | null {
+  get numberOfTicks(): number | null {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
@@ -527,8 +527,8 @@ export class Pxtone {
   /**
    * Loads a `.ptcop` or `.pttune` file and prepares it for playback.
    * Populates {@link name}, {@link comment}, {@link ticksPerBeat}, {@link beatsPerMeasure},
-   * {@link beatTempo}, {@link measureCount}, {@link loopStartMeasure}, {@link loopEndMeasure},
-   * {@link tickCount}, {@link duration}, {@link loopStart}, {@link loopEnd},
+   * {@link beatTempo}, {@link numberOfMeasures}, {@link loopStartMeasure}, {@link loopEndMeasure},
+   * {@link numberOfTicks}, {@link duration}, {@link loopStart}, {@link loopEnd},
    * and enables lazy access to {@link units} and {@link events}.
    *
    * @param buffer - Raw file bytes.

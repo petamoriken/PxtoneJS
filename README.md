@@ -33,8 +33,9 @@ is recommended to use the `using` declaration (Explicit Resource Management) or 
 `[Symbol.dispose]()` manually to ensure the resource is disposed of as soon as it is no longer
 needed.
 
-`stream()` returns a `ReadableStream<AudioData>` (WebCodecs, format `"s16"`). Feed the chunks into
-an `AudioWorkletNode` or any other WebCodecs-aware pipeline.
+`stream()` returns a `ReadableStream<AudioData>` (format `"f32-planar"`). Copy each chunk into an
+`AudioBuffer` for `AudioBufferSourceNode` playback, or forward it to an `AudioWorkletNode` for
+lower-latency output.
 
 ```ts
 import { Pxtone } from "pxtone";
@@ -58,7 +59,48 @@ while (true) {
 }
 ```
 
+To play back with the Web Audio API using `AudioBufferSourceNode`, schedule each chunk ahead of
+time:
+
+```ts
+const BUFFER_AHEAD = 0.5; // seconds
+
+const ctx = new AudioContext({ sampleRate: pxtone.sampleRate });
+const stream = pxtone.stream({ loop: true });
+const reader = stream.getReader();
+let nextStartTime = ctx.currentTime + 0.1;
+
+async function scheduleMore() {
+  while (nextStartTime < ctx.currentTime + BUFFER_AHEAD) {
+    const { done, value: audioData } = await reader.read();
+    if (done) return;
+
+    const buffer = new AudioBuffer({
+      numberOfChannels: audioData.numberOfChannels,
+      length: audioData.numberOfFrames,
+      sampleRate: audioData.sampleRate,
+    });
+    for (let ch = 0; ch < audioData.numberOfChannels; ch++) {
+      audioData.copyTo(buffer.getChannelData(ch), { planeIndex: ch });
+    }
+    audioData.close();
+
+    if (nextStartTime < ctx.currentTime) nextStartTime = ctx.currentTime + 0.05;
+    const source = new AudioBufferSourceNode(ctx, { buffer });
+    source.connect(ctx.destination);
+    source.start(nextStartTime);
+    nextStartTime += buffer.duration;
+  }
+}
+
+await scheduleMore();
+setInterval(scheduleMore, 100);
+```
+
 ### Decoding a `.ptnoise` file
+
+`decodeNoiseData()` returns an `AudioData` with format `"f32-planar"`. To play it back with the Web
+Audio API, copy each channel plane into an `AudioBuffer`:
 
 ```ts
 import { Pxtone } from "pxtone";
@@ -67,11 +109,20 @@ const response = await fetch("drum.ptnoise");
 const fileBytes = new Uint8Array(await response.arrayBuffer());
 
 using pxtone = new Pxtone();
-const buffer = await pxtone.decodeNoiseData(fileBytes);
+const audioData = await pxtone.decodeNoiseData(fileBytes);
 
 const ctx = new AudioContext();
-const source = ctx.createBufferSource();
-source.buffer = buffer;
+const buffer = new AudioBuffer({
+  numberOfChannels: audioData.numberOfChannels,
+  length: audioData.numberOfFrames,
+  sampleRate: audioData.sampleRate,
+});
+for (let ch = 0; ch < audioData.numberOfChannels; ch++) {
+  audioData.copyTo(buffer.getChannelData(ch), { planeIndex: ch });
+}
+audioData.close();
+
+const source = new AudioBufferSourceNode(ctx, { buffer });
 source.connect(ctx.destination);
 source.start();
 ```
@@ -86,10 +137,10 @@ Creates an instance backed by a WebAssembly service.
 
 #### Audio output
 
-| Property     | Type    | Description                                |
-| ------------ | ------- | ------------------------------------------ |
-| `channels`   | `2`     | Output channel count (always stereo)       |
-| `sampleRate` | `44100` | Output sample rate in Hz (always 44.1 kHz) |
+| Property           | Type    | Description                                |
+| ------------------ | ------- | ------------------------------------------ |
+| `numberOfChannels` | `2`     | Output channel count (always stereo)       |
+| `sampleRate`       | `44100` | Output sample rate in Hz (always 44.1 kHz) |
 
 #### Metadata (available after `read()`)
 
@@ -100,14 +151,14 @@ Creates an instance backed by a WebAssembly service.
 
 #### Master (available after `read()`)
 
-| Property          | Type             | Description               |
-| ----------------- | ---------------- | ------------------------- |
-| `ticksPerBeat`    | `number \| null` | Ticks per beat            |
-| `beatsPerMeasure` | `number \| null` | Beats per measure         |
-| `beatTempo`       | `number \| null` | Tempo in BPM              |
-| `measureCount`    | `number \| null` | Total number of measures  |
-| `tickCount`       | `number \| null` | Total length in ticks     |
-| `duration`        | `number \| null` | Total duration in seconds |
+| Property           | Type             | Description               |
+| ------------------ | ---------------- | ------------------------- |
+| `ticksPerBeat`     | `number \| null` | Ticks per beat            |
+| `beatsPerMeasure`  | `number \| null` | Beats per measure         |
+| `beatTempo`        | `number \| null` | Tempo in BPM              |
+| `numberOfMeasures` | `number \| null` | Total number of measures  |
+| `numberOfTicks`    | `number \| null` | Total length in ticks     |
+| `duration`         | `number \| null` | Total duration in seconds |
 
 #### Loop (available after `read()`)
 
@@ -118,7 +169,7 @@ Creates an instance backed by a WebAssembly service.
 | `loopStart`        | `number \| null` | Loop start position in seconds  |
 | `loopEnd`          | `number \| null` | Loop end position in seconds    |
 
-### Playback
+#### Playback
 
 | Property      | Type     | Description                          |
 | ------------- | -------- | ------------------------------------ |
@@ -141,8 +192,8 @@ stream is currently active.
 
 #### `stream(options?: StreamOptions): ReadableStream<AudioData>`
 
-Returns a `ReadableStream` that yields signed 16-bit interleaved PCM chunks as `AudioData` objects
-(format `"s16"`). Only one stream may be active at a time.
+Returns a `ReadableStream` that yields PCM chunks as `AudioData` objects (format `"f32-planar"`).
+Only one stream may be active at a time.
 
 ```ts
 export interface StreamOptions {
@@ -165,9 +216,9 @@ export interface StreamOptions {
 
 Resets the instance to its initial idle state, discarding all loaded song data.
 
-#### `decodeNoiseData(buffer: ArrayBuffer | Uint8Array): Promise<AudioBuffer>`
+#### `decodeNoiseData(buffer: ArrayBuffer | Uint8Array): Promise<AudioData>`
 
-Decodes a `.ptnoise` file and returns an `AudioBuffer` ready for use with the Web Audio API.
+Decodes a `.ptnoise` file and returns an `AudioData` with format `"f32-planar"`.
 
 ### `PxtoneUnit`
 

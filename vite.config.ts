@@ -66,6 +66,7 @@ export default defineConfig({
     lib: {
       entry: "src/Pxtone.ts",
     },
+    outDir: "bundle",
     emptyOutDir: false,
     minify: false,
     sourcemap: true,
