@@ -7,7 +7,6 @@ import {
   service_free,
   service_get_beat_tempo,
   service_get_beats_per_measure,
-  service_get_channels,
   service_get_event_count,
   service_get_event_kind,
   service_get_event_tick,
@@ -16,7 +15,6 @@ import {
   service_get_last_measure,
   service_get_measure_count,
   service_get_repeat_measure,
-  service_get_sample_rate,
   service_get_text_comment,
   service_get_text_name,
   service_get_ticks_per_beat,
@@ -239,6 +237,20 @@ export class PxtoneEvent {
   }
 }
 
+/** Options for {@link Pxtone}. */
+export interface PxtoneOptions {
+  /**
+   * Number of output channels. Must be `1` (mono) or `2` (stereo).
+   * @default 2
+   */
+  numberOfChannels?: 1 | 2;
+  /**
+   * Output sample rate in Hz.
+   * @default 44100
+   */
+  sampleRate?: number;
+}
+
 /** Options for {@link Pxtone.stream}. */
 export interface StreamOptions {
   /** Playback start position in seconds. Default: 0 (beginning). */
@@ -277,8 +289,8 @@ export class Pxtone {
   });
 
   #ptr: number;
-  #channels: 2;
-  #sampleRate: 44100;
+  #numberOfChannels: 1 | 2;
+  #sampleRate: number;
 
   #name: string | null = null;
   #comment: string | null = null;
@@ -286,7 +298,7 @@ export class Pxtone {
   #ticksPerBeat: number | null = null;
   #beatsPerMeasure: number | null = null;
   #beatTempo: number | null = null;
-  #measureCount: number | null = null;
+  #numberOfMeasures: number | null = null;
   #secondsPerMeasure: number | null = null;
 
   #loopStartMeasure: number | null = null;
@@ -328,10 +340,17 @@ export class Pxtone {
     }
   }
 
-  constructor() {
-    this.#ptr = service_new();
-    this.#channels = service_get_channels(this.#ptr) as 2;
-    this.#sampleRate = service_get_sample_rate(this.#ptr) as 44100;
+  constructor(
+    { numberOfChannels = 2, sampleRate = 44100 }: PxtoneOptions = {},
+  ) {
+    if (numberOfChannels !== 1 && numberOfChannels !== 2) {
+      throw new RangeError(
+        `numberOfChannels must be 1 or 2, got ${numberOfChannels}`,
+      );
+    }
+    this.#ptr = service_new(numberOfChannels, sampleRate);
+    this.#numberOfChannels = numberOfChannels;
+    this.#sampleRate = sampleRate;
     Pxtone.#registry.register(this, this.#ptr, this);
   }
 
@@ -355,12 +374,12 @@ export class Pxtone {
   }
 
   /** Number of output channels. */
-  get numberOfChannels(): 2 {
-    return this.#channels;
+  get numberOfChannels(): 1 | 2 {
+    return this.#numberOfChannels;
   }
 
   /** Output sample rate in Hz. */
-  get sampleRate(): 44100 {
+  get sampleRate(): number {
     return this.#sampleRate;
   }
 
@@ -403,7 +422,7 @@ export class Pxtone {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
-    return this.#measureCount!;
+    return this.#numberOfMeasures!;
   }
 
   /** Loop start position in measures. `null` before {@link read}. */
@@ -427,7 +446,7 @@ export class Pxtone {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
-    return this.#measureCount! * this.#beatsPerMeasure! * this.#ticksPerBeat!;
+    return this.#numberOfMeasures! * this.#beatsPerMeasure! * this.#ticksPerBeat!;
   }
 
   /** Total song duration in seconds. `null` before {@link read}. */
@@ -435,7 +454,7 @@ export class Pxtone {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return null;
     }
-    return this.#measureCount! * this.#secondsPerMeasure!;
+    return this.#numberOfMeasures! * this.#secondsPerMeasure!;
   }
 
   /** Loop start position in seconds. `null` before {@link read}. */
@@ -543,7 +562,7 @@ export class Pxtone {
     this.#beatsPerMeasure = null;
     this.#beatTempo = null;
     this.#secondsPerMeasure = null;
-    this.#measureCount = null;
+    this.#numberOfMeasures = null;
     this.#loopStartMeasure = null;
     this.#loopEndMeasure = null;
     this.#currentFrame = 0;
@@ -593,10 +612,10 @@ export class Pxtone {
     this.#beatsPerMeasure = service_get_beats_per_measure(this.#ptr);
     this.#beatTempo = service_get_beat_tempo(this.#ptr);
     this.#secondsPerMeasure = (this.#beatsPerMeasure * 60) / this.#beatTempo;
-    this.#measureCount = service_get_measure_count(this.#ptr);
+    this.#numberOfMeasures = service_get_measure_count(this.#ptr);
     this.#loopStartMeasure = service_get_repeat_measure(this.#ptr);
     const loopEndMeasure = service_get_last_measure(this.#ptr);
-    this.#loopEndMeasure = loopEndMeasure !== 0 ? loopEndMeasure : this.#measureCount;
+    this.#loopEndMeasure = loopEndMeasure !== 0 ? loopEndMeasure : this.#numberOfMeasures;
     this.#currentFrame = 0;
     this.#units = null;
     this.#events = null;
@@ -632,7 +651,7 @@ export class Pxtone {
       throw new Error("Pxtone instance has been disposed");
     }
 
-    const channels = this.#channels!;
+    const channels = this.#numberOfChannels!;
     const sampleRate = this.#sampleRate!;
     const chunkBytes = numberOfFrames * channels * 2;
     const startSample = Math.round(startTime * sampleRate);
@@ -843,7 +862,7 @@ export class Pxtone {
       const samplesLen = new Uint32Array(memory.buffer, outSamplesLen, 1)[0];
       const pcm = new Uint8Array(memory.buffer, samplesPtr, samplesLen).slice();
       dealloc(samplesPtr, samplesLen);
-      return { pcm, channels: this.#channels, sampleRate: this.#sampleRate };
+      return { pcm, channels: this.#numberOfChannels, sampleRate: this.#sampleRate };
     } finally {
       dealloc(dataPtr, bytes.length);
       dealloc(outSamplesLen, 4);

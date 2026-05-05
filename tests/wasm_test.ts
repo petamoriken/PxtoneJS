@@ -179,7 +179,7 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
     const dataPtr = alloc(ptcopData.length);
     new Uint8Array(memory.buffer, dataPtr, ptcopData.length).set(ptcopData);
 
-    const svc = service_new();
+    const svc = service_new(2, 44100);
 
     if (service_read(svc, dataPtr, ptcopData.length) !== 0) {
       failures.push(`${name}: service_read failed`);
@@ -346,7 +346,7 @@ Deno.test("decoded ptnoise matches reference (wasm)", async () => {
   }
 
   const failures: string[] = [];
-  const svc = service_new();
+  const svc = service_new(2, 44100);
 
   const channels = service_get_channels(svc);
   const sampleRate = service_get_sample_rate(svc);

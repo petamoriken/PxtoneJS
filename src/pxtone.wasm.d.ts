@@ -15,10 +15,11 @@ export declare const alloc: (size: number) => number;
 export declare const dealloc: (ptr: number, size: number) => void;
 
 /**
- * Creates a new service instance and returns an opaque pointer.
+ * Creates a new service instance and returns an owning pointer.
+ * `channels` must be `1` (mono) or `2` (stereo); returns null (0) otherwise.
  * Free with {@link service_free}.
  */
-export declare const service_new: () => number;
+export declare const service_new: (channels: number, sampleRate: number) => number;
 
 /**
  * Frees a service instance created by {@link service_new}.

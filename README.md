@@ -139,18 +139,27 @@ source.start();
 
 ## API
 
-### `new Pxtone()`
+### `new Pxtone(options?)`
 
 Creates an instance backed by a WebAssembly service.
+
+```ts
+export interface PxtoneOptions {
+  /** Number of output channels. Must be `1` (mono) or `2` (stereo). Default: 2. */
+  numberOfChannels?: 1 | 2;
+  /** Output sample rate in Hz. Default: 44100. */
+  sampleRate?: number;
+}
+```
 
 ### Properties
 
 #### Audio output
 
-| Property           | Type    | Description                                |
-| ------------------ | ------- | ------------------------------------------ |
-| `numberOfChannels` | `2`     | Output channel count (always stereo)       |
-| `sampleRate`       | `44100` | Output sample rate in Hz (always 44.1 kHz) |
+| Property           | Type     | Description              |
+| ------------------ | -------- | ------------------------ |
+| `numberOfChannels` | `1 \| 2` | Output channel count     |
+| `sampleRate`       | `number` | Output sample rate in Hz |
 
 #### Metadata (available after `read()`)
 
