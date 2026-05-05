@@ -73,9 +73,17 @@ To play back with the Web Audio API using `AudioBufferSourceNode`, schedule each
 time:
 
 ```ts
+import { Pxtone } from "pxtone";
+
+const response = await fetch("song.ptcop");
+const fileBytes = new Uint8Array(await response.arrayBuffer());
+
 const BUFFER_AHEAD = 0.5; // seconds
 
-const ctx = new AudioContext({ sampleRate: pxtone.sampleRate });
+const ctx = new AudioContext();
+using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+pxtone.read(fileBytes);
+
 const stream = pxtone.stream({ loop: true });
 const reader = stream.getReader();
 let nextStartTime = ctx.currentTime + 0.1;
@@ -118,10 +126,10 @@ import { Pxtone } from "pxtone";
 const response = await fetch("drum.ptnoise");
 const fileBytes = new Uint8Array(await response.arrayBuffer());
 
-using pxtone = new Pxtone();
+const ctx = new AudioContext();
+using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
 const audioData = await pxtone.decodeNoiseData(fileBytes);
 
-const ctx = new AudioContext();
 const buffer = new AudioBuffer({
   numberOfChannels: audioData.numberOfChannels,
   length: audioData.numberOfFrames,
