@@ -2,7 +2,7 @@
 
 <div align="center">
 	<img src="pxtonejs5x.png" alt="PxtoneJS"><br>
-	Play <a href="https://pxtone.org/" target="_blank">pxtone</a> files in the browser.
+	Play Pxtone Collage <a href="https://pxtone.org/" target="_blank">"pxtone"</a> files in the browser.
 </div>
 
 <br><br><br><br>

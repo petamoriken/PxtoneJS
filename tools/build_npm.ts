@@ -24,7 +24,7 @@ await Deno.writeTextFile(
     {
       name: "pxtone",
       version,
-      description: "Play pxtone files in the browser",
+      description: 'Play Pxtone Collage "pxtone" files in the browser',
       type: "module",
       exports: {
         ".": {
