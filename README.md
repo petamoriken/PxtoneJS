@@ -43,34 +43,8 @@ is recommended to use the `using` declaration (Explicit Resource Management) or 
 `[Symbol.dispose]()` manually to ensure the resource is disposed of as soon as it is no longer
 needed.
 
-`stream()` returns a `ReadableStream<AudioData>` (format `"f32-planar"`). Copy each chunk into an
-`AudioBuffer` for `AudioBufferSourceNode` playback, or forward it to an `AudioWorkletNode` for
-lower-latency output.
-
-```ts
-import { Pxtone } from "pxtone";
-
-const response = await fetch("song.ptcop");
-const fileBytes = new Uint8Array(await response.arrayBuffer());
-
-using pxtone = new Pxtone();
-pxtone.read(fileBytes);
-
-console.log(pxtone.name);
-console.log(pxtone.duration); // total length in seconds
-
-const stream = pxtone.stream({ loop: true });
-const reader = stream.getReader();
-
-while (true) {
-  const { done, value: audioData } = await reader.read();
-  if (done) break;
-  // pass audioData to an AudioWorklet, MediaStreamTrackGenerator, etc.
-}
-```
-
-To play back with the Web Audio API using `AudioBufferSourceNode`, schedule each chunk ahead of
-time:
+`stream()` returns a `ReadableStream<AudioData>` (format `"f32-planar"`). To play back with the Web
+Audio API using `AudioBufferSourceNode`, schedule each chunk ahead of time:
 
 ```ts
 import { Pxtone } from "pxtone";
@@ -115,6 +89,31 @@ await scheduleMore();
 setInterval(scheduleMore, 100);
 ```
 
+Each `AudioData` chunk can also be forwarded to an `AudioWorkletNode`, `MediaStreamTrackGenerator`,
+or other consumers:
+
+```ts
+import { Pxtone } from "pxtone";
+
+const response = await fetch("song.ptcop");
+const fileBytes = new Uint8Array(await response.arrayBuffer());
+
+using pxtone = new Pxtone();
+pxtone.read(fileBytes);
+
+console.log(pxtone.name);
+console.log(pxtone.duration); // total length in seconds
+
+const stream = pxtone.stream({ loop: true });
+const reader = stream.getReader();
+
+while (true) {
+  const { done, value: audioData } = await reader.read();
+  if (done) break;
+  // pass audioData to an AudioWorklet, MediaStreamTrackGenerator, etc.
+}
+```
+
 ### Decoding a `.ptnoise` file
 
 `decodeNoiseData()` returns an `AudioData` with format `"f32-planar"`. To play it back with the Web
@@ -147,7 +146,7 @@ source.start();
 
 ## API
 
-### `new Pxtone(options?)`
+### `new Pxtone(options?: PxtoneOptions)`
 
 Creates an instance backed by a WebAssembly service.
 
