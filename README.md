@@ -229,14 +229,15 @@ Checks whether `buffer` is a valid `.ptnoise` file without loading it. Returns `
 
 #### `read(buffer: ArrayBuffer | Uint8Array): void`
 
-Loads a `.ptcop` or `.pttune` file and prepares it for playback. Throws if the file is invalid or a
-stream is currently active.
+Loads a `.ptcop` or `.pttune` file and prepares it for playback. Throws a `PxtoneError` if the file
+is invalid or a stream is currently active.
 
 #### `stream(options?: StreamOptions): ReadableStream<AudioData>`
 
 Returns a `ReadableStream` that yields PCM chunks as `AudioData` objects (format `"f32-planar"`).
 Each chunk has at most `numberOfFrames` frames; the final chunk may be shorter. Only one stream may
-be active at a time.
+be active at a time. Throws a `PxtoneError` if no data has been loaded or a stream is already
+active.
 
 ```ts
 export interface StreamOptions {
@@ -276,7 +277,33 @@ Resets the instance to its initial idle state, discarding all loaded song data.
 
 #### `decodeNoiseData(buffer: ArrayBuffer | Uint8Array): Promise<AudioData>`
 
-Decodes a `.ptnoise` file and returns an `AudioData` with format `"f32-planar"`.
+Decodes a `.ptnoise` file and returns an `AudioData` with format `"f32-planar"`. Throws a
+`PxtoneError` if the data is invalid.
+
+### `PxtoneError`
+
+Thrown by `Pxtone` methods on operation failures. Extends `Error` with an optional `code` property
+for programmatic error handling.
+
+| `code`                          | Static constant                                | Description                                     |
+| ------------------------------- | ---------------------------------------------- | ----------------------------------------------- |
+| `"DISPOSED"`                    | `PxtoneError.CODE_DISPOSED`                    | The instance has already been disposed.         |
+| `"STREAMING_ACTIVE"`            | `PxtoneError.CODE_STREAMING_ACTIVE`            | Operation not allowed while a stream is active. |
+| `"NOT_READY"`                   | `PxtoneError.CODE_NOT_READY`                   | `read()` has not been called yet.               |
+| `"READ_FAILED"`                 | `PxtoneError.CODE_READ_FAILED`                 | Failed to load the pxtone data.                 |
+| `"TONES_READY_FAILED"`          | `PxtoneError.CODE_TONES_READY_FAILED`          | Failed to initialize audio tones.               |
+| `"PLAYBACK_PREPARATION_FAILED"` | `PxtoneError.CODE_PLAYBACK_PREPARATION_FAILED` | Failed to prepare audio playback.               |
+| `"RENDER_NOISE_FAILED"`         | `PxtoneError.CODE_RENDER_NOISE_FAILED`         | Failed to render noise data.                    |
+
+```ts
+try {
+  pxtone.read(buffer);
+} catch (e) {
+  if (e instanceof PxtoneError && e.code === PxtoneError.CODE_READ_FAILED) {
+    console.error("Invalid pxtone file");
+  }
+}
+```
 
 ### `PxtoneUnit`
 

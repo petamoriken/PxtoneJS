@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { assert, assertEquals, assertNotEquals, assertThrows } from "@std/assert";
 import { parse as parseToml } from "@std/toml";
 
-import { Pxtone } from "../src/Pxtone.ts";
+import { Pxtone, PxtoneError } from "../src/Pxtone.ts";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -287,7 +287,10 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
 
-  assertThrows(() => pxtone.stream());
+  {
+    const err = assertThrows(() => pxtone.stream(), PxtoneError);
+    assertEquals(err.code, PxtoneError.CODE_NOT_READY);
+  }
 
   // --- ready ---
 
@@ -334,8 +337,14 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assert(pxtone.units.length > 0);
   assert(pxtone.events.length > 0);
 
-  assertThrows(() => pxtone.read(fileData));
-  assertThrows(() => pxtone.stream());
+  {
+    const err = assertThrows(() => pxtone.read(fileData), PxtoneError);
+    assertEquals(err.code, PxtoneError.CODE_STREAMING_ACTIVE);
+  }
+  {
+    const err = assertThrows(() => pxtone.stream(), PxtoneError);
+    assertEquals(err.code, PxtoneError.CODE_STREAMING_ACTIVE);
+  }
 
   // --- ready ---
 
@@ -400,4 +409,17 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
+
+  {
+    const err = assertThrows(() => pxtone.clear(), PxtoneError);
+    assertEquals(err.code, PxtoneError.CODE_DISPOSED);
+  }
+  {
+    const err = assertThrows(() => pxtone.read(fileData), PxtoneError);
+    assertEquals(err.code, PxtoneError.CODE_DISPOSED);
+  }
+  {
+    const err = assertThrows(() => pxtone.stream(), PxtoneError);
+    assertEquals(err.code, PxtoneError.CODE_DISPOSED);
+  }
 });

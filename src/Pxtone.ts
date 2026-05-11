@@ -24,6 +24,61 @@ import {
   validate_noise,
 } from "./pxtone.wasm";
 
+/** Options for {@link PxtoneError}. */
+export interface PxtoneErrorOptions extends ErrorOptions {
+  code?: string;
+}
+
+/** Error thrown by {@link Pxtone} methods on operation failures. */
+export class PxtoneError extends Error {
+  declare code?: string;
+
+  static {
+    PxtoneError.prototype.name = "PxtoneError";
+  }
+
+  /** The instance has already been disposed. */
+  static get CODE_DISPOSED(): "DISPOSED" {
+    return "DISPOSED";
+  }
+  /** Operation not allowed while an audio stream is active. */
+  static get CODE_STREAMING_ACTIVE(): "STREAMING_ACTIVE" {
+    return "STREAMING_ACTIVE";
+  }
+  /** {@link Pxtone.read} has not been called yet. */
+  static get CODE_NOT_READY(): "NOT_READY" {
+    return "NOT_READY";
+  }
+  /** Failed to load the pxtone data. */
+  static get CODE_READ_FAILED(): "READ_FAILED" {
+    return "READ_FAILED";
+  }
+  /** Failed to initialize audio tones. */
+  static get CODE_TONES_READY_FAILED(): "TONES_READY_FAILED" {
+    return "TONES_READY_FAILED";
+  }
+  /** Failed to prepare audio playback. */
+  static get CODE_PLAYBACK_PREPARATION_FAILED(): "PLAYBACK_PREPARATION_FAILED" {
+    return "PLAYBACK_PREPARATION_FAILED";
+  }
+  /** Failed to render noise data. */
+  static get CODE_RENDER_NOISE_FAILED(): "RENDER_NOISE_FAILED" {
+    return "RENDER_NOISE_FAILED";
+  }
+
+  constructor(message?: string, options?: PxtoneErrorOptions) {
+    super(message, options);
+    if (options?.code !== undefined) {
+      Object.defineProperty(this, "code", {
+        configurable: true,
+        enumerable: false,
+        writable: true,
+        value: options.code,
+      });
+    }
+  }
+}
+
 const illegalConstructorKey: unique symbol = Symbol("illegalConstructorKey");
 
 let releaseUnitPtr!: (unit: PxtoneUnit) => void;
@@ -548,14 +603,18 @@ export class Pxtone {
 
   /**
    * Resets the instance to its initial idle state, releasing all song data.
-   * @throws {Error} If the instance has been disposed, or a stream is active.
+   * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}) or a stream is active ({@link PxtoneError.CODE_STREAMING_ACTIVE}).
    */
   clear(): void {
     if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
+      throw new PxtoneError("This Pxtone instance has already been disposed.", {
+        code: PxtoneError.CODE_DISPOSED,
+      });
     }
     if (this.#state === "streaming") {
-      throw new Error("cannot call clear while streaming");
+      throw new PxtoneError("Cannot clear while audio stream is active.", {
+        code: PxtoneError.CODE_STREAMING_ACTIVE,
+      });
     }
     this.#state = "idle";
     this.#release();
@@ -589,14 +648,18 @@ export class Pxtone {
    * and enables lazy access to {@link units} and {@link events}.
    *
    * @param buffer - Raw file bytes.
-   * @throws {Error} If the instance has been disposed, called while a stream is active, or the file is invalid.
+   * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}), a stream is active ({@link PxtoneError.CODE_STREAMING_ACTIVE}), or the file is invalid ({@link PxtoneError.CODE_READ_FAILED}, {@link PxtoneError.CODE_TONES_READY_FAILED}).
    */
   read(buffer: ArrayBuffer | Uint8Array): void {
     if (this.#state === "streaming") {
-      throw new Error("cannot call read while streaming");
+      throw new PxtoneError("Cannot load new data while audio stream is active.", {
+        code: PxtoneError.CODE_STREAMING_ACTIVE,
+      });
     }
     if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
+      throw new PxtoneError("This Pxtone instance has already been disposed.", {
+        code: PxtoneError.CODE_DISPOSED,
+      });
     }
 
     const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
@@ -604,13 +667,17 @@ export class Pxtone {
     try {
       new Uint8Array(memory.buffer, memPtr, bytes.length).set(bytes);
       if (service_read(this.#ptr, memPtr, bytes.length) !== 0) {
-        throw new Error("service_read failed");
+        throw new PxtoneError("Failed to load the pxtone data.", {
+          code: PxtoneError.CODE_READ_FAILED,
+        });
       }
     } finally {
       dealloc(memPtr, bytes.length);
     }
     if (service_tones_ready(this.#ptr) !== 0) {
-      throw new Error("service_tones_ready failed");
+      throw new PxtoneError("Failed to initialize audio tones.", {
+        code: PxtoneError.CODE_TONES_READY_FAILED,
+      });
     }
     this.#name = this.#readText(service_get_text_name);
     this.#comment = this.#readText(service_get_text_comment);
@@ -650,7 +717,7 @@ export class Pxtone {
    * Only one stream may be active at a time. The stream ends naturally when the
    * song finishes (or the loop point is reached with `loop: false`).
    *
-   * @throws {Error} If the instance has been disposed, {@link read} has not been called, or a stream is already active.
+   * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}), {@link read} has not been called ({@link PxtoneError.CODE_NOT_READY}), or a stream is already active ({@link PxtoneError.CODE_STREAMING_ACTIVE}).
    */
   stream(
     {
@@ -663,13 +730,19 @@ export class Pxtone {
     }: StreamOptions = {},
   ): ReadableStream<AudioData> {
     if (this.#state === "idle") {
-      throw new Error("read must be called before stream");
+      throw new PxtoneError("No pxtone data has been loaded. Call read() first.", {
+        code: PxtoneError.CODE_NOT_READY,
+      });
     }
     if (this.#state === "streaming") {
-      throw new Error("stream is already active");
+      throw new PxtoneError("An audio stream is already active.", {
+        code: PxtoneError.CODE_STREAMING_ACTIVE,
+      });
     }
     if (this.#state === "disposed") {
-      throw new Error("Pxtone instance has been disposed");
+      throw new PxtoneError("This Pxtone instance has already been disposed.", {
+        code: PxtoneError.CODE_DISPOSED,
+      });
     }
 
     const channels = this.#numberOfChannels!;
@@ -685,7 +758,9 @@ export class Pxtone {
         loop ? 1 : 0,
       ) !== 0
     ) {
-      throw new Error("service_moo_preparation failed");
+      throw new PxtoneError("Failed to prepare audio playback.", {
+        code: PxtoneError.CODE_PLAYBACK_PREPARATION_FAILED,
+      });
     }
 
     this.#state = "streaming";
@@ -736,7 +811,11 @@ export class Pxtone {
           if (isDisposed()) {
             cleanupAbort();
             onStreamEnd();
-            controller.error(new Error("Pxtone instance has been disposed"));
+            controller.error(
+              new PxtoneError("This Pxtone instance has already been disposed.", {
+                code: PxtoneError.CODE_DISPOSED,
+              }),
+            );
             return;
           }
           // Deno-generated Wasm types do not support Multi-Value returns.
@@ -780,13 +859,17 @@ export class Pxtone {
    *
    * @param buffer - Raw `.ptnoise` file bytes.
    * @returns A promise that resolves with the decoded `AudioData`.
-   * @throws {Error} If the instance has been disposed.
+   * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}) or rendering fails ({@link PxtoneError.CODE_RENDER_NOISE_FAILED}).
    */
   decodeNoiseData(
     buffer: ArrayBuffer | Uint8Array,
   ): Promise<AudioData> {
     if (this.#state === "disposed") {
-      return Promise.reject(new Error("Pxtone instance has been disposed"));
+      return Promise.reject(
+        new PxtoneError("This Pxtone instance has already been disposed.", {
+          code: PxtoneError.CODE_DISPOSED,
+        }),
+      );
     }
     try {
       const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
@@ -799,7 +882,11 @@ export class Pxtone {
           dataPtr,
           bytes.length,
         ) as unknown as [number, number];
-        if (!samplesPtr) throw new Error("service_render_noise failed");
+        if (!samplesPtr) {
+          throw new PxtoneError("Failed to render noise data.", {
+            code: PxtoneError.CODE_RENDER_NOISE_FAILED,
+          });
+        }
         const ptr = samplesPtr >>> 0;
         const len = samplesLen >>> 0;
         try {
@@ -880,5 +967,4 @@ export class Pxtone {
     }
     return Object.freeze(events);
   }
-
 }
