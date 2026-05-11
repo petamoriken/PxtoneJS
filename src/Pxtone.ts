@@ -434,9 +434,8 @@ export class Pxtone {
     }
   }
 
-  constructor(
-    { numberOfChannels = 2, sampleRate = 44100 }: PxtoneOptions = {},
-  ) {
+  constructor(options: PxtoneOptions = {}) {
+    const { numberOfChannels = 2, sampleRate = 44100 } = options;
     if (numberOfChannels !== 1 && numberOfChannels !== 2) {
       throw new RangeError(
         `numberOfChannels must be 1 or 2, got ${numberOfChannels}`,
@@ -774,16 +773,15 @@ export class Pxtone {
    * }
    * ```
    */
-  stream(
-    {
+  stream(options: StreamOptions = {}): ReadableStream<AudioData> {
+    const {
       startTime = 0,
       unitMute = false,
       loop = false,
       numberOfFrames = 1024,
       highWaterMark = 1,
       signal,
-    }: StreamOptions = {},
-  ): ReadableStream<AudioData> {
+    } = options;
     if (this.#state === "idle") {
       throw new PxtoneError("No pxtone data has been loaded. Call read() first.", {
         code: PxtoneError.CODE_NOT_READY,
