@@ -789,17 +789,36 @@ export class Pxtone {
       return Promise.reject(new Error("Pxtone instance has been disposed"));
     }
     try {
-      const { pcm, channels, sampleRate } = this.#renderNoise(buffer);
-      const numberOfFrames = pcm.length / (channels * 2);
-      return Promise.resolve(
-        pcmToAudioData({
-          data: new Int16Array(pcm.buffer, pcm.byteOffset, pcm.length / 2),
-          sampleRate,
-          numberOfFrames,
-          numberOfChannels: channels,
-          timestamp: 0,
-        }),
-      );
+      const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+      const dataPtr = alloc(bytes.length);
+      try {
+        new Uint8Array(memory.buffer, dataPtr, bytes.length).set(bytes);
+        // Deno-generated Wasm types do not support Multi-Value returns.
+        const { 0: samplesPtr, 1: samplesLen } = service_render_noise(
+          this.#ptr,
+          dataPtr,
+          bytes.length,
+        ) as unknown as [number, number];
+        if (!samplesPtr) throw new Error("service_render_noise failed");
+        const ptr = samplesPtr >>> 0;
+        const len = samplesLen >>> 0;
+        try {
+          const channels = this.#numberOfChannels;
+          return Promise.resolve(
+            pcmToAudioData({
+              data: new Int16Array(memory.buffer, ptr, len / 2),
+              sampleRate: this.#sampleRate,
+              numberOfFrames: len / (channels * 2),
+              numberOfChannels: channels,
+              timestamp: 0,
+            }),
+          );
+        } finally {
+          dealloc(ptr, len);
+        }
+      } finally {
+        dealloc(dataPtr, bytes.length);
+      }
     } catch (e) {
       return Promise.reject(e);
     }
@@ -862,25 +881,4 @@ export class Pxtone {
     return Object.freeze(events);
   }
 
-  #renderNoise(
-    data: ArrayBuffer | Uint8Array,
-  ): { pcm: Uint8Array; channels: 1 | 2; sampleRate: number } {
-    const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-    const dataPtr = alloc(bytes.length);
-    try {
-      new Uint8Array(memory.buffer, dataPtr, bytes.length).set(bytes);
-      // Deno-generated Wasm types do not support Multi-Value returns.
-      const { 0: samplesPtr, 1: samplesLen } = service_render_noise(
-        this.#ptr,
-        dataPtr,
-        bytes.length,
-      ) as unknown as [number, number];
-      if (!samplesPtr) throw new Error("service_render_noise failed");
-      const pcm = new Uint8Array(memory.buffer, samplesPtr >>> 0, samplesLen >>> 0).slice();
-      dealloc(samplesPtr >>> 0, samplesLen >>> 0);
-      return { pcm, channels: this.#numberOfChannels, sampleRate: this.#sampleRate };
-    } finally {
-      dealloc(dataPtr, bytes.length);
-    }
-  }
 }
