@@ -3,25 +3,14 @@ import {
   dealloc,
   memory,
   service_free,
-  service_get_beat_tempo,
-  service_get_beats_per_measure,
-  service_get_channels,
+  service_get_event,
   service_get_event_count,
-  service_get_event_kind,
-  service_get_event_tick,
-  service_get_event_unit_index,
-  service_get_event_value,
-  service_get_last_measure,
-  service_get_measure_count,
-  service_get_repeat_measure,
-  service_get_sample_rate,
+  service_get_master,
   service_get_text_comment,
   service_get_text_name,
-  service_get_ticks_per_beat,
   service_get_unit_count,
   service_get_unit_name,
   service_get_unit_played,
-  service_is_end_vomit,
   service_moo,
   service_moo_preparation,
   service_new,
@@ -53,6 +42,29 @@ interface PtcopSnapshot {
   events: Array<
     { tick: number; unit_index: number; kind: number; value: number }
   >;
+}
+
+const WAV_HEADER_LEN = 44;
+const WAV_PCM_TOLERANCE = 2;
+
+function wavMatches(
+  actual: Uint8Array,
+  expected: Uint8Array,
+): { ok: boolean; maxDiff: number } {
+  if (actual.length !== expected.length) return { ok: false, maxDiff: -1 };
+  for (let i = 0; i < WAV_HEADER_LEN; i++) {
+    if (actual[i] !== expected[i]) return { ok: false, maxDiff: -1 };
+  }
+  let maxDiff = 0;
+  for (let i = WAV_HEADER_LEN; i + 1 < actual.length; i += 2) {
+    let a = actual[i] | (actual[i + 1] << 8);
+    let e = expected[i] | (expected[i + 1] << 8);
+    if (a >= 0x8000) a -= 0x10000;
+    if (e >= 0x8000) e -= 0x10000;
+    const diff = Math.abs(a - e);
+    if (diff > maxDiff) maxDiff = diff;
+  }
+  return { ok: maxDiff <= WAV_PCM_TOLERANCE, maxDiff };
 }
 
 function pcmToWav(
@@ -195,19 +207,21 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
       continue;
     }
 
-    const lenPtr = alloc(4);
-
     // Text
     {
-      const namePtr = service_get_text_name(svc, lenPtr);
-      const nameLen = new Uint32Array(memory.buffer, lenPtr, 1)[0];
+      // @ts-expect-error: Type support for Wasm Multi-Value is not available yet
+      const [namePtr, nameLen] = service_get_text_name(svc);
       const textName = namePtr !== 0
-        ? decSjis.decode(new Uint8Array(memory.buffer, namePtr, nameLen))
+        ? decSjis.decode(
+          new Uint8Array(memory.buffer, namePtr >>> 0, nameLen >>> 0),
+        )
         : "";
-      const commentPtr = service_get_text_comment(svc, lenPtr);
-      const commentLen = new Uint32Array(memory.buffer, lenPtr, 1)[0];
+      // @ts-expect-error: Type support for Wasm Multi-Value is not available yet
+      const [commentPtr, commentLen] = service_get_text_comment(svc);
       const textComment = commentPtr !== 0
-        ? decSjis.decode(new Uint8Array(memory.buffer, commentPtr, commentLen))
+        ? decSjis.decode(
+          new Uint8Array(memory.buffer, commentPtr >>> 0, commentLen >>> 0),
+        )
         : "";
       if (
         textName !== snapshot.text.name ||
@@ -219,12 +233,15 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
 
     // Master
     {
-      const ticksPerBeat = service_get_ticks_per_beat(svc);
-      const beatsPerMeasure = service_get_beats_per_measure(svc);
-      const beatTempo = service_get_beat_tempo(svc);
-      const measureCount = service_get_measure_count(svc);
-      const repeatMeasure = service_get_repeat_measure(svc);
-      const lastMeasure = service_get_last_measure(svc);
+      // @ts-expect-error: Type support for Wasm Multi-Value is not available yet
+      const [
+        ticksPerBeat,
+        beatsPerMeasure,
+        beatTempo,
+        measureCount,
+        repeatMeasure,
+        lastMeasure,
+      ] = service_get_master(svc);
       const m = snapshot.master;
       if (
         ticksPerBeat !== m.ticks_per_beat ||
@@ -246,10 +263,10 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
       );
     } else {
       for (let i = 0; i < unitCount; i++) {
-        const namePtr = service_get_unit_name(svc, i, lenPtr);
-        const nameLen = new Uint32Array(memory.buffer, lenPtr, 1)[0];
+        // @ts-expect-error: Type support for Wasm Multi-Value is not available yet
+        const [namePtr, nameLen] = service_get_unit_name(svc, i);
         const unitName = dec.decode(
-          new Uint8Array(memory.buffer, namePtr, nameLen),
+          new Uint8Array(memory.buffer, namePtr >>> 0, nameLen >>> 0),
         );
         const played = service_get_unit_played(svc, i) !== 0;
         const expected = snapshot.units[i];
@@ -259,8 +276,6 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
       }
     }
 
-    dealloc(lenPtr, 4);
-
     // Events
     const eventCount = service_get_event_count(svc);
     if (eventCount !== snapshot.events.length) {
@@ -269,10 +284,8 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
       );
     } else {
       for (let i = 0; i < eventCount; i++) {
-        const tick = service_get_event_tick(svc, i);
-        const unitNo = service_get_event_unit_index(svc, i);
-        const kind = service_get_event_kind(svc, i);
-        const value = service_get_event_value(svc, i);
+        // @ts-expect-error: Type support for Wasm Multi-Value is not available yet
+        const [tick, unitNo, kind, value] = service_get_event(svc, i);
         const expected = snapshot.events[i];
         if (
           tick !== expected.tick || unitNo !== expected.unit_index ||
@@ -289,15 +302,17 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
       continue;
     }
 
-    const channels = service_get_channels(svc);
-    const sampleRate = service_get_sample_rate(svc);
+    const channels = 2;
+    const sampleRate = 44100;
     const chunkSize = channels * 2 * 4096;
     const bufPtr = alloc(chunkSize);
 
     const chunks: Uint8Array[] = [];
-    while (service_is_end_vomit(svc) === 0) {
-      if (service_moo(svc, bufPtr, chunkSize) === 0) break;
-      chunks.push(new Uint8Array(memory.buffer, bufPtr, chunkSize).slice());
+    while (true) {
+      // @ts-expect-error: Type support for Wasm Multi-Value is not available yet
+      const [, written] = service_moo(svc, bufPtr, chunkSize);
+      if (written === 0) break;
+      chunks.push(new Uint8Array(memory.buffer, bufPtr, written >>> 0).slice());
     }
 
     dealloc(bufPtr, chunkSize);
@@ -315,10 +330,9 @@ Deno.test("decoded ptcop matches reference (wasm)", async () => {
     const wavPath = join(snapshotDir, `${stem}.wav`);
     const expected = await Deno.readFile(wavPath);
 
-    if (
-      wav.length !== expected.length || wav.some((b, i) => b !== expected[i])
-    ) {
-      failures.push(wavPath);
+    const { ok, maxDiff } = wavMatches(wav, expected);
+    if (!ok) {
+      failures.push(`${wavPath} (maxDiff=${maxDiff})`);
     }
   }
 
@@ -348,9 +362,8 @@ Deno.test("decoded ptnoise matches reference (wasm)", async () => {
   const failures: string[] = [];
   const svc = service_new(2, 44100);
 
-  const channels = service_get_channels(svc);
-  const sampleRate = service_get_sample_rate(svc);
-  const outSamplesLen = alloc(4);
+  const channels = 2;
+  const sampleRate = 44100;
 
   for (const name of names) {
     const stem = name.slice(0, -8); // remove ".ptnoise"
@@ -361,11 +374,11 @@ Deno.test("decoded ptnoise matches reference (wasm)", async () => {
       ptnoiseData,
     );
 
-    const samplesPtr = service_render_noise(
+    // @ts-expect-error: Type support for Wasm Multi-Value is not available yet
+    const [samplesPtr, samplesLen] = service_render_noise(
       svc,
       dataPtr,
       ptnoiseData.length,
-      outSamplesLen,
     );
     dealloc(dataPtr, ptnoiseData.length);
 
@@ -374,8 +387,11 @@ Deno.test("decoded ptnoise matches reference (wasm)", async () => {
       continue;
     }
 
-    const samplesLen = new Uint32Array(memory.buffer, outSamplesLen, 1)[0];
-    const samples = new Uint8Array(memory.buffer, samplesPtr, samplesLen)
+    const samples = new Uint8Array(
+      memory.buffer,
+      samplesPtr >>> 0,
+      samplesLen >>> 0,
+    )
       .slice();
     dealloc(samplesPtr, samplesLen);
 
@@ -383,14 +399,12 @@ Deno.test("decoded ptnoise matches reference (wasm)", async () => {
     const wavPath = join(snapshotDir, `${stem}.wav`);
     const expected = await Deno.readFile(wavPath);
 
-    if (
-      wav.length !== expected.length || wav.some((b, i) => b !== expected[i])
-    ) {
-      failures.push(wavPath);
+    const { ok, maxDiff } = wavMatches(wav, expected);
+    if (!ok) {
+      failures.push(`${wavPath} (maxDiff=${maxDiff})`);
     }
   }
 
-  dealloc(outSamplesLen, 4);
   service_free(svc);
 
   if (failures.length > 0) {

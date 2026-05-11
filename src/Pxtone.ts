@@ -5,23 +5,14 @@ import {
   dealloc,
   memory,
   service_free,
-  service_get_beat_tempo,
-  service_get_beats_per_measure,
+  service_get_event,
   service_get_event_count,
-  service_get_event_kind,
-  service_get_event_tick,
-  service_get_event_unit_index,
-  service_get_event_value,
-  service_get_last_measure,
-  service_get_measure_count,
-  service_get_repeat_measure,
+  service_get_master,
   service_get_text_comment,
   service_get_text_name,
-  service_get_ticks_per_beat,
   service_get_unit_count,
   service_get_unit_name,
   service_get_unit_played,
-  service_is_end_vomit,
   service_moo,
   service_moo_preparation,
   service_new,
@@ -253,15 +244,30 @@ export interface PxtoneOptions {
 
 /** Options for {@link Pxtone.stream}. */
 export interface StreamOptions {
-  /** Playback start position in seconds. Default: 0 (beginning). */
+  /**
+   * Playback start position in seconds.
+   * @default 0
+   */
   startTime?: number;
-  /** Units whose `played` flag is false are silenced. */
+  /**
+   * Units whose `played` flag is false are silenced.
+   * @default false
+   */
   unitMute?: boolean;
-  /** Loop playback from the song's repeat point. */
+  /**
+   * Loop playback from the song's repeat point.
+   * @default false
+   */
   loop?: boolean;
-  /** Number of frames per channel per chunk. Default: 1024. */
+  /**
+   * Maximum number of frames per channel per chunk. The final chunk may be shorter.
+   * @default 1024
+   */
   numberOfFrames?: number;
-  /** Backpressure threshold for the underlying `ReadableStream`. Default: 1. */
+  /**
+   * Backpressure threshold for the underlying `ReadableStream`.
+   * @default 1
+   */
   highWaterMark?: number;
   /** AbortSignal to cancel the stream early. */
   signal?: AbortSignal;
@@ -608,14 +614,29 @@ export class Pxtone {
     }
     this.#name = this.#readText(service_get_text_name);
     this.#comment = this.#readText(service_get_text_comment);
-    this.#ticksPerBeat = service_get_ticks_per_beat(this.#ptr);
-    this.#beatsPerMeasure = service_get_beats_per_measure(this.#ptr);
-    this.#beatTempo = service_get_beat_tempo(this.#ptr);
-    this.#secondsPerMeasure = (this.#beatsPerMeasure * 60) / this.#beatTempo;
-    this.#numberOfMeasures = service_get_measure_count(this.#ptr);
-    this.#loopStartMeasure = service_get_repeat_measure(this.#ptr);
-    const loopEndMeasure = service_get_last_measure(this.#ptr);
-    this.#loopEndMeasure = loopEndMeasure !== 0 ? loopEndMeasure : this.#numberOfMeasures;
+    // Deno-generated Wasm types do not support Multi-Value returns.
+    const {
+      0: ticksPerBeat,
+      1: beatsPerMeasure,
+      2: beatTempo,
+      3: measureCount,
+      4: repeatMeasure,
+      5: lastMeasure,
+    } = service_get_master(this.#ptr) as unknown as [
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+    ];
+    this.#ticksPerBeat = ticksPerBeat;
+    this.#beatsPerMeasure = beatsPerMeasure;
+    this.#beatTempo = beatTempo;
+    this.#secondsPerMeasure = (beatsPerMeasure * 60) / beatTempo;
+    this.#numberOfMeasures = measureCount;
+    this.#loopStartMeasure = repeatMeasure;
+    this.#loopEndMeasure = lastMeasure !== 0 ? lastMeasure : measureCount;
     this.#currentFrame = 0;
     this.#units = null;
     this.#events = null;
@@ -668,8 +689,13 @@ export class Pxtone {
     }
 
     this.#state = "streaming";
+    const bufPtr = alloc(chunkBytes);
     const isDisposed = () => this.#state === "disposed";
+    let streamEnded = false;
     const onStreamEnd = () => {
+      if (streamEnded) return;
+      streamEnded = true;
+      dealloc(bufPtr, chunkBytes);
       if (this.#state === "disposed") {
         service_free(this.#ptr);
       } else {
@@ -713,33 +739,29 @@ export class Pxtone {
             controller.error(new Error("Pxtone instance has been disposed"));
             return;
           }
-          if (service_is_end_vomit(ptr) !== 0) {
+          // Deno-generated Wasm types do not support Multi-Value returns.
+          const { 1: written } = service_moo(ptr, bufPtr, chunkBytes) as unknown as [
+            number,
+            number,
+          ];
+          const writtenBytes = written >>> 0;
+          if (writtenBytes === 0) {
             cleanupAbort();
             onStreamEnd();
             controller.close();
             return;
           }
-          const memPtr = alloc(chunkBytes);
-          try {
-            if (service_moo(ptr, memPtr, chunkBytes) === 0) {
-              cleanupAbort();
-              onStreamEnd();
-              controller.close();
-              return;
-            }
-            const audioData = pcmToAudioData({
-              data: new Int16Array(memory.buffer, memPtr, chunkBytes / 2),
-              sampleRate,
-              numberOfFrames,
-              numberOfChannels: channels,
-              timestamp: Math.round(currentFrame * 1_000_000 / sampleRate),
-            });
-            controller.enqueue(audioData);
-            setCurrentFrame(currentFrame);
-            currentFrame += numberOfFrames;
-          } finally {
-            dealloc(memPtr, chunkBytes);
-          }
+          const writtenFrames = writtenBytes / (channels * 2);
+          const audioData = pcmToAudioData({
+            data: new Int16Array(memory.buffer, bufPtr, writtenBytes / 2),
+            sampleRate,
+            numberOfFrames: writtenFrames,
+            numberOfChannels: channels,
+            timestamp: Math.round(currentFrame * 1_000_000 / sampleRate),
+          });
+          controller.enqueue(audioData);
+          setCurrentFrame(currentFrame);
+          currentFrame += writtenFrames;
         } catch (e) {
           cleanupAbort();
           onStreamEnd();
@@ -783,61 +805,57 @@ export class Pxtone {
     }
   }
 
-  #readText(fn: (svc: number, outLen: number) => number): string | null {
-    const lenPtr = alloc(4);
-    try {
-      const ptr = fn(this.#ptr, lenPtr);
-      if (ptr === 0) return null;
-      const len = new Uint32Array(memory.buffer, lenPtr, 1)[0];
-      return Pxtone.#sjisDecoder.decode(
-        new Uint8Array(memory.buffer, ptr, len),
-      );
-    } finally {
-      dealloc(lenPtr, 4);
-    }
+  #readText(fn: (svc: number) => unknown): string | null {
+    // Deno-generated Wasm types do not support Multi-Value returns.
+    const { 0: ptr, 1: len } = fn(this.#ptr) as unknown as [number, number];
+    if (!ptr) return null;
+    return Pxtone.#sjisDecoder.decode(new Uint8Array(memory.buffer, ptr >>> 0, len >>> 0));
   }
 
   #loadUnits(): readonly PxtoneUnit[] {
     const count = service_get_unit_count(this.#ptr);
-    const lenPtr = alloc(4);
-    try {
-      const units: PxtoneUnit[] = [];
-      for (let i = 0; i < count; i++) {
-        const namePtr = service_get_unit_name(this.#ptr, i, lenPtr);
-        const nameLen = new Uint32Array(memory.buffer, lenPtr, 1)[0];
-        const name = Pxtone.#sjisDecoder.decode(
-          new Uint8Array(memory.buffer, namePtr, nameLen),
-        );
-        const played = service_get_unit_played(this.#ptr, i) !== 0;
-        units.push(
-          // @ts-expect-error: allow private constructor
-          new PxtoneUnit(
-            illegalConstructorKey,
-            this.#ptr,
-            name,
-            played,
-            i,
-          ),
-        );
-      }
-      return Object.freeze(units);
-    } finally {
-      dealloc(lenPtr, 4);
+    const units: PxtoneUnit[] = [];
+    for (let i = 0; i < count; i++) {
+      // Deno-generated Wasm types do not support Multi-Value returns.
+      const { 0: namePtr, 1: nameLen } = service_get_unit_name(this.#ptr, i) as unknown as [
+        number,
+        number,
+      ];
+      const name = Pxtone.#sjisDecoder.decode(
+        new Uint8Array(memory.buffer, namePtr >>> 0, nameLen >>> 0),
+      );
+      const played = service_get_unit_played(this.#ptr, i) !== 0;
+      units.push(
+        // @ts-expect-error: allow private constructor
+        new PxtoneUnit(
+          illegalConstructorKey,
+          this.#ptr,
+          name,
+          played,
+          i,
+        ),
+      );
     }
+    return Object.freeze(units);
   }
 
   #loadEvents(units: readonly PxtoneUnit[]): readonly PxtoneEvent[] {
     const count = service_get_event_count(this.#ptr);
     const events: PxtoneEvent[] = [];
     for (let i = 0; i < count; i++) {
+      // Deno-generated Wasm types do not support Multi-Value returns.
+      const { 0: tick, 1: unitNo, 2: kind, 3: value } = service_get_event(
+        this.#ptr,
+        i,
+      ) as unknown as [number, number, number, number];
       events.push(
         // @ts-expect-error: allow private constructor
         new PxtoneEvent(
           illegalConstructorKey,
-          service_get_event_tick(this.#ptr, i),
-          units[service_get_event_unit_index(this.#ptr, i)],
-          service_get_event_kind(this.#ptr, i) as PxtoneEventKind,
-          service_get_event_value(this.#ptr, i),
+          tick,
+          units[unitNo],
+          kind as PxtoneEventKind,
+          value,
         ),
       );
     }
@@ -849,23 +867,20 @@ export class Pxtone {
   ): { pcm: Uint8Array; channels: 1 | 2; sampleRate: number } {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
     const dataPtr = alloc(bytes.length);
-    const outSamplesLen = alloc(4);
     try {
       new Uint8Array(memory.buffer, dataPtr, bytes.length).set(bytes);
-      const samplesPtr = service_render_noise(
+      // Deno-generated Wasm types do not support Multi-Value returns.
+      const { 0: samplesPtr, 1: samplesLen } = service_render_noise(
         this.#ptr,
         dataPtr,
         bytes.length,
-        outSamplesLen,
-      );
-      if (samplesPtr === 0) throw new Error("service_render_noise failed");
-      const samplesLen = new Uint32Array(memory.buffer, outSamplesLen, 1)[0];
-      const pcm = new Uint8Array(memory.buffer, samplesPtr, samplesLen).slice();
-      dealloc(samplesPtr, samplesLen);
+      ) as unknown as [number, number];
+      if (!samplesPtr) throw new Error("service_render_noise failed");
+      const pcm = new Uint8Array(memory.buffer, samplesPtr >>> 0, samplesLen >>> 0).slice();
+      dealloc(samplesPtr >>> 0, samplesLen >>> 0);
       return { pcm, channels: this.#numberOfChannels, sampleRate: this.#sampleRate };
     } finally {
       dealloc(dataPtr, bytes.length);
-      dealloc(outSamplesLen, 4);
     }
   }
 }

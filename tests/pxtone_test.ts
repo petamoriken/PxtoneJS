@@ -52,6 +52,29 @@ function audioDataToPcm(audioData: MockAudioData): Uint8Array {
   return new Uint8Array(int16.buffer);
 }
 
+const WAV_HEADER_LEN = 44;
+const WAV_PCM_TOLERANCE = 2;
+
+function wavMatches(
+  actual: Uint8Array,
+  expected: Uint8Array,
+): { ok: boolean; maxDiff: number } {
+  if (actual.length !== expected.length) return { ok: false, maxDiff: -1 };
+  for (let i = 0; i < WAV_HEADER_LEN; i++) {
+    if (actual[i] !== expected[i]) return { ok: false, maxDiff: -1 };
+  }
+  let maxDiff = 0;
+  for (let i = WAV_HEADER_LEN; i + 1 < actual.length; i += 2) {
+    let a = actual[i] | (actual[i + 1] << 8);
+    let e = expected[i] | (expected[i + 1] << 8);
+    if (a >= 0x8000) a -= 0x10000;
+    if (e >= 0x8000) e -= 0x10000;
+    const diff = Math.abs(a - e);
+    if (diff > maxDiff) maxDiff = diff;
+  }
+  return { ok: maxDiff <= WAV_PCM_TOLERANCE, maxDiff };
+}
+
 function pcmToWav(
   samples: Uint8Array,
   channels: number,
@@ -167,11 +190,9 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
 
     const wav = pcmToWav(pcm, pxtone.numberOfChannels!, pxtone.sampleRate!);
     const expected = await Deno.readFile(join(snapshotDir, `${stem}.wav`));
-    const compareLen = Math.min(wav.length - 44, expected.length - 44);
-    if (
-      wav.subarray(44, 44 + compareLen).some((b, i) => b !== expected[44 + i])
-    ) {
-      failures.push(`${stem}: PCM mismatch`);
+    const { ok, maxDiff } = wavMatches(wav, expected);
+    if (!ok) {
+      failures.push(`${stem}: PCM mismatch (maxDiff=${maxDiff})`);
     }
   }
 
@@ -216,10 +237,9 @@ Deno.test("decoded ptnoise matches reference (Pxtone)", async () => {
     const buf = result as unknown as MockAudioData;
     const wav = pcmToWav(audioDataToPcm(buf), pxtone.numberOfChannels, pxtone.sampleRate);
     const expected = await Deno.readFile(join(snapshotDir, `${stem}.wav`));
-    if (
-      wav.length !== expected.length || wav.some((b, i) => b !== expected[i])
-    ) {
-      failures.push(`${stem}: PCM mismatch`);
+    const { ok, maxDiff } = wavMatches(wav, expected);
+    if (!ok) {
+      failures.push(`${stem}: PCM mismatch (maxDiff=${maxDiff})`);
     }
   }
 

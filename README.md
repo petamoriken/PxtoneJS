@@ -152,9 +152,15 @@ Creates an instance backed by a WebAssembly service.
 
 ```ts
 export interface PxtoneOptions {
-  /** Number of output channels. Must be `1` (mono) or `2` (stereo). Default: 2. */
+  /**
+   * Number of output channels. Must be `1` (mono) or `2` (stereo).
+   * @default 2
+   */
   numberOfChannels?: 1 | 2;
-  /** Output sample rate in Hz. Default: 44100. */
+  /**
+   * Output sample rate in Hz.
+   * @default 44100
+   */
   sampleRate?: number;
 }
 ```
@@ -229,19 +235,35 @@ stream is currently active.
 #### `stream(options?: StreamOptions): ReadableStream<AudioData>`
 
 Returns a `ReadableStream` that yields PCM chunks as `AudioData` objects (format `"f32-planar"`).
-Only one stream may be active at a time.
+Each chunk has at most `numberOfFrames` frames; the final chunk may be shorter. Only one stream may
+be active at a time.
 
 ```ts
 export interface StreamOptions {
-  /** Playback start position in seconds. Default: 0 (beginning). */
+  /**
+   * Playback start position in seconds.
+   * @default 0
+   */
   startTime?: number;
-  /** Units whose `played` flag is false are silenced. */
+  /**
+   * Units whose `played` flag is false are silenced.
+   * @default false
+   */
   unitMute?: boolean;
-  /** Loop playback from the song's repeat point. */
+  /**
+   * Loop playback from the song's repeat point.
+   * @default false
+   */
   loop?: boolean;
-  /** Number of frames per channel per chunk. Default: 1024. */
+  /**
+   * Maximum number of frames per channel per chunk. The final chunk may be shorter.
+   * @default 1024
+   */
   numberOfFrames?: number;
-  /** Backpressure threshold for the underlying `ReadableStream`. Default: 1. */
+  /**
+   * Backpressure threshold for the underlying `ReadableStream`.
+   * @default 1
+   */
   highWaterMark?: number;
   /** AbortSignal to cancel the stream early. */
   signal?: AbortSignal;
