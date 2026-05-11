@@ -63,5 +63,10 @@ console.log(`Generated ${outPath}`);
 
 const mjsPath = join(projectRoot, "bundle", "Pxtone.mjs");
 const mjsContent = await Deno.readTextFile(mjsPath);
-await Deno.writeTextFile(mjsPath, `// @ts-self-types="./Pxtone.d.mts"\n\n${mjsContent}`);
+const endOfComment = mjsContent.indexOf("*/") + 2;
+const newContent =
+  mjsContent.slice(0, endOfComment) +
+  '\n// @ts-self-types="./Pxtone.d.mts"' +
+  mjsContent.slice(endOfComment);
+await Deno.writeTextFile(mjsPath, newContent);
 console.log(`Updated ${mjsPath} with @ts-types directive`);

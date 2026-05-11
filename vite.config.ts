@@ -6,10 +6,22 @@ const { version } = JSON.parse(
   readFileSync("deno.json", "utf-8"),
 ) as { version: string };
 
-const banner = `/**!
- * @license
+const banner = `/**
+ * @license MIT
  * PxtoneJS v${version} | MIT License | 2016-2026 Kenta Moriuchi <moriken@kimamass.com> (https://moriken.dev)
  * Includes lewton (Vorbis decoder written in pure Rust) | MIT or Apache License 2.0 | 2016 est31 <MTest31@outlook.com> and contributors
+ *
+ * Play Pxtone Collage ["pxtone"](https://pxtone.org/) files in the browser.
+ *
+ * @example
+ * \`\`\`ts
+ * const ctx = new AudioContext();
+ * using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+ * pxtone.read(fileBytes);
+ * const stream = pxtone.stream();
+ * \`\`\`
+ *
+ * @module
  */`;
 
 function wasmInstancePlugin() {
@@ -57,9 +69,22 @@ function bannerPlugin(banner: string) {
   };
 }
 
+function stripCommentsPlugin() {
+  return {
+    name: "strip-comments",
+    renderChunk(code: string) {
+      return code
+        .replace(/\/\*\*[\s\S]*?\*\//g, "")
+        .replace(/^\s*\/\/#(end)?region.*\n?/gm, "")
+        .replace(/\n{3,}/g, "\n\n");
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     wasmInstancePlugin(),
+    stripCommentsPlugin(),
     bannerPlugin(banner),
   ],
   build: {

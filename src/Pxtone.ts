@@ -1,3 +1,21 @@
+/**
+ * @license MIT
+ * PxtoneJS | MIT License | 2016-2026 Kenta Moriuchi <moriken@kimamass.com> (https://moriken.dev)
+ * Includes lewton (Vorbis decoder written in pure Rust) | MIT or Apache License 2.0 | 2016 est31 <MTest31@outlook.com> and contributors
+ *
+ * Play Pxtone Collage ["pxtone"](https://pxtone.org/) files in the browser.
+ *
+ * @example
+ * ```ts
+ * const ctx = new AudioContext();
+ * using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+ * pxtone.read(fileBytes);
+ * const stream = pxtone.stream();
+ * ```
+ *
+ * @module
+ */
+
 import { pcmToAudioData } from "./pcm.ts";
 
 import {
@@ -129,6 +147,11 @@ export class PxtoneUnit {
    * Toggles the {@link played} flag of the unit.
    *
    * @param force - If provided, sets `played` to this value instead of toggling.
+   * @example
+   * ```ts
+   * unit.togglePlayed(); // toggle
+   * unit.togglePlayed(false); // mute
+   * ```
    */
   togglePlayed(force?: boolean | undefined) {
     const newPlayed = force ?? !this.#played;
@@ -332,8 +355,10 @@ export interface StreamOptions {
  * Main entry point for decoding and playing pxtone songs.
  *
  * Typical usage:
+ * @example
  * ```ts
- * using pxtone = new Pxtone();
+ * const ctx = new AudioContext();
+ * using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
  * pxtone.read(fileBytes);
  * const stream = pxtone.stream();
  * ```
@@ -374,6 +399,10 @@ export class Pxtone {
   /**
    * Returns `true` if `buffer` is a valid `.ptcop` / `.pttune` file, `false` otherwise.
    * Does not create a persistent service instance.
+   * @example
+   * ```ts
+   * const isValid = Pxtone.validate(fileBytes);
+   * ```
    */
   static validate(buffer: ArrayBuffer | Uint8Array): boolean {
     const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
@@ -389,6 +418,10 @@ export class Pxtone {
   /**
    * Returns `true` if `buffer` is a valid `.ptnoise` file, `false` otherwise.
    * Does not create a persistent service instance.
+   * @example
+   * ```ts
+   * const isValid = Pxtone.validateNoiseData(fileBytes);
+   * ```
    */
   static validateNoiseData(buffer: ArrayBuffer | Uint8Array): boolean {
     const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
@@ -604,6 +637,12 @@ export class Pxtone {
   /**
    * Resets the instance to its initial idle state, releasing all song data.
    * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}) or a stream is active ({@link PxtoneError.CODE_STREAMING_ACTIVE}).
+   * @example
+   * ```ts
+   * pxtone.read(file1Bytes);
+   * pxtone.clear();
+   * pxtone.read(file2Bytes);
+   * ```
    */
   clear(): void {
     if (this.#state === "disposed") {
@@ -649,6 +688,11 @@ export class Pxtone {
    *
    * @param buffer - Raw file bytes.
    * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}), a stream is active ({@link PxtoneError.CODE_STREAMING_ACTIVE}), or the file is invalid ({@link PxtoneError.CODE_READ_FAILED}, {@link PxtoneError.CODE_TONES_READY_FAILED}).
+   * @example
+   * ```ts
+   * const response = await fetch("song.ptcop");
+   * pxtone.read(new Uint8Array(await response.arrayBuffer()));
+   * ```
    */
   read(buffer: ArrayBuffer | Uint8Array): void {
     if (this.#state === "streaming") {
@@ -718,6 +762,17 @@ export class Pxtone {
    * song finishes (or the loop point is reached with `loop: false`).
    *
    * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}), {@link read} has not been called ({@link PxtoneError.CODE_NOT_READY}), or a stream is already active ({@link PxtoneError.CODE_STREAMING_ACTIVE}).
+   * @example
+   * ```ts
+   * const stream = pxtone.stream({ loop: true });
+   * const reader = stream.getReader();
+   * while (true) {
+   *   const { done, value: audioData } = await reader.read();
+   *   if (done) break;
+   *   // copy into an AudioBuffer, or forward to AudioWorklet, MediaStreamTrackGenerator, etc.
+   *   audioData.close();
+   * }
+   * ```
    */
   stream(
     {
@@ -860,6 +915,12 @@ export class Pxtone {
    * @param buffer - Raw `.ptnoise` file bytes.
    * @returns A promise that resolves with the decoded `AudioData`.
    * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}) or rendering fails ({@link PxtoneError.CODE_RENDER_NOISE_FAILED}).
+   * @example
+   * ```ts
+   * const ctx = new AudioContext();
+   * using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+   * const audioData = await pxtone.decodeNoiseData(fileBytes);
+   * ```
    */
   decodeNoiseData(
     buffer: ArrayBuffer | Uint8Array,
