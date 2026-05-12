@@ -8,8 +8,13 @@ const { version } = JSON.parse(
 
 const banner = `/**
  * @license MIT
- * PxtoneJS v${version} | MIT License | 2016-2026 Kenta Moriuchi <moriken@kimamass.com> (https://moriken.dev)
- * Includes lewton (Vorbis decoder written in pure Rust) | MIT or Apache License 2.0 | 2016 est31 <MTest31@outlook.com> and contributors
+ * PxtoneJS v${version}
+ * Copyright (c) 2016-2026 Kenta Moriuchi <moriken@kimamass.com> (https://moriken.dev)
+ *
+ * This library includes third-party software under the following licenses:
+ * - RustAudio/ogg (3-Clause BSD): Copyright (c) 2016-2017 est31 and contributors, 2002-2015 Xiph.org Foundation
+ * - RustAudio/lewton (MIT or Apache-2.0): Copyright (c) 2016 est31 and contributors
+ * - BurntSushi/byteorder (MIT or UNLICENSE): Copyright (c) 2015 Andrew Gallant
  *
  * Play Pxtone Collage ["pxtone"](https://pxtone.org/) files in the browser.
  *
