@@ -10,10 +10,11 @@ export function pcmToAudioData(init: {
 }): AudioData {
   const { data, sampleRate, numberOfFrames, numberOfChannels, timestamp } = init;
   const f32 = new Float32Array(numberOfFrames * numberOfChannels);
+  const scale = 1 / 0x8000;
   for (let i = 0; i < numberOfFrames; i++) {
     for (let ch = 0; ch < numberOfChannels; ch++) {
       const s = data[i * numberOfChannels + ch];
-      f32[ch * numberOfFrames + i] = s / 0x8000;
+      f32[ch * numberOfFrames + i] = s * scale;
     }
   }
   return new AudioData({

@@ -390,6 +390,12 @@ export class Pxtone {
   #loopStartMeasure: number | null = null;
   #loopEndMeasure: number | null = null;
 
+  #loopStartFrame = 0;
+  #loopEndFrame = 0;
+  #loopLength = 0;
+
+  #ticksPerFrame = 0;
+
   #state: "idle" | "ready" | "streaming" | "disposed" = "idle";
   #currentFrame = 0;
 
@@ -571,9 +577,7 @@ export class Pxtone {
     if (this.#state !== "ready" && this.#state !== "streaming") {
       return 0;
     }
-    const spm = this.#secondsPerMeasure!;
-    const tpm = this.#beatsPerMeasure! * this.#ticksPerBeat!;
-    return Math.round(this.#resolveCurrentFrame() * tpm / (spm * this.#sampleRate));
+    return Math.round(this.#resolveCurrentFrame() * this.#ticksPerFrame);
   }
 
   /** Current playback position in seconds, updated as each chunk is pulled from the stream. */
@@ -585,19 +589,11 @@ export class Pxtone {
   }
 
   #resolveCurrentFrame(): number {
-    const sampleRate = this.#sampleRate;
     const currentFrame = this.#currentFrame;
-    const loopEndMeasure = this.#loopEndMeasure!;
-    const loopStartMeasure = this.#loopStartMeasure!;
-    if (loopStartMeasure !== 0) {
-      const spm = this.#secondsPerMeasure!;
-      const loopEndFrame = Math.round(loopEndMeasure * spm * sampleRate);
-      const loopStartFrame = Math.round(loopStartMeasure * spm * sampleRate);
-      const loopLength = Math.round(
-        (loopEndMeasure - loopStartMeasure) * spm * sampleRate,
-      );
-      if (loopLength > 0 && currentFrame > loopEndFrame) {
-        return loopStartFrame + (currentFrame - loopEndFrame) % loopLength;
+    if (this.#loopStartMeasure !== 0) {
+      const loopLength = this.#loopLength;
+      if (loopLength > 0 && currentFrame > this.#loopEndFrame) {
+        return this.#loopStartFrame + (currentFrame - this.#loopEndFrame) % loopLength;
       }
     }
     return currentFrame;
@@ -668,6 +664,10 @@ export class Pxtone {
     this.#numberOfMeasures = null;
     this.#loopStartMeasure = null;
     this.#loopEndMeasure = null;
+    this.#loopStartFrame = 0;
+    this.#loopEndFrame = 0;
+    this.#loopLength = 0;
+    this.#ticksPerFrame = 0;
     this.#currentFrame = 0;
     if (this.#units !== null) {
       for (let i = 0; i < this.#units.length; ++i) {
@@ -743,10 +743,18 @@ export class Pxtone {
     this.#ticksPerBeat = ticksPerBeat;
     this.#beatsPerMeasure = beatsPerMeasure;
     this.#beatTempo = beatTempo;
-    this.#secondsPerMeasure = (beatsPerMeasure * 60) / beatTempo;
+    const spm = (beatsPerMeasure * 60) / beatTempo;
+    this.#secondsPerMeasure = spm;
     this.#numberOfMeasures = measureCount;
     this.#loopStartMeasure = repeatMeasure;
     this.#loopEndMeasure = lastMeasure !== 0 ? lastMeasure : measureCount;
+    const sr = this.#sampleRate;
+    this.#loopStartFrame = Math.round(this.#loopStartMeasure * spm * sr);
+    this.#loopEndFrame = Math.round(this.#loopEndMeasure * spm * sr);
+    this.#loopLength = Math.round(
+      (this.#loopEndMeasure - this.#loopStartMeasure) * spm * sr,
+    );
+    this.#ticksPerFrame = (beatsPerMeasure * ticksPerBeat) / (spm * sr);
     this.#currentFrame = 0;
     this.#units = null;
     this.#events = null;
@@ -800,7 +808,9 @@ export class Pxtone {
 
     const channels = this.#numberOfChannels!;
     const sampleRate = this.#sampleRate!;
-    const chunkBytes = numberOfFrames * channels * 2;
+    const bytesPerFrame = channels * 2;
+    const chunkBytes = numberOfFrames * bytesPerFrame;
+    const microsPerSample = 1_000_000 / sampleRate;
     const startSample = Math.round(startTime * sampleRate);
 
     if (
@@ -883,13 +893,13 @@ export class Pxtone {
             controller.close();
             return;
           }
-          const writtenFrames = writtenBytes / (channels * 2);
+          const writtenFrames = writtenBytes / bytesPerFrame;
           const audioData = pcmToAudioData({
-            data: new Int16Array(memory.buffer, bufPtr, writtenBytes / 2),
+            data: new Int16Array(memory.buffer, bufPtr, writtenFrames * channels),
             sampleRate,
             numberOfFrames: writtenFrames,
             numberOfChannels: channels,
-            timestamp: Math.round(currentFrame * 1_000_000 / sampleRate),
+            timestamp: Math.round(currentFrame * microsPerSample),
           });
           controller.enqueue(audioData);
           setCurrentFrame(currentFrame);
