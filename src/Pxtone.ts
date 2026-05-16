@@ -1,23 +1,16 @@
 /**
  * @license MIT
- * PxtoneJS
+ * PxtoneJS v4.1.0
  * Copyright (c) 2016-2026 Kenta Moriuchi <moriken@kimamass.com> (https://moriken.dev)
  *
  * This library includes third-party software under the following licenses:
- * - RustAudio/ogg (3-Clause BSD): Copyright (c) 2016-2017 est31 and contributors, 2002-2015 Xiph.org Foundation
- * - RustAudio/lewton (MIT or Apache-2.0): Copyright (c) 2016 est31 and contributors
- * - BurntSushi/byteorder (MIT or UNLICENSE): Copyright (c) 2015 Andrew Gallant
+ * - ogg (3-Clause BSD): Copyright (c) 2016-2017 est31 and contributors, 2002-2015 Xiph.org Foundation
+ * - lewton (MIT or Apache-2.0): Copyright (c) 2016 est31 and contributors
+ * - byteorder (MIT or UNLICENSE): Copyright (c) 2015 Andrew Gallant
+ * - tinyvec (Zlib or MIT or Apache-2.0): Copyright (c) 2019 Daniel "Lokathor" Gee
+ * - talc (MIT): Copyright (c) 2026 Shaun Beautement
  *
  * Play Pxtone Collage ["pxtone"](https://pxtone.org/) files in the browser.
- *
- * @example
- * ```ts
- * const ctx = new AudioContext();
- * using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
- * pxtone.read(fileBytes);
- * const stream = pxtone.stream();
- * ```
- *
  * @module
  */
 
@@ -359,7 +352,10 @@ export interface StreamOptions {
 /**
  * Main entry point for decoding and playing pxtone songs.
  *
- * Typical usage:
+ * The instance holds a native Wasm resource and must be disposed when no
+ * longer needed. Use the `using` declaration (Explicit Resource Management)
+ * or call {@link Symbol.dispose} manually.
+ *
  * @example
  * ```ts
  * const ctx = new AudioContext();
@@ -367,10 +363,6 @@ export interface StreamOptions {
  * pxtone.read(fileBytes);
  * const stream = pxtone.stream();
  * ```
- *
- * The instance holds a native Wasm resource and must be disposed when no
- * longer needed. Use the `using` declaration (Explicit Resource Management)
- * or call {@link Symbol.dispose} manually.
  */
 export class Pxtone {
   static #sjisDecoder = new TextDecoder("shift-jis");
@@ -410,6 +402,7 @@ export class Pxtone {
   /**
    * Returns `true` if `buffer` is a valid `.ptcop` / `.pttune` file, `false` otherwise.
    * Does not create a persistent service instance.
+   *
    * @example
    * ```ts
    * const isValid = Pxtone.validate(fileBytes);
@@ -429,6 +422,7 @@ export class Pxtone {
   /**
    * Returns `true` if `buffer` is a valid `.ptnoise` file, `false` otherwise.
    * Does not create a persistent service instance.
+   *
    * @example
    * ```ts
    * const isValid = Pxtone.validateNoiseData(fileBytes);
@@ -636,6 +630,7 @@ export class Pxtone {
 
   /**
    * Resets the instance to its initial idle state, releasing all song data.
+   *
    * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}) or a stream is active ({@link PxtoneError.CODE_STREAMING_ACTIVE}).
    * @example
    * ```ts

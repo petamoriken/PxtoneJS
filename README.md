@@ -335,8 +335,4 @@ Rust port of the Pxtone Collage library.
 
 [MIT](LICENSE.md)
 
-This software includes the following third-party components:
-
-- [RustAudio/ogg](https://github.com/RustAudio/ogg) (3-Clause BSD)
-- [RustAudio/lewton](https://github.com/RustAudio/lewton) (MIT or Apache-2.0)
-- [BurntSushi/byteorder](https://github.com/BurntSushi/byteorder) (MIT or Unlicense)
+See [NOTICE.md](NOTICE.md) for third-party license notices.

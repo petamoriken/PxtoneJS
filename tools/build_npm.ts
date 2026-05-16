@@ -13,6 +13,7 @@ await Promise.all([
   Deno.copyFile("./bundle/Pxtone.js.map", "./npm/Pxtone.js.map"),
   Deno.copyFile("./bundle/Pxtone.d.mts", "./npm/Pxtone.d.mts"),
   Deno.copyFile("./LICENSE.md", "./npm/LICENSE.md"),
+  Deno.copyFile("./NOTICE.md", "./npm/NOTICE.md"),
   Deno.copyFile("./README.md", "./npm/README.md"),
   Deno.copyFile("./pxtonejs.png", "./npm/pxtonejs.png"),
   Deno.copyFile("./pxtonejs5x.png", "./npm/pxtonejs5x.png"),
