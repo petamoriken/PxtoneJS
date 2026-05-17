@@ -104,7 +104,7 @@ export default defineConfig({
           format: "iife",
           entryFileNames: "Pxtone.js",
           name: "Pxtone",
-          intro: 'Symbol.dispose ??= Symbol("@@dispose");',
+          intro: '"use strict"; Symbol.dispose ??= Symbol("@@dispose");',
         },
       ],
     },
