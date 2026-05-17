@@ -1,6 +1,6 @@
 /**
  * @license MIT
- * PxtoneJS v4.1.0
+ * PxtoneJS v4.1.1
  * Copyright (c) 2016-2026 Kenta Moriuchi <moriken@kimamass.com> (https://moriken.dev)
  *
  * This library includes third-party software under the following licenses:
