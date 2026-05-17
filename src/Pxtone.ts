@@ -352,16 +352,17 @@ export interface StreamOptions {
 /**
  * Main entry point for decoding and playing pxtone songs.
  *
- * The instance holds a native Wasm resource and must be disposed when no
- * longer needed. Use the `using` declaration (Explicit Resource Management)
- * or call {@link Symbol.dispose} manually.
+ * The instance holds a native Wasm resource and must be released when no
+ * longer needed. Call {@link close} explicitly to free the resource promptly.
  *
  * @example
  * ```ts
  * const ctx = new AudioContext();
- * using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+ * const pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
  * pxtone.read(fileBytes);
  * const stream = pxtone.stream();
+ * // ...
+ * pxtone.close();
  * ```
  */
 export class Pxtone {
@@ -453,14 +454,14 @@ export class Pxtone {
   }
 
   /**
-   * Releases the underlying Wasm resource. Called automatically by `using`.
+   * Releases the underlying Wasm resource.
    * Safe to call multiple times; subsequent calls are no-ops.
    *
    * If called while a stream is active, the Wasm memory is not freed immediately —
    * it is freed when the next chunk is pulled (the stream will error) or when the
    * stream is cancelled.
    */
-  [Symbol.dispose](): void {
+  close(): void {
     if (this.#state === "disposed") return;
     const wasStreaming = this.#state === "streaming";
     this.#state = "disposed";
@@ -468,6 +469,20 @@ export class Pxtone {
     Pxtone.#registry.unregister(this);
     if (!wasStreaming) {
       service_free(this.#ptr);
+    }
+  }
+
+  /** Alias for {@link close}. Available only in environments that support `Symbol.dispose`. */
+  declare [Symbol.dispose]: () => void;
+
+  static {
+    // Alias close() as Symbol.dispose for environments that support Explicit Resource Management.
+    if (typeof Symbol.dispose !== "undefined") {
+      Object.defineProperty(Pxtone.prototype, Symbol.dispose, {
+        configurable: true,
+        writable: true,
+        value: Pxtone.prototype.close,
+      });
     }
   }
 
@@ -926,8 +941,10 @@ export class Pxtone {
    * @example
    * ```ts
    * const ctx = new AudioContext();
-   * using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+   * const pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
    * const audioData = await pxtone.decodeNoiseData(fileBytes);
+   * // ...
+   * pxtone.close();
    * ```
    */
   decodeNoiseData(

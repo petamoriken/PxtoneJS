@@ -36,7 +36,8 @@ deno add jsr:@petamoriken/pxtone
 
 ### Direct download
 
-Bundled scripts are available on [GitHub Releases](https://github.com/petamoriken/PxtoneJS/releases):
+Bundled scripts are available on
+[GitHub Releases](https://github.com/petamoriken/PxtoneJS/releases):
 
 - `Pxtone.js` — IIFE bundle (exposes `Pxtone`, `PxtoneError`, etc. as globals)
 - `Pxtone.mjs` — ES Modules bundle
@@ -46,9 +47,9 @@ Bundled scripts are available on [GitHub Releases](https://github.com/petamorike
 ### Playing a `.ptcop` / `.pttune` file
 
 `Pxtone` holds a native WebAssembly resource. While it will be automatically released eventually, it
-is recommended to use the `using` declaration (Explicit Resource Management) or call
-`[Symbol.dispose]()` manually to ensure the resource is disposed of as soon as it is no longer
-needed.
+is recommended to call `close()` when the instance is no longer needed to ensure the resource is
+released promptly. If `Symbol.dispose` is available in your environment, you can also use the
+`using` declaration (Explicit Resource Management).
 
 `stream()` returns a `ReadableStream<AudioData>` (format `"f32-planar"`). To play back with the Web
 Audio API using `AudioBufferSourceNode`, schedule each chunk ahead of time:
@@ -60,7 +61,7 @@ const fileBytes = await response.arrayBuffer();
 const BUFFER_AHEAD = 0.5; // seconds
 
 const ctx = new AudioContext();
-using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+const pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
 pxtone.read(fileBytes);
 
 const stream = pxtone.stream({ loop: true });
@@ -92,6 +93,9 @@ async function scheduleMore() {
 
 await scheduleMore();
 setInterval(scheduleMore, 100);
+
+// When stopping playback:
+// pxtone.close();
 ```
 
 Each `AudioData` chunk can also be forwarded to an `AudioWorkletNode`, `MediaStreamTrackGenerator`,
@@ -101,7 +105,7 @@ or other consumers:
 const response = await fetch("song.ptcop");
 const fileBytes = await response.arrayBuffer();
 
-using pxtone = new Pxtone();
+const pxtone = new Pxtone();
 pxtone.read(fileBytes);
 
 console.log(pxtone.name);
@@ -115,6 +119,7 @@ while (true) {
   if (done) break;
   // pass audioData to an AudioWorklet, MediaStreamTrackGenerator, etc.
 }
+pxtone.close();
 ```
 
 ### Decoding a `.ptnoise` file
@@ -127,8 +132,9 @@ const response = await fetch("drum.ptnoise");
 const fileBytes = await response.arrayBuffer();
 
 const ctx = new AudioContext();
-using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
+const pxtone = new Pxtone({ sampleRate: ctx.sampleRate });
 const audioData = await pxtone.decodeNoiseData(fileBytes);
+pxtone.close();
 
 const buffer = new AudioBuffer({
   numberOfChannels: audioData.numberOfChannels,
@@ -271,6 +277,12 @@ export interface StreamOptions {
   signal?: AbortSignal;
 }
 ```
+
+#### `close(): void`
+
+Releases the underlying Wasm resource. Safe to call multiple times; subsequent calls are no-ops. If
+`Symbol.dispose` is available in the runtime environment, it is aliased to `close()` so the `using`
+declaration also works.
 
 #### `clear(): void`
 
