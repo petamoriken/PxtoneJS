@@ -11,7 +11,7 @@
  * - talc (MIT): Copyright (c) 2026 Shaun Beautement
  *
  * Play Pxtone Collage ["pxtone"](https://pxtone.org/) files in the browser.
- * @module
+ * @module Pxtone
  */
 
 import { pcmToAudioData } from "./pcm.ts";
