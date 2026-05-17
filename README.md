@@ -34,6 +34,13 @@ npm install pxtone
 deno add jsr:@petamoriken/pxtone
 ```
 
+### Direct download
+
+Bundled scripts are available on [GitHub Releases](https://github.com/petamoriken/PxtoneJS/releases):
+
+- `Pxtone.js` — IIFE bundle (exposes `Pxtone`, `PxtoneError`, etc. as globals)
+- `Pxtone.mjs` — ES Modules bundle
+
 ## Usage
 
 ### Playing a `.ptcop` / `.pttune` file
@@ -47,10 +54,8 @@ needed.
 Audio API using `AudioBufferSourceNode`, schedule each chunk ahead of time:
 
 ```ts
-import { Pxtone } from "pxtone";
-
 const response = await fetch("song.ptcop");
-const fileBytes = new Uint8Array(await response.arrayBuffer());
+const fileBytes = await response.arrayBuffer();
 
 const BUFFER_AHEAD = 0.5; // seconds
 
@@ -93,10 +98,8 @@ Each `AudioData` chunk can also be forwarded to an `AudioWorkletNode`, `MediaStr
 or other consumers:
 
 ```ts
-import { Pxtone } from "pxtone";
-
 const response = await fetch("song.ptcop");
-const fileBytes = new Uint8Array(await response.arrayBuffer());
+const fileBytes = await response.arrayBuffer();
 
 using pxtone = new Pxtone();
 pxtone.read(fileBytes);
@@ -120,10 +123,8 @@ while (true) {
 Audio API, copy each channel plane into an `AudioBuffer`:
 
 ```ts
-import { Pxtone } from "pxtone";
-
 const response = await fetch("drum.ptnoise");
-const fileBytes = new Uint8Array(await response.arrayBuffer());
+const fileBytes = await response.arrayBuffer();
 
 const ctx = new AudioContext();
 using pxtone = new Pxtone({ sampleRate: ctx.sampleRate });

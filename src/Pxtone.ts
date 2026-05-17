@@ -690,7 +690,7 @@ export class Pxtone {
    * @example
    * ```ts
    * const response = await fetch("song.ptcop");
-   * pxtone.read(new Uint8Array(await response.arrayBuffer()));
+   * pxtone.read(await response.arrayBuffer());
    * ```
    */
   read(buffer: ArrayBuffer | Uint8Array): void {
