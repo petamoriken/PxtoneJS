@@ -39,7 +39,8 @@ deno add jsr:@petamoriken/pxtone
 Bundled scripts are available on
 [GitHub Releases](https://github.com/petamoriken/PxtoneJS/releases):
 
-- `Pxtone.js` — IIFE bundle (exposes `Pxtone`, `PxtoneError`, etc. as globals)
+- `Pxtone.js` — IIFE bundle (exposes a `Pxtone` namespace as a global, e.g. `Pxtone.Pxtone`,
+  `Pxtone.PxtoneError`)
 - `Pxtone.mjs` — ES Modules bundle
 
 ## Usage
