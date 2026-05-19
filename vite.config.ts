@@ -98,13 +98,12 @@ export default defineConfig({
         {
           format: "es",
           entryFileNames: "Pxtone.mjs",
-          intro: 'Symbol.dispose ??= Symbol("@@dispose");',
         },
         {
           format: "iife",
           entryFileNames: "Pxtone.js",
           name: "Pxtone",
-          intro: '"use strict"; Symbol.dispose ??= Symbol("@@dispose");',
+          intro: '"use strict";',
         },
       ],
     },
