@@ -13,7 +13,6 @@
     "jsr:@std/toml@^1.0.11": "1.0.11",
     "jsr:@ts-morph/bootstrap@0.27": "0.27.0",
     "jsr:@ts-morph/common@0.27": "0.27.0",
-    "npm:typescript@^6.0.3": "6.0.3",
     "npm:vite@^8.0.10": "8.0.10"
   },
   "jsr": {
@@ -344,10 +343,6 @@
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
     },
-    "typescript@6.0.3": {
-      "integrity": "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==",
-      "bin": true
-    },
     "vite@8.0.10": {
       "integrity": "sha512-rZuUu9j6J5uotLDs+cAA4O5H4K1SfPliUlQwqa6YEwSrWDZzP4rhm00oJR5snMewjxF5V/K3D4kctsUTsIU9Mw==",
       "dependencies": [
@@ -368,7 +363,6 @@
       "jsr:@deno/dnt@~0.42.3",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/toml@^1.0.11",
-      "npm:typescript@^6.0.3",
       "npm:vite@^8.0.10"
     ]
   }
