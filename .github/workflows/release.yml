@@ -73,6 +73,25 @@ jobs:
             --title "chore: bump version to v${{ inputs.version }}" \
             --body "Automated version bump for release v${{ inputs.version }}."
 
+      - name: Wait for checks to be registered
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+        run: |
+          for i in {1..30}; do
+            count=$(gh pr checks "release/v${{ inputs.version }}" \
+              --required --json name --jq 'length' 2>/dev/null || true)
+
+            if [ "$count" -gt 0 ]; then
+              exit 0
+            fi
+
+            echo "Checks are not registered yet ($i/30)"
+            sleep 10
+          done
+
+          echo "Timed out waiting for checks to be registered"
+          exit 1
+
       - name: Wait for required checks
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PAT }}
