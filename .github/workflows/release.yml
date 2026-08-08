@@ -37,13 +37,6 @@ jobs:
       - name: Bump version
         run: deno run --allow-read --allow-write tools/bump_version.ts "${{ inputs.version }}"
 
-      - name: Commit version bump
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore: bump version to v${{ inputs.version }}"
-          git push origin HEAD
-
       - name: Build
         run: deno task build && deno task build:npm
 
@@ -54,10 +47,13 @@ jobs:
         run: npm publish --provenance --access public
         working-directory: ./npm
 
-      - name: Tag version bump
+      - name: Commit and tag version bump
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: bump version to v${{ inputs.version }}"
           git tag "v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
+          git push origin HEAD "v${{ inputs.version }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
