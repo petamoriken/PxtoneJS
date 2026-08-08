@@ -1,61 +1,46 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import ts from "typescript";
-
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-const compilerOptions: ts.CompilerOptions = {
-  declaration: true,
-  emitDeclarationOnly: true,
-  allowImportingTsExtensions: true,
-  allowArbitraryExtensions: true,
-  moduleResolution: ts.ModuleResolutionKind.Bundler,
-  module: ts.ModuleKind.ESNext,
-  target: ts.ScriptTarget.ESNext,
-  strict: true,
-  lib: ["lib.dom.d.ts", "lib.dom.iterable.d.ts", "lib.esnext.d.ts"],
-};
-
-let dtsContent = "";
-
-const host = ts.createCompilerHost(compilerOptions);
-host.writeFile = (fileName: string, data: string) => {
-  if (fileName.endsWith("Pxtone.d.ts")) {
-    dtsContent = data;
-  }
-};
-
-const program = ts.createProgram(
-  [join(projectRoot, "src/Pxtone.ts")],
-  compilerOptions,
-  host,
+// deno.json's lib includes deno.ns for tests, which conflicts with the bundle's
+// DOM-only target, so override compilerOptions.lib with a config just for this transpile
+const tempDir = await Deno.makeTempDir();
+const configPath = join(tempDir, "deno.json");
+await Deno.writeTextFile(
+  configPath,
+  JSON.stringify({ compilerOptions: { lib: ["dom", "dom.iterable", "esnext"] } }),
 );
 
-const emitResult = program.emit();
+const jsPath = join(tempDir, "Pxtone.js");
+const dtsPath = join(tempDir, "Pxtone.d.ts");
 
-const diagnostics = ts
-  .getPreEmitDiagnostics(program)
-  .concat(emitResult.diagnostics);
+const command = new Deno.Command(Deno.execPath(), {
+  args: [
+    "transpile",
+    join(projectRoot, "src/Pxtone.ts"),
+    "-o",
+    jsPath,
+    "--declaration",
+    "--config",
+    configPath,
+    "--quiet",
+  ],
+  stderr: "inherit",
+});
 
-let hasError = false;
-for (const diag of diagnostics) {
-  if (diag.category === ts.DiagnosticCategory.Error) {
-    const message = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
-    const location = diag.file
-      ? `${diag.file.fileName}:${diag.file.getLineAndCharacterOfPosition(diag.start!).line + 1}`
-      : "unknown";
-    console.error(`error: ${location}: ${message}`);
-    hasError = true;
-  }
-}
-
-if (hasError) Deno.exit(1);
-
-if (!dtsContent) {
-  console.error("error: no .d.ts output was generated");
+const { success } = await command.output();
+if (!success) {
+  await Deno.remove(tempDir, { recursive: true });
   Deno.exit(1);
 }
+
+const dtsLines = (await Deno.readTextFile(dtsPath)).split("\n");
+const dtsContent = dtsLines
+  .filter((line) => !line.includes("<amd-module"))
+  .join("\n");
+
+await Deno.remove(tempDir, { recursive: true });
 
 const outPath = join(projectRoot, "bundle", "Pxtone.d.mts");
 await Deno.writeTextFile(outPath, dtsContent);
