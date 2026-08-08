@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
   id-token: write
 
 jobs:
@@ -44,16 +45,48 @@ jobs:
         run: deno publish --allow-dirty
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: |
+          if npm view "pxtone@${{ inputs.version }}" version >/dev/null 2>&1; then
+            echo "Version ${{ inputs.version }} is already published to npm, skipping"
+          else
+            npm publish --provenance --access public
+          fi
         working-directory: ./npm
 
-      - name: Commit and tag version bump
+      - name: Commit version bump
+        id: bump_commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "release/v${{ inputs.version }}"
           git commit -am "chore: bump version to v${{ inputs.version }}"
-          git tag "v${{ inputs.version }}"
-          git push origin HEAD "v${{ inputs.version }}"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          git push origin "release/v${{ inputs.version }}"
+
+      - name: Open version bump PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+        run: |
+          gh pr create \
+            --base main \
+            --head "release/v${{ inputs.version }}" \
+            --title "chore: bump version to v${{ inputs.version }}" \
+            --body "Automated version bump for release v${{ inputs.version }}."
+
+      - name: Wait for required checks
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+        run: gh pr checks "release/v${{ inputs.version }}" --watch --required
+
+      - name: Merge version bump PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+        run: gh pr merge "release/v${{ inputs.version }}" --merge --delete-branch
+
+      - name: Tag version bump
+        run: |
+          git tag "v${{ inputs.version }}" "${{ steps.bump_commit.outputs.sha }}"
+          git push origin "v${{ inputs.version }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
