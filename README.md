@@ -18,7 +18,7 @@
 
 ## Demo
 
-[PxtoneJS v4 Demo](https://codepen.io/petamoriken/pen/JGWQOE/)
+[PxtoneJS v4 Demo](https://codepen.io/editor/petamoriken/pen/01521c00-2e80-71ec-962a-44e8c06d3120?panel=false&show=preview)
 
 ## Install
 
