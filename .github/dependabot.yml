@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: deno
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "08:00"
+      timezone: "Asia/Tokyo"
+    cooldown:
+      default-days: 2
+    allow:
+      - dependency-type: direct
+    open-pull-requests-limit: 10
