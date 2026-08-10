@@ -4,14 +4,18 @@ import { buildNotes } from "../src/notes.ts";
 import type {
   PxtoneEvent,
   PxtoneNote,
+  PxtonePanVolumeSegment,
   PxtonePitchInterpolation,
   PxtonePitchSegment,
   PxtoneUnit,
+  PxtoneVolumeSegment,
 } from "../src/Pxtone.ts";
 
-const KEY = 2;
 const ON = 1;
+const KEY = 2;
+const PAN_VOLUME = 3;
 const VELOCITY = 4;
+const VOLUME = 5;
 const PORTAMENT = 6;
 
 const factory = {
@@ -32,14 +36,34 @@ const factory = {
       interpolation,
     } as unknown as PxtonePitchSegment;
   },
+  createVolumeSegment(startTick: number, endTick: number, value: number): PxtoneVolumeSegment {
+    return { startTick, endTick, value } as unknown as PxtoneVolumeSegment;
+  },
+  createPanVolumeSegment(
+    startTick: number,
+    endTick: number,
+    value: number,
+  ): PxtonePanVolumeSegment {
+    return { startTick, endTick, value } as unknown as PxtonePanVolumeSegment;
+  },
   createNote(
     unit: PxtoneUnit,
     startTick: number,
     endTick: number,
     velocity: number,
     pitchSegments: PxtonePitchSegment[],
+    volumeSegments: PxtoneVolumeSegment[],
+    panVolumeSegments: PxtonePanVolumeSegment[],
   ): PxtoneNote {
-    return { unit, startTick, endTick, velocity, pitchSegments } as unknown as PxtoneNote;
+    return {
+      unit,
+      startTick,
+      endTick,
+      velocity,
+      pitchSegments,
+      volumeSegments,
+      panVolumeSegments,
+    } as unknown as PxtoneNote;
   },
 };
 
@@ -65,6 +89,12 @@ function pitchSegmentsOf(note: PxtoneNote) {
     targetKey: segment.targetKey,
     interpolation: segment.interpolation,
   }));
+}
+
+function volumeSegmentsOf(
+  segments: readonly (PxtoneVolumeSegment | PxtonePanVolumeSegment)[],
+) {
+  return segments.map((segment) => [segment.startTick, segment.endTick, segment.value]);
 }
 
 Deno.test("buildNotes creates hold and portamento segments", () => {
@@ -177,6 +207,36 @@ Deno.test("buildNotes keeps the written key when a note ends mid-glide", () => {
       interpolation: "linear",
     },
   ]);
+});
+
+Deno.test("buildNotes clips volume and pan automation to each note", () => {
+  const unit = testUnit("lead");
+  const notes = buildNotes(
+    [unit],
+    [
+      event(unit, 10, VOLUME, 80),
+      event(unit, 20, PAN_VOLUME, 32),
+      event(unit, 30, ON, 100),
+      event(unit, 50, VOLUME, 64),
+      event(unit, 70, VOLUME, 64), // Repeated values do not split the segment.
+      event(unit, 90, PAN_VOLUME, 96),
+      event(unit, 110, VOLUME, 104),
+      event(unit, 140, ON, 20),
+    ],
+    factory,
+  );
+
+  assertEquals(volumeSegmentsOf(notes[0].volumeSegments), [
+    [30, 50, 80],
+    [50, 110, 64],
+    [110, 130, 104],
+  ]);
+  assertEquals(volumeSegmentsOf(notes[0].panVolumeSegments), [
+    [30, 90, 32],
+    [90, 130, 96],
+  ]);
+  assertEquals(volumeSegmentsOf(notes[1].volumeSegments), [[140, 160, 104]]);
+  assertEquals(volumeSegmentsOf(notes[1].panVolumeSegments), [[140, 160, 96]]);
 });
 
 Deno.test("buildNotes truncates overlapping notes and sorts units chronologically", () => {
