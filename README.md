@@ -218,10 +218,11 @@ export interface PxtoneOptions {
 
 #### Song data
 
-| Property | Type                     | Description           |
-| -------- | ------------------------ | --------------------- |
-| `units`  | `readonly PxtoneUnit[]`  | Instrument tracks     |
-| `events` | `readonly PxtoneEvent[]` | Automation event list |
+| Property | Type                     | Description                                |
+| -------- | ------------------------ | ------------------------------------------ |
+| `units`  | `readonly PxtoneUnit[]`  | Instrument tracks                          |
+| `events` | `readonly PxtoneEvent[]` | Events ordered by tick and pxtone priority |
+| `notes`  | `readonly PxtoneNote[]`  | Notes ordered by tick, then by unit        |
 
 ### Methods
 
@@ -323,6 +324,7 @@ try {
 
 | Property | Type      | Description                            |
 | -------- | --------- | -------------------------------------- |
+| `index`  | `number`  | Position in `Pxtone#units`             |
 | `name`   | `string`  | Display name                           |
 | `played` | `boolean` | Whether the unit is active (not muted) |
 
@@ -339,6 +341,47 @@ than toggled.
 | `unit`   | `PxtoneUnit`      | Target unit in the loaded song                  |
 | `kind`   | `PxtoneEventKind` | Event type (see `PxtoneEvent.KIND_*` constants) |
 | `value`  | `number`          | Event payload                                   |
+
+### `PxtoneNote`
+
+Each note corresponds to one note-on event. Pitch changes during the note are represented by
+`pitchSegments`. Notes belonging to the same unit never overlap: if the next note-on arrives before
+the current note is over, the current note is cut short at that tick.
+
+| Property        | Type                            | Description                  |
+| --------------- | ------------------------------- | ---------------------------- |
+| `unit`          | `PxtoneUnit`                    | Instrument track             |
+| `startTick`     | `number`                        | Start position in ticks      |
+| `endTick`       | `number`                        | End position in ticks        |
+| `startTime`     | `number`                        | Start position in seconds    |
+| `endTime`       | `number`                        | End position in seconds      |
+| `velocity`      | `number`                        | Attack strength (0–128)      |
+| `pitchSegments` | `readonly PxtonePitchSegment[]` | Pitch movement over the note |
+
+#### `PxtonePitchSegment`
+
+| Property        | Type                 | Description                                     |
+| --------------- | -------------------- | ----------------------------------------------- |
+| `startTick`     | `number`             | Segment start in ticks                          |
+| `endTick`       | `number`             | Segment end in ticks                            |
+| `startTime`     | `number`             | Segment start in seconds                        |
+| `endTime`       | `number`             | Segment end in seconds                          |
+| `startKey`      | `number`             | Start key in pxtone units (256 per semitone)    |
+| `endKey`        | `number`             | End key in pxtone units                         |
+| `targetKey`     | `number`             | Key the segment is heading for, in pxtone units |
+| `startPitch`    | `number`             | Start pitch in semitones                        |
+| `endPitch`      | `number`             | End pitch in semitones                          |
+| `targetPitch`   | `number`             | `targetKey` in semitones                        |
+| `interpolation` | `"hold" \| "linear"` | Constant pitch or linear portamento             |
+
+A note always has at least one pitch segment, and its segments are chronological and cover the note
+from `startTick` to `endTick` without gaps. Portamento is exposed as a continuous linear model for
+visualization; tuning events and sample-level integer rounding are not included.
+
+`targetKey` equals `endKey` except when the note ends, or another key event arrives, before the
+portamento completes; then `endKey` is the interpolated pitch reached so far while `targetKey` stays
+the key that was written. Renderers that snap a note to a single key row want `targetKey`; renderers
+that draw the glide want `endKey`.
 
 ## WebAssembly
 
