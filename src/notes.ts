@@ -1,17 +1,23 @@
 import type {
   PxtoneEvent,
   PxtoneNote,
+  PxtonePanVolumeSegment,
   PxtonePitchInterpolation,
   PxtonePitchSegment,
   PxtoneUnit,
+  PxtoneVolumeSegment,
 } from "./Pxtone.ts";
 
 const DEFAULT_KEY = 0x6000;
 const DEFAULT_VELOCITY = 104;
+const DEFAULT_VOLUME = 104;
+const DEFAULT_PAN_VOLUME = 64;
 
 const KIND_ON = 1;
 const KIND_KEY = 2;
+const KIND_PAN_VOLUME = 3;
 const KIND_VELOCITY = 4;
+const KIND_VOLUME = 5;
 const KIND_PORTAMENT = 6;
 
 interface NoteFactory {
@@ -23,12 +29,20 @@ interface NoteFactory {
     targetKey: number,
     interpolation: PxtonePitchInterpolation,
   ): PxtonePitchSegment;
+  createVolumeSegment(startTick: number, endTick: number, value: number): PxtoneVolumeSegment;
+  createPanVolumeSegment(
+    startTick: number,
+    endTick: number,
+    value: number,
+  ): PxtonePanVolumeSegment;
   createNote(
     unit: PxtoneUnit,
     startTick: number,
     endTick: number,
     velocity: number,
     pitchSegments: PxtonePitchSegment[],
+    volumeSegments: PxtoneVolumeSegment[],
+    panVolumeSegments: PxtonePanVolumeSegment[],
   ): PxtoneNote;
 }
 
@@ -44,8 +58,12 @@ interface MutableNote {
   startTick: number;
   endTick: number;
   velocity: number;
-  cursorTick: number;
+  pitchCursorTick: number;
+  volumeCursorTick: number;
+  panVolumeCursorTick: number;
   pitchSegments: PxtonePitchSegment[];
+  volumeSegments: PxtoneVolumeSegment[];
+  panVolumeSegments: PxtonePanVolumeSegment[];
 }
 
 function keyAt(glide: Glide | null, holdKey: number, tick: number): number {
@@ -69,7 +87,7 @@ function appendPitchSegments(
   holdKey: number,
   factory: NoteFactory,
 ): void {
-  let startTick = note.cursorTick;
+  let startTick = note.pitchCursorTick;
   if (endTick <= startTick) {
     return;
   }
@@ -104,7 +122,31 @@ function appendPitchSegments(
       factory.createPitchSegment(startTick, endTick, key, key, key, "hold"),
     );
   }
-  note.cursorTick = endTick;
+  note.pitchCursorTick = endTick;
+}
+
+function appendVolumeSegment(
+  segments: PxtoneVolumeSegment[],
+  startTick: number,
+  endTick: number,
+  value: number,
+  factory: NoteFactory,
+): void {
+  if (startTick < endTick) {
+    segments.push(factory.createVolumeSegment(startTick, endTick, value));
+  }
+}
+
+function appendPanVolumeSegment(
+  segments: PxtonePanVolumeSegment[],
+  startTick: number,
+  endTick: number,
+  value: number,
+  factory: NoteFactory,
+): void {
+  if (startTick < endTick) {
+    segments.push(factory.createPanVolumeSegment(startTick, endTick, value));
+  }
 }
 
 function finishNote(
@@ -112,10 +154,26 @@ function finishNote(
   endTick: number,
   glide: Glide | null,
   holdKey: number,
+  volume: number,
+  panVolume: number,
   factory: NoteFactory,
 ): PxtoneNote | null {
   const clippedEnd = Math.min(note.endTick, endTick);
   appendPitchSegments(note, clippedEnd, glide, holdKey, factory);
+  appendVolumeSegment(
+    note.volumeSegments,
+    note.volumeCursorTick,
+    clippedEnd,
+    volume,
+    factory,
+  );
+  appendPanVolumeSegment(
+    note.panVolumeSegments,
+    note.panVolumeCursorTick,
+    clippedEnd,
+    panVolume,
+    factory,
+  );
   if (clippedEnd <= note.startTick) {
     return null;
   }
@@ -125,12 +183,14 @@ function finishNote(
     clippedEnd,
     note.velocity,
     note.pitchSegments,
+    note.volumeSegments,
+    note.panVolumeSegments,
   );
 }
 
 /**
- * @internal Converts events ordered by tick and pxtone event priority into note and
- * pitch-segment objects.
+ * @internal Converts events ordered by tick and pxtone event priority into notes and their
+ * pitch and value segments.
  */
 export function buildNotes(
   units: readonly PxtoneUnit[],
@@ -150,6 +210,8 @@ export function buildNotes(
   for (let unitIndex = 0; unitIndex < unitEvents.length; unitIndex++) {
     let holdKey = DEFAULT_KEY;
     let velocity = DEFAULT_VELOCITY;
+    let volume = DEFAULT_VOLUME;
+    let panVolume = DEFAULT_PAN_VOLUME;
     let portamento = 0;
     let glide: Glide | null = null;
     let activeNote: MutableNote | null = null;
@@ -161,6 +223,8 @@ export function buildNotes(
           activeNote.endTick,
           glide,
           holdKey,
+          volume,
+          panVolume,
           factory,
         );
         if (note !== null) {
@@ -170,9 +234,39 @@ export function buildNotes(
       }
 
       switch (event.kind) {
-        case KIND_PORTAMENT:
-          portamento = Math.max(0, event.value);
+        case KIND_ON: {
+          if (activeNote !== null) {
+            const note = finishNote(
+              activeNote,
+              event.tick,
+              glide,
+              holdKey,
+              volume,
+              panVolume,
+              factory,
+            );
+            if (note !== null) {
+              notes.push({ note, unitIndex });
+            }
+          }
+          holdKey = glide?.endKey ?? holdKey;
+          glide = null;
+          activeNote = event.value > 0
+            ? {
+              unit: units[unitIndex],
+              startTick: event.tick,
+              endTick: event.tick + event.value,
+              velocity,
+              pitchCursorTick: event.tick,
+              volumeCursorTick: event.tick,
+              panVolumeCursorTick: event.tick,
+              pitchSegments: [],
+              volumeSegments: [],
+              panVolumeSegments: [],
+            }
+            : null;
           break;
+        }
         case KIND_KEY: {
           if (activeNote !== null) {
             appendPitchSegments(activeNote, event.tick, glide, holdKey, factory);
@@ -192,29 +286,41 @@ export function buildNotes(
           }
           break;
         }
-        case KIND_ON: {
-          if (activeNote !== null) {
-            const note = finishNote(activeNote, event.tick, glide, holdKey, factory);
-            if (note !== null) {
-              notes.push({ note, unitIndex });
+        case KIND_PAN_VOLUME:
+          if (event.value !== panVolume) {
+            if (activeNote !== null) {
+              appendPanVolumeSegment(
+                activeNote.panVolumeSegments,
+                activeNote.panVolumeCursorTick,
+                event.tick,
+                panVolume,
+                factory,
+              );
+              activeNote.panVolumeCursorTick = event.tick;
             }
+            panVolume = event.value;
           }
-          holdKey = glide?.endKey ?? holdKey;
-          glide = null;
-          activeNote = event.value > 0
-            ? {
-              unit: units[unitIndex],
-              startTick: event.tick,
-              endTick: event.tick + event.value,
-              velocity,
-              cursorTick: event.tick,
-              pitchSegments: [],
-            }
-            : null;
           break;
-        }
         case KIND_VELOCITY:
           velocity = event.value;
+          break;
+        case KIND_VOLUME:
+          if (event.value !== volume) {
+            if (activeNote !== null) {
+              appendVolumeSegment(
+                activeNote.volumeSegments,
+                activeNote.volumeCursorTick,
+                event.tick,
+                volume,
+                factory,
+              );
+              activeNote.volumeCursorTick = event.tick;
+            }
+            volume = event.value;
+          }
+          break;
+        case KIND_PORTAMENT:
+          portamento = Math.max(0, event.value);
           break;
       }
     }
@@ -225,6 +331,8 @@ export function buildNotes(
         activeNote.endTick,
         glide,
         holdKey,
+        volume,
+        panVolume,
         factory,
       );
       if (note !== null) {

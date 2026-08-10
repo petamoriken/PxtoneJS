@@ -230,7 +230,7 @@ export class PxtoneEvent {
   static get KIND_KEY(): 2 {
     return 2;
   }
-  /** Pan (stereo position). `value` ranges from 0 (left) to 128 (center) to 256 (right). */
+  /** Pan (stereo position). `value` ranges from 0 (left) to 64 (center) to 128 (right). */
   static get KIND_PAN_VOLUME(): 3 {
     return 3;
   }
@@ -459,6 +459,140 @@ export class PxtonePitchSegment {
   }
 }
 
+/** A constant volume interval within a {@link PxtoneNote}. */
+export class PxtoneVolumeSegment {
+  readonly #startTick: number;
+  readonly #endTick: number;
+  readonly #value: number;
+  readonly #timing: NoteTiming;
+
+  private constructor(
+    key: typeof illegalConstructorKey,
+    startTick: number,
+    endTick: number,
+    value: number,
+    timing: NoteTiming,
+  ) {
+    if (key !== illegalConstructorKey) {
+      throw new TypeError("Illegal constructor");
+    }
+    this.#startTick = startTick;
+    this.#endTick = endTick;
+    this.#value = value;
+    this.#timing = timing;
+  }
+
+  get startTick(): number {
+    return this.#startTick;
+  }
+
+  get endTick(): number {
+    return this.#endTick;
+  }
+
+  get startTime(): number {
+    return this.#startTick * this.#timing.secondsPerTick;
+  }
+
+  get endTime(): number {
+    return this.#endTick * this.#timing.secondsPerTick;
+  }
+
+  get value(): number {
+    return this.#value;
+  }
+
+  /** Volume as a gain multiplier, where the usual pxtone range 0–128 maps to 0–1. */
+  get gain(): number {
+    return this.#value / 128;
+  }
+
+  toJSON(): {
+    startTick: number;
+    endTick: number;
+    startTime: number;
+    endTime: number;
+    value: number;
+    gain: number;
+  } {
+    return {
+      startTick: this.#startTick,
+      endTick: this.#endTick,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      value: this.#value,
+      gain: this.gain,
+    };
+  }
+}
+
+/** A constant stereo-pan interval within a {@link PxtoneNote}. */
+export class PxtonePanVolumeSegment {
+  readonly #startTick: number;
+  readonly #endTick: number;
+  readonly #value: number;
+  readonly #timing: NoteTiming;
+
+  private constructor(
+    key: typeof illegalConstructorKey,
+    startTick: number,
+    endTick: number,
+    value: number,
+    timing: NoteTiming,
+  ) {
+    if (key !== illegalConstructorKey) {
+      throw new TypeError("Illegal constructor");
+    }
+    this.#startTick = startTick;
+    this.#endTick = endTick;
+    this.#value = value;
+    this.#timing = timing;
+  }
+
+  get startTick(): number {
+    return this.#startTick;
+  }
+
+  get endTick(): number {
+    return this.#endTick;
+  }
+
+  get startTime(): number {
+    return this.#startTick * this.#timing.secondsPerTick;
+  }
+
+  get endTime(): number {
+    return this.#endTick * this.#timing.secondsPerTick;
+  }
+
+  get value(): number {
+    return this.#value;
+  }
+
+  /** Pan position, where the usual pxtone range 0–64–128 maps to left −1–0–right +1. */
+  get pan(): number {
+    return (this.#value - 64) / 64;
+  }
+
+  toJSON(): {
+    startTick: number;
+    endTick: number;
+    startTime: number;
+    endTime: number;
+    value: number;
+    pan: number;
+  } {
+    return {
+      startTick: this.#startTick,
+      endTick: this.#endTick,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      value: this.#value,
+      pan: this.pan,
+    };
+  }
+}
+
 /**
  * A note-on interval and its pitch movement over time.
  *
@@ -472,6 +606,8 @@ export class PxtoneNote {
   readonly #endTick: number;
   readonly #velocity: number;
   readonly #pitchSegments: readonly PxtonePitchSegment[];
+  readonly #volumeSegments: readonly PxtoneVolumeSegment[];
+  readonly #panVolumeSegments: readonly PxtonePanVolumeSegment[];
   readonly #timing: NoteTiming;
 
   private constructor(
@@ -481,6 +617,8 @@ export class PxtoneNote {
     endTick: number,
     velocity: number,
     pitchSegments: readonly PxtonePitchSegment[],
+    volumeSegments: readonly PxtoneVolumeSegment[],
+    panVolumeSegments: readonly PxtonePanVolumeSegment[],
     timing: NoteTiming,
   ) {
     if (key !== illegalConstructorKey) {
@@ -491,6 +629,8 @@ export class PxtoneNote {
     this.#endTick = endTick;
     this.#velocity = velocity;
     this.#pitchSegments = pitchSegments;
+    this.#volumeSegments = volumeSegments;
+    this.#panVolumeSegments = panVolumeSegments;
     this.#timing = timing;
   }
 
@@ -527,6 +667,16 @@ export class PxtoneNote {
     return this.#pitchSegments;
   }
 
+  /** Volume over the note, in chronological, gap-free constant-value segments. */
+  get volumeSegments(): readonly PxtoneVolumeSegment[] {
+    return this.#volumeSegments;
+  }
+
+  /** Stereo pan over the note, in chronological, gap-free constant-value segments. */
+  get panVolumeSegments(): readonly PxtonePanVolumeSegment[] {
+    return this.#panVolumeSegments;
+  }
+
   toJSON(): {
     unit: PxtoneUnit;
     startTick: number;
@@ -535,6 +685,8 @@ export class PxtoneNote {
     endTime: number;
     velocity: number;
     pitchSegments: readonly PxtonePitchSegment[];
+    volumeSegments: readonly PxtoneVolumeSegment[];
+    panVolumeSegments: readonly PxtonePanVolumeSegment[];
   } {
     return {
       unit: this.#unit,
@@ -544,6 +696,8 @@ export class PxtoneNote {
       endTime: this.endTime,
       velocity: this.#velocity,
       pitchSegments: this.#pitchSegments,
+      volumeSegments: this.#volumeSegments,
+      panVolumeSegments: this.#panVolumeSegments,
     };
   }
 }
@@ -887,7 +1041,7 @@ export class Pxtone {
   }
 
   /**
-   * Notes in the loaded song, including constant and portamento pitch segments.
+   * Notes in the loaded song, including pitch, volume, and stereo-pan segments.
    *
    * Ordered by {@link PxtoneNote.startTick}; notes starting on the same tick follow the order
    * of {@link units}. Drawing them in this order therefore starts earlier notes first.
@@ -1347,7 +1501,35 @@ export class Pxtone {
           timing,
         );
       },
-      createNote(unit, startTick, endTick, velocity, pitchSegments) {
+      createVolumeSegment(startTick, endTick, value) {
+        // @ts-expect-error: allow private constructor
+        return new PxtoneVolumeSegment(
+          illegalConstructorKey,
+          startTick,
+          endTick,
+          value,
+          timing,
+        );
+      },
+      createPanVolumeSegment(startTick, endTick, value) {
+        // @ts-expect-error: allow private constructor
+        return new PxtonePanVolumeSegment(
+          illegalConstructorKey,
+          startTick,
+          endTick,
+          value,
+          timing,
+        );
+      },
+      createNote(
+        unit,
+        startTick,
+        endTick,
+        velocity,
+        pitchSegments,
+        volumeSegments,
+        panVolumeSegments,
+      ) {
         // @ts-expect-error: allow private constructor
         return new PxtoneNote(
           illegalConstructorKey,
@@ -1356,6 +1538,8 @@ export class Pxtone {
           endTick,
           velocity,
           Object.freeze(pitchSegments),
+          Object.freeze(volumeSegments),
+          Object.freeze(panVolumeSegments),
           timing,
         );
       },

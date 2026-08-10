@@ -10,7 +10,14 @@ import {
 } from "@std/assert";
 import { parse as parseToml } from "@std/toml";
 
-import { Pxtone, PxtoneError, PxtoneNote, PxtonePitchSegment } from "../src/Pxtone.ts";
+import {
+  Pxtone,
+  PxtoneError,
+  PxtoneNote,
+  PxtonePanVolumeSegment,
+  PxtonePitchSegment,
+  PxtoneVolumeSegment,
+} from "../src/Pxtone.ts";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -379,7 +386,11 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assert(Object.isFrozen(pxtone.notes));
   assert(pxtone.notes[0] instanceof PxtoneNote);
   assert(Object.isFrozen(pxtone.notes[0].pitchSegments));
+  assert(Object.isFrozen(pxtone.notes[0].volumeSegments));
+  assert(Object.isFrozen(pxtone.notes[0].panVolumeSegments));
   assert(pxtone.notes[0].pitchSegments[0] instanceof PxtonePitchSegment);
+  assert(pxtone.notes[0].volumeSegments[0] instanceof PxtoneVolumeSegment);
+  assert(pxtone.notes[0].panVolumeSegments[0] instanceof PxtonePanVolumeSegment);
   const firstNote = pxtone.notes[0];
   const firstSegment = firstNote.pitchSegments[0];
   const secondsPerTick = 60 / (pxtone.beatTempo! * pxtone.ticksPerBeat!);
@@ -389,6 +400,12 @@ Deno.test("Pxtone getters are guarded by state", async () => {
   assertEquals(firstSegment.endTime, firstSegment.endTick * secondsPerTick);
   assertEquals(firstSegment.startPitch, firstSegment.startKey / 256);
   assertEquals(firstSegment.endPitch, firstSegment.endKey / 256);
+  const firstVolumeSegment = firstNote.volumeSegments[0];
+  assertEquals(firstVolumeSegment.startTime, firstVolumeSegment.startTick * secondsPerTick);
+  assertEquals(firstVolumeSegment.endTime, firstVolumeSegment.endTick * secondsPerTick);
+  assertEquals(firstVolumeSegment.gain, firstVolumeSegment.value / 128);
+  const firstPanVolumeSegment = firstNote.panVolumeSegments[0];
+  assertEquals(firstPanVolumeSegment.pan, (firstPanVolumeSegment.value - 64) / 64);
 
   // --- streaming ---
 

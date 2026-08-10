@@ -344,19 +344,21 @@ than toggled.
 
 ### `PxtoneNote`
 
-Each note corresponds to one note-on event. Pitch changes during the note are represented by
-`pitchSegments`. Notes belonging to the same unit never overlap: if the next note-on arrives before
-the current note is over, the current note is cut short at that tick.
+Each note corresponds to one note-on event. Pitch, volume, and stereo-pan changes during the note
+are represented by segments. Notes belonging to the same unit never overlap: if the next note-on
+arrives before the current note is over, the current note is cut short at that tick.
 
-| Property        | Type                            | Description                  |
-| --------------- | ------------------------------- | ---------------------------- |
-| `unit`          | `PxtoneUnit`                    | Instrument track             |
-| `startTick`     | `number`                        | Start position in ticks      |
-| `endTick`       | `number`                        | End position in ticks        |
-| `startTime`     | `number`                        | Start position in seconds    |
-| `endTime`       | `number`                        | End position in seconds      |
-| `velocity`      | `number`                        | Attack strength (0–128)      |
-| `pitchSegments` | `readonly PxtonePitchSegment[]` | Pitch movement over the note |
+| Property            | Type                                | Description                       |
+| ------------------- | ----------------------------------- | --------------------------------- |
+| `unit`              | `PxtoneUnit`                        | Instrument track                  |
+| `startTick`         | `number`                            | Start position in ticks           |
+| `endTick`           | `number`                            | End position in ticks             |
+| `startTime`         | `number`                            | Start position in seconds         |
+| `endTime`           | `number`                            | End position in seconds           |
+| `velocity`          | `number`                            | Attack strength (0–128)           |
+| `pitchSegments`     | `readonly PxtonePitchSegment[]`     | Pitch movement over the note      |
+| `volumeSegments`    | `readonly PxtoneVolumeSegment[]`    | Volume over the note              |
+| `panVolumeSegments` | `readonly PxtonePanVolumeSegment[]` | Stereo pan position over the note |
 
 #### `PxtonePitchSegment`
 
@@ -382,6 +384,33 @@ visualization; tuning events and sample-level integer rounding are not included.
 portamento completes; then `endKey` is the interpolated pitch reached so far while `targetKey` stays
 the key that was written. Renderers that snap a note to a single key row want `targetKey`; renderers
 that draw the glide want `endKey`.
+
+#### `PxtoneVolumeSegment`
+
+| Property    | Type     | Description                                   |
+| ----------- | -------- | --------------------------------------------- |
+| `startTick` | `number` | Segment start in ticks                        |
+| `endTick`   | `number` | Segment end in ticks                          |
+| `startTime` | `number` | Segment start in seconds                      |
+| `endTime`   | `number` | Segment end in seconds                        |
+| `value`     | `number` | Native pxtone volume                          |
+| `gain`      | `number` | Gain multiplier, normally 0–1 (`value / 128`) |
+
+#### `PxtonePanVolumeSegment`
+
+| Property    | Type     | Description                                     |
+| ----------- | -------- | ----------------------------------------------- |
+| `startTick` | `number` | Segment start in ticks                          |
+| `endTick`   | `number` | Segment end in ticks                            |
+| `startTime` | `number` | Segment start in seconds                        |
+| `endTime`   | `number` | Segment end in seconds                          |
+| `value`     | `number` | Native pxtone pan volume                        |
+| `pan`       | `number` | Pan position (`-1` left, `0` center, `1` right) |
+
+Volume and pan-volume events change their value immediately rather than interpolating. Each array is
+chronological and covers the note without gaps. Values set before a note are carried into its first
+segment. Volume defaults to `104`; pan volume defaults to `64` and ranges from `0` (left) to `64`
+(center) to `128` (right).
 
 ## WebAssembly
 
