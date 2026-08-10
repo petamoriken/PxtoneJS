@@ -1,10 +1,16 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { assert, assertEquals, assertNotEquals, assertThrows } from "@std/assert";
+import {
+  assert,
+  assertEquals,
+  assertNotEquals,
+  assertStrictEquals,
+  assertThrows,
+} from "@std/assert";
 import { parse as parseToml } from "@std/toml";
 
-import { Pxtone, PxtoneError } from "../src/Pxtone.ts";
+import { Pxtone, PxtoneError, PxtoneNote, PxtonePitchSegment } from "../src/Pxtone.ts";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -54,6 +60,24 @@ function audioDataToPcm(audioData: MockAudioData): Uint8Array {
 
 const WAV_HEADER_LEN = 44;
 const WAV_PCM_TOLERANCE = 2;
+const PXTONE_EVENT_PRIORITY = [
+  0,
+  50,
+  40,
+  60,
+  70,
+  80,
+  30,
+  0,
+  0,
+  0,
+  0,
+  255,
+  10,
+  20,
+  90,
+  100,
+];
 
 function wavMatches(
   actual: Uint8Array,
@@ -146,9 +170,9 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
       );
     } else {
       for (let i = 0; i < pxtone.units.length; i++) {
-        const { name: unitName, played } = pxtone.units[i];
+        const { index, name: unitName, played } = pxtone.units[i];
         const exp = snapshot.units[i];
-        if (unitName !== exp.name || played !== exp.played) {
+        if (index !== i || unitName !== exp.name || played !== exp.played) {
           failures.push(`${stem}: unit[${i}] mismatch`);
         }
       }
@@ -162,14 +186,49 @@ Deno.test("decoded ptcop matches reference (Pxtone)", async () => {
       for (let i = 0; i < pxtone.events.length; i++) {
         const { tick, unit, kind, value } = pxtone.events[i];
         const exp = snapshot.events[i];
-        const unitIndex = pxtone.units.indexOf(unit);
         if (
-          tick !== exp.tick || unitIndex !== exp.unit_index ||
+          tick !== exp.tick || unit.index !== exp.unit_index ||
           kind !== exp.kind || value !== exp.value
         ) {
           failures.push(`${stem}: event[${i}] mismatch`);
         }
       }
+    }
+
+    for (let i = 1; i < pxtone.events.length; i++) {
+      const previous = pxtone.events[i - 1];
+      const current = pxtone.events[i];
+      if (
+        previous.tick > current.tick ||
+        (previous.tick === current.tick &&
+          PXTONE_EVENT_PRIORITY[previous.kind] > PXTONE_EVENT_PRIORITY[current.kind])
+      ) {
+        failures.push(`${stem}: events are not ordered at index ${i}`);
+        break;
+      }
+    }
+
+    let previousStartTick = -Infinity;
+    for (let i = 0; i < pxtone.notes.length; i++) {
+      const note = pxtone.notes[i];
+      if (
+        note.startTick < previousStartTick ||
+        note.endTick <= note.startTick ||
+        !pxtone.units.includes(note.unit) ||
+        note.pitchSegments.length === 0 ||
+        note.pitchSegments[0].startTick !== note.startTick ||
+        note.pitchSegments.at(-1)?.endTick !== note.endTick
+      ) {
+        failures.push(`${stem}: note[${i}] has invalid bounds or ordering`);
+        break;
+      }
+      for (let j = 1; j < note.pitchSegments.length; j++) {
+        if (note.pitchSegments[j - 1].endTick !== note.pitchSegments[j].startTick) {
+          failures.push(`${stem}: note[${i}] pitch segments contain a gap`);
+          break;
+        }
+      }
+      previousStartTick = note.startTick;
     }
 
     const pcmChunks: Uint8Array[] = [];
@@ -286,6 +345,7 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
+  assertEquals(pxtone.notes.length, 0);
 
   {
     const err = assertThrows(() => pxtone.stream(), PxtoneError);
@@ -312,6 +372,23 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   assert(pxtone.units.length > 0);
   assert(pxtone.events.length > 0);
+  assert(pxtone.notes.length > 0);
+  assertStrictEquals(pxtone.units, pxtone.units);
+  assertStrictEquals(pxtone.events, pxtone.events);
+  assertStrictEquals(pxtone.notes, pxtone.notes);
+  assert(Object.isFrozen(pxtone.notes));
+  assert(pxtone.notes[0] instanceof PxtoneNote);
+  assert(Object.isFrozen(pxtone.notes[0].pitchSegments));
+  assert(pxtone.notes[0].pitchSegments[0] instanceof PxtonePitchSegment);
+  const firstNote = pxtone.notes[0];
+  const firstSegment = firstNote.pitchSegments[0];
+  const secondsPerTick = 60 / (pxtone.beatTempo! * pxtone.ticksPerBeat!);
+  assertEquals(firstNote.startTime, firstNote.startTick * secondsPerTick);
+  assertEquals(firstNote.endTime, firstNote.endTick * secondsPerTick);
+  assertEquals(firstSegment.startTime, firstSegment.startTick * secondsPerTick);
+  assertEquals(firstSegment.endTime, firstSegment.endTick * secondsPerTick);
+  assertEquals(firstSegment.startPitch, firstSegment.startKey / 256);
+  assertEquals(firstSegment.endPitch, firstSegment.endKey / 256);
 
   // --- streaming ---
 
@@ -336,6 +413,7 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   assert(pxtone.units.length > 0);
   assert(pxtone.events.length > 0);
+  assert(pxtone.notes.length > 0);
 
   {
     const err = assertThrows(() => pxtone.read(fileData), PxtoneError);
@@ -367,6 +445,7 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   assert(pxtone.units.length > 0);
   assert(pxtone.events.length > 0);
+  assert(pxtone.notes.length > 0);
 
   // --- idle ---
 
@@ -388,6 +467,7 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
+  assertEquals(pxtone.notes.length, 0);
 
   // --- disposed ---
 
@@ -409,6 +489,7 @@ Deno.test("Pxtone getters are guarded by state", async () => {
 
   assertEquals(pxtone.units.length, 0);
   assertEquals(pxtone.events.length, 0);
+  assertEquals(pxtone.notes.length, 0);
 
   {
     const err = assertThrows(() => pxtone.clear(), PxtoneError);

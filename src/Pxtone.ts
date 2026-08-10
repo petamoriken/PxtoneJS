@@ -15,6 +15,7 @@
  */
 
 import { pcmToAudioData } from "./pcm.ts";
+import { buildNotes } from "./notes.ts";
 
 import {
   alloc,
@@ -128,6 +129,11 @@ export class PxtoneUnit {
     };
   }
 
+  /** Position of this unit in {@link Pxtone.units}. */
+  get index(): number {
+    return this.#index;
+  }
+
   /** Display name of this unit. */
   get name(): string {
     return this.#name;
@@ -159,8 +165,9 @@ export class PxtoneUnit {
     }
   }
 
-  toJSON(): { name: string; played: boolean } {
+  toJSON(): { index: number; name: string; played: boolean } {
     return {
+      index: this.#index,
       name: this.#name,
       played: this.#played,
     };
@@ -185,6 +192,29 @@ export type PxtoneEventKind =
   | 13
   | 14
   | 15;
+
+const PXTONE_EVENT_PRIORITY = [
+  0,
+  50,
+  40,
+  60,
+  70,
+  80,
+  30,
+  0,
+  0,
+  0,
+  0,
+  255,
+  10,
+  20,
+  90,
+  100,
+];
+
+function pxtoneEventPriority(kind: PxtoneEventKind): number {
+  return PXTONE_EVENT_PRIORITY[kind];
+}
 
 /** A single automation event in a pxtone song's event list. */
 export class PxtoneEvent {
@@ -279,7 +309,7 @@ export class PxtoneEvent {
     return this.#tick;
   }
 
-  /** Index into {@link Pxtone.units} that this event targets. */
+  /** Unit this event targets. */
   get unit(): PxtoneUnit {
     return this.#unit;
   }
@@ -300,6 +330,220 @@ export class PxtoneEvent {
       unit: this.#unit,
       kind: this.#kind,
       value: this.#value,
+    };
+  }
+}
+
+/** Interpolation used by a {@link PxtonePitchSegment}. */
+export type PxtonePitchInterpolation = "hold" | "linear";
+
+interface NoteTiming {
+  readonly secondsPerTick: number;
+}
+
+/** A constant or linearly changing pitch interval within a {@link PxtoneNote}. */
+export class PxtonePitchSegment {
+  readonly #startTick: number;
+  readonly #endTick: number;
+  readonly #startKey: number;
+  readonly #endKey: number;
+  readonly #targetKey: number;
+  readonly #interpolation: PxtonePitchInterpolation;
+  readonly #timing: NoteTiming;
+
+  private constructor(
+    key: typeof illegalConstructorKey,
+    startTick: number,
+    endTick: number,
+    startKey: number,
+    endKey: number,
+    targetKey: number,
+    interpolation: PxtonePitchInterpolation,
+    timing: NoteTiming,
+  ) {
+    if (key !== illegalConstructorKey) {
+      throw new TypeError("Illegal constructor");
+    }
+    this.#startTick = startTick;
+    this.#endTick = endTick;
+    this.#startKey = startKey;
+    this.#endKey = endKey;
+    this.#targetKey = targetKey;
+    this.#interpolation = interpolation;
+    this.#timing = timing;
+  }
+
+  get startTick(): number {
+    return this.#startTick;
+  }
+
+  get endTick(): number {
+    return this.#endTick;
+  }
+
+  get startTime(): number {
+    return this.#startTick * this.#timing.secondsPerTick;
+  }
+
+  get endTime(): number {
+    return this.#endTick * this.#timing.secondsPerTick;
+  }
+
+  /** Start pitch in native pxtone key units (256 per semitone). */
+  get startKey(): number {
+    return this.#startKey;
+  }
+
+  /** End pitch in native pxtone key units (256 per semitone). */
+  get endKey(): number {
+    return this.#endKey;
+  }
+
+  /**
+   * Pitch this segment is heading for, in native pxtone key units (256 per semitone).
+   *
+   * Equal to {@link endKey} except when the note ends, or another key event arrives,
+   * before the portamento completes; then {@link endKey} is the interpolated pitch
+   * reached so far while this stays the key that was written. Renderers that snap a
+   * note to a single key row want this; renderers that draw the glide want {@link endKey}.
+   */
+  get targetKey(): number {
+    return this.#targetKey;
+  }
+
+  /** Start pitch in semitones. */
+  get startPitch(): number {
+    return this.#startKey / 256;
+  }
+
+  /** End pitch in semitones. */
+  get endPitch(): number {
+    return this.#endKey / 256;
+  }
+
+  /** {@link targetKey} in semitones. */
+  get targetPitch(): number {
+    return this.#targetKey / 256;
+  }
+
+  get interpolation(): PxtonePitchInterpolation {
+    return this.#interpolation;
+  }
+
+  toJSON(): {
+    startTick: number;
+    endTick: number;
+    startTime: number;
+    endTime: number;
+    startKey: number;
+    endKey: number;
+    targetKey: number;
+    startPitch: number;
+    endPitch: number;
+    targetPitch: number;
+    interpolation: PxtonePitchInterpolation;
+  } {
+    return {
+      startTick: this.#startTick,
+      endTick: this.#endTick,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      startKey: this.#startKey,
+      endKey: this.#endKey,
+      targetKey: this.#targetKey,
+      startPitch: this.startPitch,
+      endPitch: this.endPitch,
+      targetPitch: this.targetPitch,
+      interpolation: this.#interpolation,
+    };
+  }
+}
+
+/**
+ * A note-on interval and its pitch movement over time.
+ *
+ * Notes belonging to the same unit never overlap: if the next note-on arrives before the
+ * current note is over, the current note is cut short at that tick. Malformed files — songs
+ * converted from other formats, for instance — rely on this.
+ */
+export class PxtoneNote {
+  readonly #unit: PxtoneUnit;
+  readonly #startTick: number;
+  readonly #endTick: number;
+  readonly #velocity: number;
+  readonly #pitchSegments: readonly PxtonePitchSegment[];
+  readonly #timing: NoteTiming;
+
+  private constructor(
+    key: typeof illegalConstructorKey,
+    unit: PxtoneUnit,
+    startTick: number,
+    endTick: number,
+    velocity: number,
+    pitchSegments: readonly PxtonePitchSegment[],
+    timing: NoteTiming,
+  ) {
+    if (key !== illegalConstructorKey) {
+      throw new TypeError("Illegal constructor");
+    }
+    this.#unit = unit;
+    this.#startTick = startTick;
+    this.#endTick = endTick;
+    this.#velocity = velocity;
+    this.#pitchSegments = pitchSegments;
+    this.#timing = timing;
+  }
+
+  get unit(): PxtoneUnit {
+    return this.#unit;
+  }
+
+  get startTick(): number {
+    return this.#startTick;
+  }
+
+  get endTick(): number {
+    return this.#endTick;
+  }
+
+  get startTime(): number {
+    return this.#startTick * this.#timing.secondsPerTick;
+  }
+
+  get endTime(): number {
+    return this.#endTick * this.#timing.secondsPerTick;
+  }
+
+  get velocity(): number {
+    return this.#velocity;
+  }
+
+  /**
+   * Pitch movement over the note, in chronological order. Always holds at least one segment,
+   * and the segments cover the note from {@link startTick} to {@link endTick} without gaps or
+   * overlaps.
+   */
+  get pitchSegments(): readonly PxtonePitchSegment[] {
+    return this.#pitchSegments;
+  }
+
+  toJSON(): {
+    unit: PxtoneUnit;
+    startTick: number;
+    endTick: number;
+    startTime: number;
+    endTime: number;
+    velocity: number;
+    pitchSegments: readonly PxtonePitchSegment[];
+  } {
+    return {
+      unit: this.#unit,
+      startTick: this.#startTick,
+      endTick: this.#endTick,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      velocity: this.#velocity,
+      pitchSegments: this.#pitchSegments,
     };
   }
 }
@@ -399,6 +643,7 @@ export class Pxtone {
 
   #units: readonly PxtoneUnit[] | null = null;
   #events: readonly PxtoneEvent[] | null = null;
+  #notes: readonly PxtoneNote[] | null = null;
 
   /**
    * Returns `true` if `buffer` is a valid `.ptcop` / `.pttune` file, `false` otherwise.
@@ -619,28 +864,48 @@ export class Pxtone {
       return this.#units;
     }
     if (this.#state === "idle" || this.#state === "disposed") {
-      this.#events = Object.freeze([]);
-      this.#units = Object.freeze([]);
+      this.#units ??= Object.freeze([]);
     } else {
       this.#units = this.#loadUnits();
-      this.#events = this.#loadEvents(this.#units);
     }
     return this.#units;
   }
 
-  /** Ordered list of automation events in the loaded song. */
+  /** Automation events ordered by tick and pxtone event priority. */
   get events(): readonly PxtoneEvent[] {
     if (this.#events !== null) {
       return this.#events;
     }
     if (this.#state === "idle" || this.#state === "disposed") {
-      this.#units = Object.freeze([]);
-      this.#events = Object.freeze([]);
+      this.#units ??= Object.freeze([]);
+      this.#events ??= Object.freeze([]);
     } else {
-      this.#units = this.#loadUnits();
-      this.#events = this.#loadEvents(this.#units);
+      const units = this.#units ??= this.#loadUnits();
+      this.#events = this.#loadEvents(units);
     }
     return this.#events;
+  }
+
+  /**
+   * Notes in the loaded song, including constant and portamento pitch segments.
+   *
+   * Ordered by {@link PxtoneNote.startTick}; notes starting on the same tick follow the order
+   * of {@link units}. Drawing them in this order therefore starts earlier notes first.
+   */
+  get notes(): readonly PxtoneNote[] {
+    if (this.#notes !== null) {
+      return this.#notes;
+    }
+    if (this.#state === "idle" || this.#state === "disposed") {
+      this.#units ??= Object.freeze([]);
+      this.#events ??= Object.freeze([]);
+      this.#notes ??= Object.freeze([]);
+    } else {
+      const units = this.#units ??= this.#loadUnits();
+      const events = this.#events ??= this.#loadEvents(units);
+      this.#notes = this.#loadNotes(units, events);
+    }
+    return this.#notes;
   }
 
   /**
@@ -684,6 +949,10 @@ export class Pxtone {
     this.#loopLength = 0;
     this.#ticksPerFrame = 0;
     this.#currentFrame = 0;
+    this.#invalidateSongData();
+  }
+
+  #invalidateSongData() {
     if (this.#units !== null) {
       for (let i = 0; i < this.#units.length; ++i) {
         releaseUnitPtr(this.#units[i]);
@@ -691,6 +960,7 @@ export class Pxtone {
     }
     this.#units = null;
     this.#events = null;
+    this.#notes = null;
   }
 
   /**
@@ -698,7 +968,7 @@ export class Pxtone {
    * Populates {@link name}, {@link comment}, {@link ticksPerBeat}, {@link beatsPerMeasure},
    * {@link beatTempo}, {@link numberOfMeasures}, {@link loopStartMeasure}, {@link loopEndMeasure},
    * {@link numberOfTicks}, {@link duration}, {@link loopStart}, {@link loopEnd},
-   * and enables lazy access to {@link units} and {@link events}.
+   * and enables lazy access to {@link units}, {@link events}, and {@link notes}.
    *
    * @param buffer - Raw file bytes.
    * @throws {PxtoneError} If the instance has been disposed ({@link PxtoneError.CODE_DISPOSED}), a stream is active ({@link PxtoneError.CODE_STREAMING_ACTIVE}), or the file is invalid ({@link PxtoneError.CODE_READ_FAILED}, {@link PxtoneError.CODE_TONES_READY_FAILED}).
@@ -737,6 +1007,7 @@ export class Pxtone {
         code: PxtoneError.CODE_TONES_READY_FAILED,
       });
     }
+    this.#invalidateSongData();
     this.#name = this.#readText(service_get_text_name);
     this.#comment = this.#readText(service_get_text_comment);
     // Deno-generated Wasm types do not support Multi-Value returns.
@@ -771,8 +1042,6 @@ export class Pxtone {
     );
     this.#ticksPerFrame = (beatsPerMeasure * ticksPerBeat) / (spm * sr);
     this.#currentFrame = 0;
-    this.#units = null;
-    this.#events = null;
     this.#state = "ready";
   }
 
@@ -1051,6 +1320,46 @@ export class Pxtone {
         ),
       );
     }
+    events.sort((a, b) =>
+      a.tick - b.tick || pxtoneEventPriority(a.kind) - pxtoneEventPriority(b.kind)
+    );
     return Object.freeze(events);
+  }
+
+  #loadNotes(
+    units: readonly PxtoneUnit[],
+    events: readonly PxtoneEvent[],
+  ): readonly PxtoneNote[] {
+    const timing = Object.freeze({
+      secondsPerTick: 60 / (this.#beatTempo! * this.#ticksPerBeat!),
+    });
+    const notes = buildNotes(units, events, {
+      createPitchSegment(startTick, endTick, startKey, endKey, targetKey, interpolation) {
+        // @ts-expect-error: allow private constructor
+        return new PxtonePitchSegment(
+          illegalConstructorKey,
+          startTick,
+          endTick,
+          startKey,
+          endKey,
+          targetKey,
+          interpolation,
+          timing,
+        );
+      },
+      createNote(unit, startTick, endTick, velocity, pitchSegments) {
+        // @ts-expect-error: allow private constructor
+        return new PxtoneNote(
+          illegalConstructorKey,
+          unit,
+          startTick,
+          endTick,
+          velocity,
+          Object.freeze(pitchSegments),
+          timing,
+        );
+      },
+    });
+    return Object.freeze(notes);
   }
 }
