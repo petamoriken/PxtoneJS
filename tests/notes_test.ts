@@ -112,7 +112,7 @@ Deno.test("buildNotes creates hold and portamento segments", () => {
   );
 
   assertEquals(notes.length, 1);
-  assertEquals(notes[0].velocity, 104); // VELOCITY follows ON at the same tick.
+  assertEquals(notes[0].velocity, 80); // the velocity written alongside the note-on
   assertEquals(pitchSegmentsOf(notes[0]), [
     {
       startTick: 0,
@@ -171,6 +171,29 @@ Deno.test("buildNotes restarts an interrupted glide from its current pitch", () 
       { ticks: [200, 300], keys: [0x6800, 0x6800], targetKey: 0x6800, interpolation: "hold" },
     ],
   );
+});
+
+Deno.test("buildNotes takes the velocity written alongside each note-on", () => {
+  const unit = testUnit("lead");
+  const notes = buildNotes(
+    [unit],
+    [
+      // pxtone writes one velocity event per note, at the note's own tick, and event
+      // priority places it after the note-on.
+      event(unit, 0, KEY, 0x6000),
+      event(unit, 0, ON, 100),
+      event(unit, 0, VELOCITY, 40),
+      event(unit, 100, KEY, 0x6000),
+      event(unit, 100, ON, 100),
+      event(unit, 100, VELOCITY, 120),
+      // A note with no velocity event of its own keeps the value still in effect.
+      event(unit, 200, KEY, 0x6000),
+      event(unit, 200, ON, 100),
+    ],
+    factory,
+  );
+
+  assertEquals(notes.map((note) => note.velocity), [40, 120, 120]);
 });
 
 Deno.test("buildNotes keeps the written key when a note ends mid-glide", () => {
