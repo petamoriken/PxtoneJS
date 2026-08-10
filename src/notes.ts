@@ -125,6 +125,28 @@ function appendPitchSegments(
   note.pitchCursorTick = endTick;
 }
 
+/**
+ * The velocity a note starting at `events[index]` sounds with.
+ *
+ * pxtone writes the velocity of a note alongside its note-on, but event priority orders velocity
+ * after note-on, so the running value has not caught up yet when the note begins. Volume and pan
+ * volume do not need this: their same-tick event closes a zero-length segment, which is dropped,
+ * and the new value carries into the note's first segment.
+ */
+function velocityAtNoteOn(
+  events: readonly PxtoneEvent[],
+  index: number,
+  velocity: number,
+): number {
+  const { tick } = events[index];
+  for (let i = index + 1; i < events.length && events[i].tick === tick; i++) {
+    if (events[i].kind === KIND_VELOCITY) {
+      velocity = events[i].value;
+    }
+  }
+  return velocity;
+}
+
 function appendVolumeSegment(
   segments: PxtoneVolumeSegment[],
   startTick: number,
@@ -216,7 +238,9 @@ export function buildNotes(
     let glide: Glide | null = null;
     let activeNote: MutableNote | null = null;
 
-    for (const event of unitEvents[unitIndex]) {
+    const events = unitEvents[unitIndex];
+    for (let eventIndex = 0; eventIndex < events.length; eventIndex++) {
+      const event = events[eventIndex];
       if (activeNote !== null && activeNote.endTick <= event.tick) {
         const note = finishNote(
           activeNote,
@@ -256,7 +280,7 @@ export function buildNotes(
               unit: units[unitIndex],
               startTick: event.tick,
               endTick: event.tick + event.value,
-              velocity,
+              velocity: velocityAtNoteOn(events, eventIndex, velocity),
               pitchCursorTick: event.tick,
               volumeCursorTick: event.tick,
               panVolumeCursorTick: event.tick,

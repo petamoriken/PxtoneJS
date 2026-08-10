@@ -360,6 +360,10 @@ arrives before the current note is over, the current note is cut short at that t
 | `volumeSegments`    | `readonly PxtoneVolumeSegment[]`    | Volume over the note              |
 | `panVolumeSegments` | `readonly PxtonePanVolumeSegment[]` | Stereo pan position over the note |
 
+`velocity` is the value written alongside the note-on, which is how pxtone stores the velocity of a
+note. A note with no velocity event of its own keeps whichever value was still in effect, starting
+from the default of `104`.
+
 #### `PxtonePitchSegment`
 
 | Property        | Type                 | Description                                     |
