@@ -11,3 +11,13 @@ updates:
     allow:
       - dependency-type: direct
     open-pull-requests-limit: 10
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "08:00"
+      timezone: "Asia/Tokyo"
+    cooldown:
+      default-days: 2
+    open-pull-requests-limit: 10
