@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 import { defineConfig } from "vite";
 
@@ -51,30 +52,38 @@ ${namedExports}`;
   };
 }
 
+// rolldown strips the indentation of `output.banner` and of anything renderChunk returns, and
+// renderChunk without a sourcemap warns [SOURCEMAP_BROKEN], so prepend the banner to the written
+// files and shift the sourcemap by the number of added lines
 function bannerPlugin(banner: string) {
   return {
     name: "banner",
-    generateBundle(
-      _opts: unknown,
-      bundle: Record<string, { type: string; code?: string }>,
+    writeBundle(
+      options: { dir?: string; format?: string },
+      bundle: Record<string, { type: string; fileName: string; sourcemapFileName?: string }>,
     ) {
-      for (const chunk of Object.values(bundle)) {
-        if (chunk.type === "chunk" && chunk.code !== undefined) {
-          chunk.code = banner + "\n" + chunk.code;
-        }
-      }
-    },
-  };
-}
+      const { dir, format } = options;
+      if (dir === undefined) return;
 
-function stripCommentsPlugin() {
-  return {
-    name: "strip-comments",
-    renderChunk(code: string) {
-      return code
-        .replace(/\/\*\*[\s\S]*?\*\//g, "")
-        .replace(/^\s*\/\/#(end)?region.*\n?/gm, "")
-        .replace(/\n{3,}/g, "\n\n");
+      // the ES bundle also points at its type definitions
+      const text = format === "es"
+        ? `${banner}\n// @ts-self-types="./Pxtone.d.mts"\n`
+        : `${banner}\n`;
+      const emptyLines = ";".repeat(text.split("\n").length - 1);
+
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== "chunk") continue;
+
+        const codePath = join(dir, chunk.fileName);
+        writeFileSync(codePath, text + readFileSync(codePath, "utf-8"));
+
+        const { sourcemapFileName } = chunk;
+        if (sourcemapFileName === undefined) continue;
+        const mapPath = join(dir, sourcemapFileName);
+        const map = JSON.parse(readFileSync(mapPath, "utf-8")) as { mappings: string };
+        map.mappings = emptyLines + map.mappings;
+        writeFileSync(mapPath, JSON.stringify(map));
+      }
     },
   };
 }
@@ -82,7 +91,6 @@ function stripCommentsPlugin() {
 export default defineConfig({
   plugins: [
     wasmInstancePlugin(),
-    stripCommentsPlugin(),
     bannerPlugin(banner),
   ],
   build: {
@@ -93,17 +101,23 @@ export default defineConfig({
     emptyOutDir: false,
     minify: false,
     sourcemap: true,
-    rollupOptions: {
+    rolldownOptions: {
+      // drop the `//#region` comments
+      experimental: {
+        attachDebugInfo: "none",
+      },
       output: [
         {
           format: "es",
           entryFileNames: "Pxtone.mjs",
+          comments: { legal: false, jsdoc: false },
         },
         {
           format: "iife",
           entryFileNames: "Pxtone.js",
           name: "Pxtone",
           intro: '"use strict";',
+          comments: { legal: false, jsdoc: false },
         },
       ],
     },
