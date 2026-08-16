@@ -15,7 +15,6 @@ const banner = `/**
  * This library includes third-party software under the following licenses:
  * - ogg (3-Clause BSD): Copyright (c) 2016-2017 est31 and contributors, 2002-2015 Xiph.org Foundation
  * - lewton (MIT or Apache-2.0): Copyright (c) 2016 est31 and contributors
- * - byteorder (MIT or UNLICENSE): Copyright (c) 2015 Andrew Gallant
  * - tinyvec (Zlib or MIT or Apache-2.0): Copyright (c) 2019 Daniel "Lokathor" Gee
  * - talc (MIT): Copyright (c) 2026 Shaun Beautement
  *
