@@ -1,6 +1,6 @@
 {
   "name": "@petamoriken/pxtone",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "exports": {
     ".": "./src/Pxtone.ts",
     "./bundle": "./bundle/Pxtone.mjs"
