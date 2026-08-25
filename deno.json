@@ -35,7 +35,8 @@
   "tasks": {
     "build": "vite build && deno run -A tools/build_dts.ts",
     "build:npm": "deno run -A tools/build_npm.ts",
-    "test": "deno test --allow-read=tests/ tests/"
+    "test": "deno test --allow-read=tests/ tests/",
+    "update:wasm": "deno run --allow-net --allow-env=GITHUB_TOKEN --allow-read=src --allow-write=src tools/update_wasm.ts"
   },
   "fmt": {
     "lineWidth": 100
