@@ -23,7 +23,8 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: latest
+          # 2.9.6 breaks `deno transpile --declaration` (denoland/deno#36709)
+          deno-version: v2.9.5
           cache: true
 
       - name: Setup Node.js
