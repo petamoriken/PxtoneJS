@@ -26,6 +26,10 @@ const command = new Deno.Command(Deno.execPath(), {
     configPath,
     "--quiet",
   ],
+  // `transpile --declaration` still reads compilerOptions.lib from the cwd
+  // deno.json, even with `--config`. The project lib includes `deno.ns`, which
+  // on Deno 2.9.6 fails to resolve `node:net` / `NodeJS` (denoland/deno#36709).
+  cwd: tempDir,
   stderr: "inherit",
 });
 
