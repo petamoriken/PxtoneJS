@@ -20,8 +20,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          # 2.9.6 breaks `deno transpile --declaration` (denoland/deno#36709)
-          deno-version: v2.9.5
+          deno-version: latest
           cache: true
 
       - name: Install Deno dependencies
