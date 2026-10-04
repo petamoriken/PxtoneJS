@@ -2,7 +2,7 @@
   "version": "5",
   "specifiers": {
     "jsr:@david/code-block-writer@^13.0.3": "13.0.3",
-    "jsr:@deno/dnt@~0.43.2": "0.43.2",
+    "jsr:@deno/dnt@0.44": "0.44.0",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/collections@^1.1.3": "1.1.6",
     "jsr:@std/fmt@1": "1.0.10",
@@ -20,8 +20,8 @@
     "@david/code-block-writer@13.0.3": {
       "integrity": "f98c77d320f5957899a61bfb7a9bead7c6d83ad1515daee92dbacc861e13bb7f"
     },
-    "@deno/dnt@0.43.2": {
-      "integrity": "8068703a782f389d9fcb4ead32809ca666d3b088262a23f1d9016cbc9af5d37f",
+    "@deno/dnt@0.44.0": {
+      "integrity": "87f4cf9f6b87f5d443ed981781440c21106c7097bed07f9b58a5dcaf0d1e7289",
       "dependencies": [
         "jsr:@david/code-block-writer",
         "jsr:@std/fmt",
@@ -321,7 +321,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@deno/dnt@~0.43.2",
+      "jsr:@deno/dnt@0.44",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/toml@^1.0.11",
       "npm:vite@^8.3.1"
