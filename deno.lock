@@ -14,7 +14,7 @@
     "jsr:@std/toml@^1.0.11": "1.0.11",
     "jsr:@ts-morph/bootstrap@0.29": "0.29.0",
     "jsr:@ts-morph/common@0.29": "0.29.0",
-    "npm:vite@^8.3.3": "8.3.4"
+    "npm:vite@^8.3.4": "8.3.4"
   },
   "jsr": {
     "@david/code-block-writer@13.0.3": {
@@ -324,7 +324,7 @@
       "jsr:@deno/dnt@0.44",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/toml@^1.0.11",
-      "npm:vite@^8.3.3"
+      "npm:vite@^8.3.4"
     ]
   }
 }
